@@ -105,4 +105,21 @@ describe('Geometric Pattern Encoding & Verification', () => {
     expect(result.isVerified).toBe(false);
     expect(result.residual).toBeGreaterThan(0.32);
   });
+
+  it('normalizes geometry with zero-centered centroid and unit RMS scale', () => {
+    const norm = normalizeGeometry(samplePath);
+    expect(norm.normalizedPoints.length).toBe(samplePath.length);
+
+    // Sum of coordinates of normalized points should be 0 (zero-centered)
+    const sumX = norm.normalizedPoints.reduce((acc, p) => acc + p.x, 0);
+    const sumY = norm.normalizedPoints.reduce((acc, p) => acc + p.y, 0);
+    expect(Math.abs(sumX)).toBeLessThan(1e-10);
+    expect(Math.abs(sumY)).toBeLessThan(1e-10);
+
+    // Root mean square distance from origin should be 1
+    const rms = Math.sqrt(
+      norm.normalizedPoints.reduce((acc, p) => acc + p.x * p.x + p.y * p.y, 0) / norm.normalizedPoints.length
+    );
+    expect(rms).toBeCloseTo(1.0, 5);
+  });
 });

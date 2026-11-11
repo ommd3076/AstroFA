@@ -37,12 +37,12 @@ AstroFA combines formal Theory of Computation (automata theory, $\varepsilon$-NF
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M_TEST | E2E Testing Suite | Create E2E test infra and test cases (Tiers 1-4) across visual tokens and functionality | none | IN_PROGRESS |
+| M_TEST | E2E Testing Suite | Create E2E test infra and test cases (Tiers 1-4) across visual tokens and functionality | none | DONE |
 | M1 | Core Tokens & Universal Shell | index.html, src/index.css, src/App.css, src/App.tsx, HeaderNav.tsx, TimelineBar.tsx | none | DONE |
-| M2 | Sky Viewport & Trace Telemetry | SkyCanvas.tsx, StarInspector.tsx, TraceHud.tsx, PatternAnalysisModal.tsx, RecognitionResultsModal.tsx | M1 contract | IN_PROGRESS |
-| M3 | Automata Lab Hardware Console | AutomataLab.tsx, NfaView.tsx, EpsilonClosureView.tsx, SubsetConstructionView.tsx, DfaView.tsx, MinimizedDfaView.tsx, SimulatorView.tsx, FormalDefinitionView.tsx, TransitionTableView.tsx, ExportModal.tsx | M1 contract | IN_PROGRESS |
-| M4 | Observational Tools & Image Lab | ConstellationExplorer.tsx, SkyTonight.tsx, HuntMode.tsx, ImageLab.tsx, AcademicWalkthrough.tsx, CreditsModal.tsx | M1 contract | IN_PROGRESS |
-| M_FINAL | E2E Verification & Adversarial Hardening | Pass 100% E2E test suite, adversarial coverage audit, forensic integrity review | M1, M2, M3, M4, M_TEST | PLANNED |
+| M2 | Sky Viewport & Trace Telemetry | SkyCanvas.tsx, StarInspector.tsx, TraceHud.tsx, PatternAnalysisModal.tsx, RecognitionResultsModal.tsx | M1 contract | DONE |
+| M3 | Automata Lab Hardware Console | AutomataLab.tsx, NfaView.tsx, EpsilonClosureView.tsx, SubsetConstructionView.tsx, DfaView.tsx, MinimizedDfaView.tsx, SimulatorView.tsx, FormalDefinitionView.tsx, TransitionTableView.tsx, ExportModal.tsx | M1 contract | DONE |
+| M4 | Observational Tools & Image Lab | ConstellationExplorer.tsx, SkyTonight.tsx, HuntMode.tsx, ImageLab.tsx, AcademicWalkthrough.tsx, CreditsModal.tsx | M1 contract | DONE |
+| M_FINAL | E2E Verification & Adversarial Hardening | Pass 100% E2E test suite, adversarial coverage audit, forensic integrity review | M1, M2, M3, M4, M_TEST | IN_PROGRESS |
 
 ## Interface Contracts
 

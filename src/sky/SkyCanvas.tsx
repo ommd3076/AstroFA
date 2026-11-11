@@ -87,6 +87,7 @@ export const SkyCanvas: React.FC = () => {
   const prevPointer = useRef({ x: 0, y: 0 });
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const hasDragged = useRef(false);
+  const syncSvgOverlayRef = useRef<() => void>(() => {});
 
   // 1. Initialize Scene & Three.js Canvas
   useEffect(() => {
@@ -317,7 +318,7 @@ export const SkyCanvas: React.FC = () => {
       }
 
       // Synchronize SVG overlay for numbered trace points and labels
-      syncSvgOverlay();
+      syncSvgOverlayRef.current();
     };
     animate();
 
@@ -449,6 +450,10 @@ export const SkyCanvas: React.FC = () => {
 
     overlay.innerHTML = svgContent;
   };
+
+  useEffect(() => {
+    syncSvgOverlayRef.current = syncSvgOverlay;
+  });
 
   // 2. Rotate Celestial Sphere according to Observer & Date/Time
   useEffect(() => {
