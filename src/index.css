@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@import "./App.css";
+
+@theme {
+  --color-bg-shell: #ECEEF2;
+  --color-bg-tray: #E2E5EC;
+  --color-bg-card: #F5F6F8;
+  --color-bg-card-subtle: #EDF0F5;
+  --color-bg-pill-neutral: #E6E9EF;
+  --color-bg-pill-active: #E0E8F9;
+  --color-bg-viewport: #060A14;
+
+  --color-ink-primary: #181A20;
+  --color-ink-secondary: #525866;
+  --color-ink-muted: #8C93A0;
+  --color-ink-on-signal: #FFFFFF;
+
+  --color-signal-cobalt: #1D55F5;
+  --color-signal-mid: #6892F6;
+  --color-signal-surface: #C7D5EC;
+
+  --color-dot-inactive: #C8CCD4;
+  --color-dot-active: #1D55F5;
+  --color-reticle-tick: #8FA4C4;
+
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --font-dot: 'Doto', monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --bg-shell: #ECEEF2;
+    --bg-tray: #E2E5EC;
+    --bg-card: #F5F6F8;
+    --bg-card-subtle: #EDF0F5;
+    --bg-pill-neutral: #E6E9EF;
+    --bg-pill-active: #E0E8F9;
+    --bg-viewport: #060A14;
+    --ink-primary: #181A20;
+    --ink-secondary: #525866;
+    --ink-muted: #8C93A0;
+    --ink-on-signal: #FFFFFF;
+    --signal-cobalt: #1D55F5;
+    --signal-mid: #6892F6;
+    --signal-surface: #C7D5EC;
+    --dot-inactive: #C8CCD4;
+    --dot-active: #1D55F5;
+    --reticle-tick: #8FA4C4;
+    --reticle-tick-active: #1D55F5;
+    --card-border: 1px solid rgba(255, 255, 255, 0.7);
+    --card-border-subtle: 1px solid rgba(0, 0, 0, 0.06);
+    --card-border-active: 1px solid #1D55F5;
+    --card-radius: 12px;
+    --bento-gap: 6px;
+    --pill-radius: 8px;
+    --tag-radius: 6px;
+    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+    --font-dot: 'Doto', monospace;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-shell);
+    color: var(--ink-primary);
+    font-family: var(--font-mono);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+  }
+}
+
+/* Tactile hardware custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-tray);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dot-inactive);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--reticle-tick);
+}
