@@ -1,6 +1,6 @@
-# AstroFA: Data Sources & Provenance
+# Costellar: Data Sources & Provenance
 
-AstroFA uses strictly authentic astronomical data from authoritative open scientific catalogs.
+Costellar uses strictly authentic astronomical data from authoritative open scientific catalogs.
 
 ---
 

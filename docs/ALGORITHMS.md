@@ -1,6 +1,6 @@
-# AstroFA: Computational Algorithms
+# Costellar: Computational Algorithms
 
-This document provides detailed mathematical specifications of all core algorithms implemented in AstroFA.
+This document provides detailed mathematical specifications of all core algorithms implemented in Costellar.
 
 ---
 

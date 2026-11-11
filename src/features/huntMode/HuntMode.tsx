@@ -73,14 +73,14 @@ export const HuntMode: React.FC = () => {
           </div>
         </div>
 
-        {/* Tactical Telemetry Verdict Dialog (PaceOS Hardware Verdict) */}
+        {/* Tactical Telemetry Verdict Dialog (Costellar Hardware Verdict) */}
         {isSuccess && (
           <div className="absolute inset-0 z-40 bg-[#060A14]/70 backdrop-blur-[2px] flex items-center justify-center p-4 font-mono pointer-events-auto">
             <div className="bento-card border-2 border-[var(--signal-cobalt)] max-w-md w-full p-6 text-left space-y-4 shadow-none hud-reticle-4corner animate-in zoom-in-95 duration-150">
               {/* Verdict Header with Tier 1 Doto READOUT */}
               <div className="space-y-1 border-b border-[var(--card-border-subtle)] pb-3">
                 <div className="flex items-center justify-between">
-                  <span className="telemetry-label text-[10px]">[ VERDICT TELEMETRY // ASTROFA ENGINE ]</span>
+                  <span className="telemetry-label text-[10px]">[ VERDICT TELEMETRY // COSTELLAR ENGINE ]</span>
                   <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
                 </div>
                 <div className="font-dot text-3xl font-bold tracking-wider text-[var(--signal-cobalt)] pt-1">

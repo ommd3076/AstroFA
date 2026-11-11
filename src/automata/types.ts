@@ -1,5 +1,5 @@
 /**
- * Formal Automata Types for AstroFA
+ * Formal Automata Types for Costellar
  * Formal Definition: M = (Q, Σ, δ, q0, F)
  */
 

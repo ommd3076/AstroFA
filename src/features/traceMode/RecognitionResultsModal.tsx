@@ -35,7 +35,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `astrofa_recognition_report_${Date.now()}.json`;
+    a.download = `costellar_recognition_report_${Date.now()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

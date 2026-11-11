@@ -1,7 +1,7 @@
-# Project: PaceOS Hardware Telemetry UI Overhaul for AstroFA
+# Project: Costellar Hardware Telemetry UI Overhaul
 
 ## Architecture
-AstroFA combines formal Theory of Computation (automata theory, $\varepsilon$-NFA $\to$ DFA $\to$ Minimized DFA) with observational celestial mechanics (Three.js 3D celestial sphere, Astronomy Engine). The presentation layer is overhauled into a tactile hardware telemetry instrument panel inspired by Braun and Teenage Engineering consoles (OP-1, Field, EP-133), replacing SaaS clichés with discrete, quantized telemetry while preserving 100% of functional logic, calculations, event handlers, and state management.
+Costellar combines formal Theory of Computation (automata theory, $\varepsilon$-NFA $\to$ DFA $\to$ Minimized DFA) with observational celestial mechanics (Three.js 3D celestial sphere, Astronomy Engine). The presentation layer is overhauled into a tactile hardware telemetry instrument panel inspired by Braun and Teenage Engineering consoles (OP-1, Field, EP-133), replacing SaaS clichés with discrete, quantized telemetry while preserving 100% of functional logic, calculations, event handlers, and state management.
 
 ### Global Visual & Token Architecture
 - **Chassis Shell**: `--bg-shell: #ECEEF2` (molded polymer cool off-white chassis)

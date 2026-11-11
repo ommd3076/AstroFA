@@ -1,4 +1,4 @@
-# TEST_READY: PaceOS Hardware Telemetry Test Suite Verification
+# TEST_READY: Costellar Hardware Telemetry Test Suite Verification
 
 ## Status: ALL TESTS PASSING (73 / 73 Tests Passed)
 - **Suite Execution**: 5 Test Files, 73 Tests Passed, 0 Failures
@@ -15,7 +15,7 @@
 # Execute entire test suite
 npm test
 
-# Target the PaceOS E2E telemetry suite specifically
+# Target the Costellar E2E telemetry suite specifically
 npx vitest run tests/e2e-telemetry.test.ts
 
 # Production build check
@@ -32,7 +32,7 @@ npm run build
 | `tests/geometry.test.ts` | Invariant geometric encoding (translation, scale, rotation, Procrustes) | 7 | PASS |
 | `tests/astronomy.test.ts` | Astrometric calculations, coordinate frames, J2000 to Horizontal matrices | 6 | PASS |
 | `tests/recognition.test.ts` | Trace-to-Recognize pipeline, reference traversals, symbolic rejection | 6 | PASS |
-| `tests/e2e-telemetry.test.ts` | **PaceOS Hardware Telemetry 4-Tier E2E Verification Suite** | **44** | **PASS** |
+| `tests/e2e-telemetry.test.ts` | **Costellar Hardware Telemetry 4-Tier E2E Verification Suite** | **44** | **PASS** |
 | **Total** | **Unified Test Harness** | **73** | **PASS** |
 
 ---

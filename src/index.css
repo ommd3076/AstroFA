@@ -25,6 +25,10 @@
 
   --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
   --font-dot: 'Doto', monospace;
+
+  --tracking-wide: 0.06em;
+  --tracking-wider: 0.08em;
+  --tracking-widest: 0.10em;
 }
 
 @layer base {
@@ -57,6 +61,9 @@
     --tag-radius: 6px;
     --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
     --font-dot: 'Doto', monospace;
+    --tracking-wide: 0.06em;
+    --tracking-wider: 0.08em;
+    --tracking-widest: 0.10em;
   }
 
   body {

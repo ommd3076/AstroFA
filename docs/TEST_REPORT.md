@@ -1,6 +1,6 @@
-# AstroFA: Test Execution Report
+# Costellar: Test Execution Report
 
-AstroFA includes an automated test suite executed via Vitest covering all core theoretical algorithms and astronomical calculations.
+Costellar includes an automated test suite executed via Vitest covering all core theoretical algorithms and astronomical calculations.
 
 ## Test Summary
 

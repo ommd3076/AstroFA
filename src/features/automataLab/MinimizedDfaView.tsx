@@ -489,7 +489,7 @@ export const MinimizedDfaView: React.FC = () => {
 
             <div className="p-3 bg-[var(--bg-tray,#E2E5EC)] rounded-[8px] border border-[rgba(0,0,0,0.06)]">
               <h5 className="font-bold text-[var(--signal-cobalt,#1D55F5)] uppercase tracking-wider mb-1">
-                2. AstroFA Multi-Pattern Constraint (Label Preservation)
+                2. Costellar Multi-Pattern Constraint (Label Preservation)
               </h5>
               <p className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider leading-relaxed">
                 Classical minimization merges all accepting states without distinction. In astronomical pattern recognition,

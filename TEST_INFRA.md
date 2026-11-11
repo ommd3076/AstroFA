@@ -1,10 +1,10 @@
-# PaceOS Hardware Telemetry: E2E Test Infrastructure & Test Plan (TEST_INFRA)
+# Costellar Hardware Telemetry: E2E Test Infrastructure & Test Plan (TEST_INFRA)
 
 ## 1. Test Philosophy
 
-The testing framework for the PaceOS Tactile Hardware Telemetry UI Overhaul follows an **opaque-box, requirement-driven, 4-tier verification methodology**. 
+The testing framework for the Costellar Tactile Hardware Telemetry UI Overhaul follows an **opaque-box, requirement-driven, 4-tier verification methodology**. 
 
-AstroFA unifies formal Theory of Computation ($\varepsilon$-NFA $\to$ DFA $\to$ Minimized DFA) with observational celestial mechanics (Three.js 3D celestial sphere, Astronomy Engine). The presentation layer overhaul replaces consumer SaaS clichés with tactile, quantized hardware telemetry inspired by Braun and Teenage Engineering consoles (OP-1, Field, EP-133). 
+Costellar unifies formal Theory of Computation ($\varepsilon$-NFA $\to$ DFA $\to$ Minimized DFA) with observational celestial mechanics (Three.js 3D celestial sphere, Astronomy Engine). The presentation layer overhaul replaces consumer SaaS clichés with tactile, quantized hardware telemetry inspired by Braun and Teenage Engineering consoles (OP-1, Field, EP-133). 
 
 Because astronomical calculations and automata state reductions are mathematically rigorous, our testing philosophy mandates:
 1. **Opaque-Box Requirement Verification**: Tests evaluate system behavior from the public interface contracts without relying on transient implementation internals. Visual styling, CSS token contracts, DOM classes, state machine invariants, and mathematical projections are verified against the authoritative specifications in `ORIGINAL_REQUEST.md` and `PROJECT.md`.

@@ -14,7 +14,7 @@ export const CreditsModal: React.FC = () => {
             <span className="telemetry-label text-xs">[ ℹ️ DATA PROVENANCE // SCIENTIFIC CITATIONS &amp; LICENSES ]</span>
           </div>
           <p className="text-[11px] text-[var(--ink-secondary)] mt-1">
-            AstroFA is built strictly on open scientific datasets and verifiable astronomical computations.
+            Costellar is built strictly on open scientific datasets and verifiable astronomical computations.
           </p>
         </div>
         <button
@@ -106,7 +106,7 @@ export const CreditsModal: React.FC = () => {
           The <strong>International Astronomical Union (IAU)</strong> officially defines constellations as 88 contiguous regions dividing the entire celestial sphere,
           bounded by lines of right ascension and declination adopted in 1928 by Eugène Delporte.
           The familiar connecting lines (such as the Big Dipper or Orion's hourglass) are historical and cultural <em>asterisms</em>.
-          AstroFA respects this distinction by modeling IAU boundary metadata alongside traditional asterism figure graphs.
+          Costellar respects this distinction by modeling IAU boundary metadata alongside traditional asterism figure graphs.
         </p>
       </div>
 
@@ -119,7 +119,7 @@ export const CreditsModal: React.FC = () => {
           </h3>
         </div>
         <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-          AstroFA runs <strong>100% locally in your client web browser</strong>. No star trace coordinates, uploaded sky photographs,
+          Costellar runs <strong>100% locally in your client web browser</strong>. No star trace coordinates, uploaded sky photographs,
           or simulation traces are ever sent to remote servers or third-party tracking APIs.
           Zero accounts, zero trackers, zero secret keys.
         </p>

@@ -156,7 +156,7 @@ export const TraceHud: React.FC = () => {
           </button>
         </div>
 
-        {/* Recognition Outcome Badge (PaceOS HUD Reticle & Doto Font) */}
+        {/* Recognition Outcome Badge (Costellar HUD Reticle & Doto Font) */}
         {recognitionReport ? (
           <div className="space-y-2">
             {recognitionReport.status === 'FULL_MATCH' && (

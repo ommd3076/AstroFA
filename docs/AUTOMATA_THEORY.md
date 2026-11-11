@@ -1,6 +1,6 @@
-# AstroFA: Automata Theory & Formal Language Foundations
+# Costellar: Automata Theory & Formal Language Foundations
 
-AstroFA implements a deterministic finite-state pattern recognition engine that converts celestial star asterisms into symbolic sequences over a finite geometric feature alphabet $\Sigma$, classifies them via a minimized DFA $M$, and validates shape geometry using similarity transformations.
+Costellar implements a deterministic finite-state pattern recognition engine that converts celestial star asterisms into symbolic sequences over a finite geometric feature alphabet $\Sigma$, classifies them via a minimized DFA $M$, and validates shape geometry using similarity transformations.
 
 ---
 
@@ -12,7 +12,7 @@ $$w = a_1 a_2 \dots a_k \in \Sigma^*$$
 
 where each symbol $a_i$ encodes the invariant geometric change in trajectory (turning angle and distance ratio) between successive star vectors. The recognition problem is to decide membership in the regular language:
 
-$$L(\text{AstroFA}) = \bigcup_{i=1}^P L(C_i)$$
+$$L(\text{Costellar}) = \bigcup_{i=1}^P L(C_i)$$
 
 where each $L(C_i)$ is the regular language of valid representations of constellation $C_i$.
 
@@ -65,7 +65,7 @@ Where:
   - State $q_{k,m} \in F_{\text{NFA}}$ is accepting with label $\text{constellationId}(p_k)$.
 - Bounded tolerance: If a feature is within $\pm 7.5^\circ$ or $\pm 0.12$ of a bin boundary, non-deterministic branches on the alternate symbol are added.
 
-In AstroFA:
+In Costellar:
 - $|Q_{\text{NFA}}| = 107$ states
 - $|\delta_{\text{NFA}}| = 142$ transitions
 - $|\Sigma| = 15$ symbols
@@ -78,7 +78,7 @@ The $\varepsilon$-closure of a state subset $S \subseteq Q_{\text{NFA}}$ is defi
 
 $$\varepsilon\text{-closure}(S) = S \cup \{ q' \in Q_{\text{NFA}} \mid \exists q \in \varepsilon\text{-closure}(S) \text{ such that } (q, \varepsilon, q') \in \delta_{\text{NFA}} \}$$
 
-AstroFA implements this via Breadth-First Search using a `Set<StateId>` visited tracker, ensuring cycle freedom and multi-hop chain correctness.
+Costellar implements this via Breadth-First Search using a `Set<StateId>` visited tracker, ensuring cycle freedom and multi-hop chain correctness.
 
 ---
 
@@ -95,14 +95,14 @@ To eliminate nondeterminism, we apply the classic Rabin-Scott Powerset Construct
 4. **Acceptance:** $D \in F_{\text{DFA}}$ iff $D \cap F_{\text{NFA}} \neq \emptyset$.
    $$\text{labels}(D) = \bigcup_{q \in D \cap F_{\text{NFA}}} \text{labels}(q)$$
 
-AstroFA determinization result:
+Costellar determinization result:
 - Original DFA states: 74 active states + 1 dead trap state = 75 states.
 
 ---
 
 ## 6. DFA Minimization via Partition Refinement
 
-AstroFA implements Hopcroft-style partition refinement with a **strict academic constraint**:
+Costellar implements Hopcroft-style partition refinement with a **strict academic constraint**:
 
 ### Label Preservation Invariant
 > Accepting states with distinct constellation labels **must never be merged**, even if they exhibit identical future transitions. Merging them would destroy pattern identification.
@@ -114,7 +114,7 @@ $$P_0 = \{ Q_{\text{non-accepting}}, Q_{\text{dead}} \} \cup \left\{ Q_{L} \mid 
 A partition block $B \in P$ is split if two states $s_1, s_2 \in B$ transition into different blocks on any symbol $a \in \Sigma$:
 $$\exists a \in \Sigma \text{ s.t. } \text{block}(\delta(s_1, a)) \neq \text{block}(\delta(s_2, a))$$
 
-AstroFA minimization result:
+Costellar minimization result:
 - Original States: 75
 - Minimized States: 63 (12 redundant equivalent states merged, 16% reduction)
 - Equivalence Classes preserved: 100% verified.
@@ -140,7 +140,7 @@ AstroFA minimization result:
 
 ## 8. String Rejection: Symbolic vs. Geometric
 
-AstroFA distinctly separates:
+Costellar distinctly separates:
 1. **Symbolic Rejection:** The input string cannot be formed or reaches the dead/trap state $q_{\text{dead}}$. The automaton halts with $q \notin F$.
 2. **Geometric Rejection:** The symbolic string is accepted by the DFA (e.g. coincidental zig-zag), but Layer 2 **Procrustes Analysis** reveals that the root-mean-square residual error exceeds the tolerance threshold:
    $$\text{RMSE} = \sqrt{\frac{1}{N}\sum_{i=1}^N |P_{\text{norm}, i} - R_{\text{rot}, i}|^2} > 0.32$$

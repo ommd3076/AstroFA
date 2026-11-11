@@ -136,7 +136,7 @@ export const FormalDefinitionView: React.FC = () => {
       {/* Model Hierarchy Comparison Table — Recessed Matrix List */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] p-3.5 space-y-2 flex-1 flex flex-col">
         <h4 className="text-[11px] font-bold text-[var(--ink-primary,#181A20)] uppercase tracking-wider">
-          Automata Hierarchy in AstroFA Pipeline
+          Automata Hierarchy in Costellar Pipeline
         </h4>
         <div className="overflow-x-auto border border-[var(--bg-tray,#E2E5EC)] rounded-[8px] bg-[var(--bg-card,#F5F6F8)]">
           <table className="w-full text-left text-xs border-collapse font-mono">
@@ -157,7 +157,7 @@ export const FormalDefinitionView: React.FC = () => {
                 <td className="p-2.5 text-[var(--ink-primary,#181A20)] font-bold">{NFA_MACHINE.states.length}</td>
                 <td className="p-2.5 text-[var(--ink-primary,#181A20)] font-bold">{NFA_MACHINE.transitions.length}</td>
                 <td className="p-2.5 text-[var(--ink-secondary,#525866)] uppercase text-[10px]">NONDETERMINISTIC</td>
-                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(ASTROFA)</td>
+                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(COSTELLAR)</td>
               </tr>
               <tr className="hover:bg-[var(--bg-pill-neutral,#E6E9EF)] transition-colors">
                 <td className="p-2.5 font-bold text-[var(--signal-cobalt,#1D55F5)]">DFA MACHINE</td>
@@ -165,7 +165,7 @@ export const FormalDefinitionView: React.FC = () => {
                 <td className="p-2.5 text-[var(--ink-primary,#181A20)] font-bold">{DFA_MACHINE.states.length}</td>
                 <td className="p-2.5 text-[var(--ink-primary,#181A20)] font-bold">{DFA_MACHINE.transitions.length}</td>
                 <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] uppercase text-[10px] font-bold">DETERMINISTIC</td>
-                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(ASTROFA) IDENTICAL</td>
+                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(COSTELLAR) IDENTICAL</td>
               </tr>
               <tr className="hover:bg-[var(--bg-pill-neutral,#E6E9EF)] transition-colors">
                 <td className="p-2.5 font-bold text-[var(--signal-cobalt,#1D55F5)]">MINIMIZED DFA</td>
@@ -173,7 +173,7 @@ export const FormalDefinitionView: React.FC = () => {
                 <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold">{MINIMIZED_DFA_MACHINE.states.length}</td>
                 <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold">{MINIMIZED_DFA_MACHINE.transitions.length}</td>
                 <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] uppercase text-[10px] font-bold">CANONICAL MINIMAL</td>
-                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(ASTROFA) ISOMORPHIC</td>
+                <td className="p-2.5 text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">L(COSTELLAR) ISOMORPHIC</td>
               </tr>
             </tbody>
           </table>

@@ -2,7 +2,7 @@
 
 ## Initial Request — 2026-11-11T14:58:10Z
 
-Deploy more subagents at a time to finish the project ASAP; implement using multiple agents doing UI implementing simultaneously. Implement the PaceOS tactile hardware telemetry UI overhaul for production across the application based on the design inspiration in the UI-REFENECE folder, preserving all existing logic while replacing presentation.
+Deploy more subagents at a time to finish the project ASAP; implement using multiple agents doing UI implementing simultaneously. Implement the Costellar tactile hardware telemetry UI overhaul for production across the application based on the design inspiration in the UI-REFENECE folder, preserving all existing logic while replacing presentation.
 
 Integrity mode: development
 
@@ -10,7 +10,7 @@ Reference material: Images and design inspiration in workspace folder UI-REFENEC
 
 ## Requirements
 
-### R1. PaceOS Hardware Telemetry Visual System and Token Architecture
+### R1. Costellar Hardware Telemetry Visual System and Token Architecture
 Overhaul the interface to embody tactile hardware telemetry inspired by Braun and Teenage Engineering instrument panels, replacing SaaS clichés:
 - Apply the CSS token matrix:
   --bg-shell: #ECEEF2

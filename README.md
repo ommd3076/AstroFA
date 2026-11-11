@@ -1,18 +1,18 @@
-# AstroFA: Interactive Constellation Recognition & Automata-Based Pattern Analysis
+# Costellar: Interactive Constellation Recognition & Automata-Based Pattern Analysis
 
 > **Explore the sky. Understand the pattern.**
 >
 > A Theory of Computation & Computational Astronomy web application connecting real celestial datasets with a custom finite-state pattern recognition engine.
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-emerald)](https://github.com)
-[![Tests](https://img.shields.io/badge/Tests-26%2F26%20Passing-emerald)](https://github.com)
+[![Tests](https://img.shields.io/badge/Tests-74%2F74%20Passing-emerald)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT%20%2F%20CC%20BY--SA%204.0-blue)](https://github.com)
 
 ---
 
 ## 🌟 Overview
 
-AstroFA demonstrates how abstract **Theory of Computation** concepts—Deterministic Finite Automata (DFA), Nondeterministic Finite Automata (NFA), $\varepsilon$-closure, subset powerset construction, and partition-refinement minimization—power real-world geometric pattern recognition across the celestial sphere.
+Costellar demonstrates how abstract **Theory of Computation** concepts—Deterministic Finite Automata (DFA), Nondeterministic Finite Automata (NFA), $\varepsilon$-closure, subset powerset construction, and partition-refinement minimization—power real-world geometric pattern recognition across the celestial sphere.
 
 Users can explore an authentic 3D night sky renderer with **8,921 real stars** from the **HYG Star Database**, trace star asterisms in sequence, watch the geometry convert into a finite alphabet string $\Sigma^*$, and observe the state machine transition in real time to classify constellations.
 
@@ -94,8 +94,8 @@ $$M = (Q, \Sigma, \delta, q_0, F)$$
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/astrofa.git
-cd astrofa
+git clone https://github.com/ommd3076/AstroFA.git costellar
+cd costellar
 
 # Install dependencies
 npm install
@@ -133,7 +133,7 @@ The production output is emitted to the `dist/` directory.
 
 ## ☁️ Deployment (Cloudflare Pages)
 
-AstroFA is a 100% static client-side web application and requires no custom backend or server-side database.
+Costellar is a 100% static client-side web application and requires no custom backend or server-side database.
 
 ### Cloudflare Pages Build Settings:
 
@@ -158,7 +158,7 @@ For Single Page App (SPA) routing, Cloudflare Pages serves `dist/index.html` for
 
 ## ⚖️ License & Attribution
 
-- **AstroFA Codebase:** MIT License
+- **Costellar Codebase:** MIT License
 - **HYG Star Database (v3.8):** Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) by David Nash / Astronexus.
 - **Constellation Lines Dataset:** Creative Commons Attribution 4.0 International (CC BY 4.0) by Marc van der Sluys.
 - **Astronomy Engine:** MIT License (c) 2019-2024 Don Cross.

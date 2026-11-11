@@ -28,7 +28,7 @@ import { simulateDfa } from '../src/automata/simulate';
 import { recognizePattern } from '../src/recognition/matcher';
 import type { Point2D } from '../src/geometry/types';
 
-describe('PaceOS Tactile Hardware Telemetry E2E Verification Suite', () => {
+describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
   // Read static files once for Tier 1 checks
   let indexHtml: string;
   let indexCss: string;

@@ -1,10 +1,10 @@
-# AstroFA: System Architecture
+# Costellar: System Architecture
 
-AstroFA is architected as a modular, purely client-side static web application designed for deployment to static hosting platforms such as Cloudflare Pages.
+Costellar is architected as a modular, purely client-side static web application designed for deployment to static hosting platforms such as Cloudflare Pages.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                          AstroFA Frontend                              │
+│                          Costellar Frontend                            │
 │                                                                        │
 │   ┌─────────────────────┐   ┌──────────────────────────────────────┐   │
 │   │   Interactive Sky   │   │            Automata Lab              │   │

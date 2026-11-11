@@ -181,7 +181,7 @@ export const ImageLab: React.FC = () => {
 
     setDetectedStars(candidates);
 
-    // Render detected star square corner reticles [ ] (PaceOS tactile hardware reticle)
+    // Render detected star square corner reticles [ ] (Costellar tactile hardware reticle)
     const size = 7;
     const tick = 3;
     ctx.strokeStyle = '#1D55F5'; // electric cobalt

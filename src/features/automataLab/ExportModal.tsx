@@ -41,19 +41,19 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
       rows.push(row.join(','));
     }
 
-    handleDownload('astrofa_dfa_transition_table.csv', rows.join('\n'), 'text/csv;charset=utf-8');
+    handleDownload('costellar_dfa_transition_table.csv', rows.join('\n'), 'text/csv;charset=utf-8');
   };
 
   // 2. Export DFA as JSON
   const exportDfaJson = () => {
     const jsonStr = JSON.stringify(MINIMIZED_DFA_MACHINE, null, 2);
-    handleDownload('astrofa_minimized_dfa.json', jsonStr, 'application/json');
+    handleDownload('costellar_minimized_dfa.json', jsonStr, 'application/json');
   };
 
   // 3. Export NFA as JSON
   const exportNfaJson = () => {
     const jsonStr = JSON.stringify(NFA_MACHINE, null, 2);
-    handleDownload('astrofa_nfa.json', jsonStr, 'application/json');
+    handleDownload('costellar_nfa.json', jsonStr, 'application/json');
   };
 
   // 4. Export Recognition Trace as JSON
@@ -63,7 +63,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
       simulatorInput: simulatorSymbols,
       recognitionReport,
     };
-    handleDownload('astrofa_recognition_trace.json', JSON.stringify(data, null, 2), 'application/json');
+    handleDownload('costellar_recognition_trace.json', JSON.stringify(data, null, 2), 'application/json');
   };
 
   // 5. Export SVG State Diagram
@@ -75,7 +75,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}">\n`;
     svg += `  <style>\n    .state { font-family: monospace; font-size: 11px; font-weight: bold; fill: #ffffff; }\n    .edge { stroke: #525866; stroke-width: 1.5; }\n    .label { font-family: monospace; font-size: 9px; fill: #1D55F5; font-weight: bold; }\n  </style>\n`;
     svg += `  <rect width="${svgWidth}" height="${svgHeight}" fill="#060A14"/>\n`;
-    svg += `  <text x="30" y="40" font-family="monospace" font-size="16" font-weight="bold" fill="#1D55F5">ASTROFA MINIMIZED DFA HARDWARE TELEMETRY DIAGRAM</text>\n`;
+    svg += `  <text x="30" y="40" font-family="monospace" font-size="16" font-weight="bold" fill="#1D55F5">COSTELLAR MINIMIZED DFA HARDWARE TELEMETRY DIAGRAM</text>\n`;
 
     // Render grid of states
     const cols = 9;
@@ -99,7 +99,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     });
 
     svg += '</svg>';
-    handleDownload('astrofa_minimized_dfa.svg', svg, 'image/svg+xml');
+    handleDownload('costellar_minimized_dfa.svg', svg, 'image/svg+xml');
   };
 
   return (

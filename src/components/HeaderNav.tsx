@@ -92,17 +92,17 @@ export const HeaderNav: React.FC = () => {
             className="flex items-center gap-2.5 group text-left cursor-pointer"
           >
             <div className="w-8 h-8 rounded-[6px] bg-[var(--signal-cobalt)] flex items-center justify-center border border-[var(--signal-mid)] shadow-none shrink-0 transition-opacity group-hover:opacity-90">
-              <span className="text-white font-bold text-sm tracking-wider font-mono">A</span>
+              <span className="text-white font-bold text-sm tracking-wider font-mono">C</span>
             </div>
             <div>
               <div className="font-bold tracking-tight text-[var(--ink-primary)] text-xs uppercase flex items-center gap-1.5">
-                <span className="tracking-wider">ASTRO-FA</span>
+                <span className="tracking-wider">COSTELLAR</span>
                 <span className="hud-reticle text-[9px] font-mono uppercase px-1.5 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-mid)] rounded-[4px] font-semibold">
-                  PACE-OS
+                  DFA ENGINE
                 </span>
               </div>
               <div className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wider hidden sm:block">
-                HARDWARE TELEMETRY // DFA
+                HARDWARE TELEMETRY // AUTOMATA
               </div>
             </div>
           </button>

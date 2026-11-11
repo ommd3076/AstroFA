@@ -699,7 +699,7 @@ export const SkyCanvas: React.FC = () => {
         className="absolute inset-0 pointer-events-none z-10 w-full h-full"
       />
 
-      {/* Hovered Star Tooltip Telemetry Readout (PaceOS HUD Reticle) */}
+      {/* Hovered Star Tooltip Telemetry Readout (Costellar HUD Reticle) */}
       {hoveredStar && (
         <div className="hud-reticle absolute pointer-events-none z-20 bottom-6 left-6 p-3 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] text-xs space-y-2 font-mono">
           <div className="flex items-center justify-between gap-3 border-b border-[#1E293B] pb-1.5">
