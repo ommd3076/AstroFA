@@ -1,0 +1,7635 @@
+[
+  {
+    "id": "And",
+    "name": "Andromeda",
+    "genitive": "Andromedae",
+    "englishName": "Chained Maiden",
+    "area": 722,
+    "raCenter": 12,
+    "decCenter": 37.5,
+    "brightestStar": "Alpheratz",
+    "family": "Perseus",
+    "polylines": [
+      [
+        116218,
+        116439,
+        116265,
+        113366,
+        116265,
+        1470,
+        3086,
+        676,
+        3086,
+        3025,
+        3685,
+        3025,
+        3086,
+        5436,
+        9618,
+        5436,
+        7593,
+        5436,
+        4426,
+        3871
+      ]
+    ],
+    "starIds": [
+      116218,
+      116439,
+      116265,
+      113366,
+      1470,
+      3086,
+      676,
+      3025,
+      3685,
+      5436,
+      9618,
+      7593,
+      4426,
+      3871
+    ],
+    "lineSegments": [
+      {
+        "starId1": 116218,
+        "starId2": 116439,
+        "hr1": 8961,
+        "hr2": 8976
+      },
+      {
+        "starId1": 116439,
+        "starId2": 116265,
+        "hr1": 8976,
+        "hr2": 8965
+      },
+      {
+        "starId1": 116265,
+        "starId2": 113366,
+        "hr1": 8965,
+        "hr2": 8762
+      },
+      {
+        "starId1": 113366,
+        "starId2": 116265,
+        "hr1": 8762,
+        "hr2": 8965
+      },
+      {
+        "starId1": 116265,
+        "starId2": 1470,
+        "hr1": 8965,
+        "hr2": 68
+      },
+      {
+        "starId1": 1470,
+        "starId2": 3086,
+        "hr1": 68,
+        "hr2": 165
+      },
+      {
+        "starId1": 3086,
+        "starId2": 676,
+        "hr1": 165,
+        "hr2": 15
+      },
+      {
+        "starId1": 676,
+        "starId2": 3086,
+        "hr1": 15,
+        "hr2": 165
+      },
+      {
+        "starId1": 3086,
+        "starId2": 3025,
+        "hr1": 165,
+        "hr2": 163
+      },
+      {
+        "starId1": 3025,
+        "starId2": 3685,
+        "hr1": 163,
+        "hr2": 215
+      },
+      {
+        "starId1": 3685,
+        "starId2": 3025,
+        "hr1": 215,
+        "hr2": 163
+      },
+      {
+        "starId1": 3025,
+        "starId2": 3086,
+        "hr1": 163,
+        "hr2": 165
+      },
+      {
+        "starId1": 3086,
+        "starId2": 5436,
+        "hr1": 165,
+        "hr2": 337
+      },
+      {
+        "starId1": 5436,
+        "starId2": 9618,
+        "hr1": 337,
+        "hr2": 603
+      },
+      {
+        "starId1": 9618,
+        "starId2": 5436,
+        "hr1": 603,
+        "hr2": 337
+      },
+      {
+        "starId1": 5436,
+        "starId2": 7593,
+        "hr1": 337,
+        "hr2": 464
+      },
+      {
+        "starId1": 7593,
+        "starId2": 5436,
+        "hr1": 464,
+        "hr2": 337
+      },
+      {
+        "starId1": 5436,
+        "starId2": 4426,
+        "hr1": 337,
+        "hr2": 269
+      },
+      {
+        "starId1": 4426,
+        "starId2": 3871,
+        "hr1": 269,
+        "hr2": 226
+      }
+    ]
+  },
+  {
+    "id": "Ant",
+    "name": "Antlia",
+    "genitive": "Antliae",
+    "englishName": "Air Pump",
+    "area": 239,
+    "raCenter": 150,
+    "decCenter": -32.5,
+    "brightestStar": "Alp Ant",
+    "family": "La Caille",
+    "polylines": [
+      [
+        53347,
+        51027,
+        47623,
+        46382
+      ]
+    ],
+    "starIds": [
+      53347,
+      51027,
+      47623,
+      46382
+    ],
+    "lineSegments": [
+      {
+        "starId1": 53347,
+        "starId2": 51027,
+        "hr1": 4273,
+        "hr2": 4104
+      },
+      {
+        "starId1": 51027,
+        "starId2": 47623,
+        "hr1": 4104,
+        "hr2": 3871
+      },
+      {
+        "starId1": 47623,
+        "starId2": 46382,
+        "hr1": 3871,
+        "hr2": 3765
+      }
+    ]
+  },
+  {
+    "id": "Aps",
+    "name": "Apus",
+    "genitive": "Apodis",
+    "englishName": "Bird of Paradise",
+    "area": 206,
+    "raCenter": 241.5,
+    "decCenter": -75.3,
+    "brightestStar": "Alp Aps",
+    "family": "Bayer",
+    "polylines": [
+      [
+        72144,
+        79805,
+        80819,
+        81602
+      ]
+    ],
+    "starIds": [
+      72144,
+      79805,
+      80819,
+      81602
+    ],
+    "lineSegments": [
+      {
+        "starId1": 72144,
+        "starId2": 79805,
+        "hr1": 5470,
+        "hr2": 6020
+      },
+      {
+        "starId1": 79805,
+        "starId2": 80819,
+        "hr1": 6020,
+        "hr2": 6102
+      },
+      {
+        "starId1": 80819,
+        "starId2": 81602,
+        "hr1": 6102,
+        "hr2": 6163
+      }
+    ]
+  },
+  {
+    "id": "Aqr",
+    "name": "Aquarius",
+    "genitive": "Aquarii",
+    "englishName": "Water Bearer",
+    "area": 980,
+    "raCenter": 334.5,
+    "decCenter": -10.8,
+    "brightestStar": "Sadalsuud",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        113980,
+        114493,
+        114362,
+        111147,
+        110049,
+        112601,
+        112776,
+        112601,
+        110049,
+        109657,
+        108793,
+        109657,
+        110049,
+        108728,
+        105936
+      ]
+    ],
+    "starIds": [
+      113980,
+      114493,
+      114362,
+      111147,
+      110049,
+      112601,
+      112776,
+      109657,
+      108793,
+      108728,
+      105936
+    ],
+    "lineSegments": [
+      {
+        "starId1": 113980,
+        "starId2": 114493,
+        "hr1": 8812,
+        "hr2": 8841
+      },
+      {
+        "starId1": 114493,
+        "starId2": 114362,
+        "hr1": 8841,
+        "hr2": 8834
+      },
+      {
+        "starId1": 114362,
+        "starId2": 111147,
+        "hr1": 8834,
+        "hr2": 8597
+      },
+      {
+        "starId1": 111147,
+        "starId2": 110049,
+        "hr1": 8597,
+        "hr2": 8518
+      },
+      {
+        "starId1": 110049,
+        "starId2": 112601,
+        "hr1": 8518,
+        "hr2": 8698
+      },
+      {
+        "starId1": 112601,
+        "starId2": 112776,
+        "hr1": 8698,
+        "hr2": 8709
+      },
+      {
+        "starId1": 112776,
+        "starId2": 112601,
+        "hr1": 8709,
+        "hr2": 8698
+      },
+      {
+        "starId1": 112601,
+        "starId2": 110049,
+        "hr1": 8698,
+        "hr2": 8518
+      },
+      {
+        "starId1": 110049,
+        "starId2": 109657,
+        "hr1": 8518,
+        "hr2": 8499
+      },
+      {
+        "starId1": 109657,
+        "starId2": 108793,
+        "hr1": 8499,
+        "hr2": 8418
+      },
+      {
+        "starId1": 108793,
+        "starId2": 109657,
+        "hr1": 8418,
+        "hr2": 8499
+      },
+      {
+        "starId1": 109657,
+        "starId2": 110049,
+        "hr1": 8499,
+        "hr2": 8518
+      },
+      {
+        "starId1": 110049,
+        "starId2": 108728,
+        "hr1": 8518,
+        "hr2": 8414
+      },
+      {
+        "starId1": 108728,
+        "starId2": 105936,
+        "hr1": 8414,
+        "hr2": 8232
+      }
+    ]
+  },
+  {
+    "id": "Aql",
+    "name": "Aquila",
+    "genitive": "Aquilae",
+    "englishName": "Eagle",
+    "area": 652,
+    "raCenter": 295.5,
+    "decCenter": 3.4,
+    "brightestStar": "Altair",
+    "family": "Hercules",
+    "polylines": [
+      [
+        97725,
+        97338,
+        96970,
+        95207,
+        93452,
+        95207,
+        97493,
+        99156,
+        97493,
+        95207,
+        93510,
+        93136
+      ]
+    ],
+    "starIds": [
+      97725,
+      97338,
+      96970,
+      95207,
+      93452,
+      97493,
+      99156,
+      93510,
+      93136
+    ],
+    "lineSegments": [
+      {
+        "starId1": 97725,
+        "starId2": 97338,
+        "hr1": 7602,
+        "hr2": 7557
+      },
+      {
+        "starId1": 97338,
+        "starId2": 96970,
+        "hr1": 7557,
+        "hr2": 7525
+      },
+      {
+        "starId1": 96970,
+        "starId2": 95207,
+        "hr1": 7525,
+        "hr2": 7377
+      },
+      {
+        "starId1": 95207,
+        "starId2": 93452,
+        "hr1": 7377,
+        "hr2": 7235
+      },
+      {
+        "starId1": 93452,
+        "starId2": 95207,
+        "hr1": 7235,
+        "hr2": 7377
+      },
+      {
+        "starId1": 95207,
+        "starId2": 97493,
+        "hr1": 7377,
+        "hr2": 7570
+      },
+      {
+        "starId1": 97493,
+        "starId2": 99156,
+        "hr1": 7570,
+        "hr2": 7710
+      },
+      {
+        "starId1": 99156,
+        "starId2": 97493,
+        "hr1": 7710,
+        "hr2": 7570
+      },
+      {
+        "starId1": 97493,
+        "starId2": 95207,
+        "hr1": 7570,
+        "hr2": 7377
+      },
+      {
+        "starId1": 95207,
+        "starId2": 93510,
+        "hr1": 7377,
+        "hr2": 7236
+      },
+      {
+        "starId1": 93510,
+        "starId2": 93136,
+        "hr1": 7236,
+        "hr2": 7193
+      }
+    ]
+  },
+  {
+    "id": "Ara",
+    "name": "Ara",
+    "genitive": "Arae",
+    "englishName": "Altar",
+    "area": 237,
+    "raCenter": 261,
+    "decCenter": -56.6,
+    "brightestStar": "Alp Ara",
+    "family": "Hercules",
+    "polylines": [
+      [
+        88439,
+        85530,
+        84999,
+        85008,
+        85467,
+        85008,
+        82826,
+        82112,
+        82826,
+        82898,
+        85530
+      ]
+    ],
+    "starIds": [
+      88439,
+      85530,
+      84999,
+      85008,
+      85467,
+      82826,
+      82112,
+      82898
+    ],
+    "lineSegments": [
+      {
+        "starId1": 88439,
+        "starId2": 85530,
+        "hr1": 6743,
+        "hr2": 6510
+      },
+      {
+        "starId1": 85530,
+        "starId2": 84999,
+        "hr1": 6510,
+        "hr2": 6461
+      },
+      {
+        "starId1": 84999,
+        "starId2": 85008,
+        "hr1": 6461,
+        "hr2": 6462
+      },
+      {
+        "starId1": 85008,
+        "starId2": 85467,
+        "hr1": 6462,
+        "hr2": 6500
+      },
+      {
+        "starId1": 85467,
+        "starId2": 85008,
+        "hr1": 6500,
+        "hr2": 6462
+      },
+      {
+        "starId1": 85008,
+        "starId2": 82826,
+        "hr1": 6462,
+        "hr2": 6285
+      },
+      {
+        "starId1": 82826,
+        "starId2": 82112,
+        "hr1": 6285,
+        "hr2": 6229
+      },
+      {
+        "starId1": 82112,
+        "starId2": 82826,
+        "hr1": 6229,
+        "hr2": 6285
+      },
+      {
+        "starId1": 82826,
+        "starId2": 82898,
+        "hr1": 6285,
+        "hr2": 6295
+      },
+      {
+        "starId1": 82898,
+        "starId2": 85530,
+        "hr1": 6295,
+        "hr2": 6510
+      }
+    ]
+  },
+  {
+    "id": "Ari",
+    "name": "Aries",
+    "genitive": "Arietis",
+    "englishName": "Ram",
+    "area": 441,
+    "raCenter": 39,
+    "decCenter": 20.8,
+    "brightestStar": "Hamal",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        14802,
+        13176,
+        9861,
+        8884,
+        8813
+      ]
+    ],
+    "starIds": [
+      14802,
+      13176,
+      9861,
+      8884,
+      8813
+    ],
+    "lineSegments": [
+      {
+        "starId1": 14802,
+        "starId2": 13176,
+        "hr1": 951,
+        "hr2": 838
+      },
+      {
+        "starId1": 13176,
+        "starId2": 9861,
+        "hr1": 838,
+        "hr2": 617
+      },
+      {
+        "starId1": 9861,
+        "starId2": 8884,
+        "hr1": 617,
+        "hr2": 553
+      },
+      {
+        "starId1": 8884,
+        "starId2": 8813,
+        "hr1": 553,
+        "hr2": 546
+      }
+    ]
+  },
+  {
+    "id": "Aur",
+    "name": "Auriga",
+    "genitive": "Aurigae",
+    "englishName": "Charioteer",
+    "area": 657,
+    "raCenter": 90,
+    "decCenter": 42,
+    "brightestStar": "Capella",
+    "family": "Perseus",
+    "polylines": [
+      [
+        24549,
+        28288,
+        28309,
+        25364,
+        22961,
+        23398,
+        23712,
+        23361,
+        24549
+      ]
+    ],
+    "starIds": [
+      24549,
+      28288,
+      28309,
+      25364,
+      22961,
+      23398,
+      23712,
+      23361
+    ],
+    "lineSegments": [
+      {
+        "starId1": 24549,
+        "starId2": 28288,
+        "hr1": 1708,
+        "hr2": 2088
+      },
+      {
+        "starId1": 28288,
+        "starId2": 28309,
+        "hr1": 2088,
+        "hr2": 2095
+      },
+      {
+        "starId1": 28309,
+        "starId2": 25364,
+        "hr1": 2095,
+        "hr2": 1791
+      },
+      {
+        "starId1": 25364,
+        "starId2": 22961,
+        "hr1": 1791,
+        "hr2": 1577
+      },
+      {
+        "starId1": 22961,
+        "starId2": 23398,
+        "hr1": 1577,
+        "hr2": 1612
+      },
+      {
+        "starId1": 23398,
+        "starId2": 23712,
+        "hr1": 1612,
+        "hr2": 1641
+      },
+      {
+        "starId1": 23712,
+        "starId2": 23361,
+        "hr1": 1641,
+        "hr2": 1605
+      },
+      {
+        "starId1": 23361,
+        "starId2": 24549,
+        "hr1": 1605,
+        "hr2": 1708
+      }
+    ]
+  },
+  {
+    "id": "Boo",
+    "name": "Boötes",
+    "genitive": "Boötis",
+    "englishName": "Herdsman",
+    "area": 907,
+    "raCenter": 220.5,
+    "decCenter": 31.2,
+    "brightestStar": "Arcturus",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        70851,
+        70828,
+        69451,
+        74438,
+        73327,
+        70851,
+        69510,
+        70274,
+        69261,
+        69510
+      ]
+    ],
+    "starIds": [
+      70851,
+      70828,
+      69451,
+      74438,
+      73327,
+      69510,
+      70274,
+      69261
+    ],
+    "lineSegments": [
+      {
+        "starId1": 70851,
+        "starId2": 70828,
+        "hr1": 5435,
+        "hr2": 5429
+      },
+      {
+        "starId1": 70828,
+        "starId2": 69451,
+        "hr1": 5429,
+        "hr2": 5340
+      },
+      {
+        "starId1": 69451,
+        "starId2": 74438,
+        "hr1": 5340,
+        "hr2": 5681
+      },
+      {
+        "starId1": 74438,
+        "starId2": 73327,
+        "hr1": 5681,
+        "hr2": 5602
+      },
+      {
+        "starId1": 73327,
+        "starId2": 70851,
+        "hr1": 5602,
+        "hr2": 5435
+      },
+      {
+        "starId1": 70851,
+        "starId2": 69510,
+        "hr1": 5435,
+        "hr2": 5351
+      },
+      {
+        "starId1": 69510,
+        "starId2": 70274,
+        "hr1": 5351,
+        "hr2": 5404
+      },
+      {
+        "starId1": 70274,
+        "starId2": 69261,
+        "hr1": 5404,
+        "hr2": 5329
+      },
+      {
+        "starId1": 69261,
+        "starId2": 69510,
+        "hr1": 5329,
+        "hr2": 5351
+      }
+    ]
+  },
+  {
+    "id": "Cae",
+    "name": "Caelum",
+    "genitive": "Caeli",
+    "englishName": "Chisel",
+    "area": 125,
+    "raCenter": 70.5,
+    "decCenter": -37.9,
+    "brightestStar": "Alp Cae",
+    "family": "La Caille",
+    "polylines": [
+      [
+        21008,
+        21717,
+        21808
+      ]
+    ],
+    "starIds": [
+      21008,
+      21717,
+      21808
+    ],
+    "lineSegments": [
+      {
+        "starId1": 21008,
+        "starId2": 21717,
+        "hr1": 1443,
+        "hr2": 1502
+      },
+      {
+        "starId1": 21717,
+        "starId2": 21808,
+        "hr1": 1502,
+        "hr2": 1503
+      }
+    ]
+  },
+  {
+    "id": "Cam",
+    "name": "Camelopardalis",
+    "genitive": "Camelopardalis",
+    "englishName": "Giraffe",
+    "area": 757,
+    "raCenter": 90,
+    "decCenter": 70,
+    "brightestStar": "Bet Cam",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        16241,
+        16187,
+        17842,
+        17917,
+        22730,
+        23467,
+        22987
+      ]
+    ],
+    "starIds": [
+      16241,
+      16187,
+      17842,
+      17917,
+      22730,
+      23467,
+      22987
+    ],
+    "lineSegments": [
+      {
+        "starId1": 16241,
+        "starId2": 16187,
+        "hr1": 1040,
+        "hr2": 1035
+      },
+      {
+        "starId1": 16187,
+        "starId2": 17842,
+        "hr1": 1035,
+        "hr2": 1155
+      },
+      {
+        "starId1": 17842,
+        "starId2": 17917,
+        "hr1": 1155,
+        "hr2": 1148
+      },
+      {
+        "starId1": 17917,
+        "starId2": 22730,
+        "hr1": 1148,
+        "hr2": 1542
+      },
+      {
+        "starId1": 22730,
+        "starId2": 23467,
+        "hr1": 1542,
+        "hr2": 1603
+      },
+      {
+        "starId1": 23467,
+        "starId2": 22987,
+        "hr1": 1603,
+        "hr2": 1568
+      }
+    ]
+  },
+  {
+    "id": "Cnc",
+    "name": "Cancer",
+    "genitive": "Cancri",
+    "englishName": "Crab",
+    "area": 506,
+    "raCenter": 129,
+    "decCenter": 19.8,
+    "brightestStar": "Tarf",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        43939,
+        42792,
+        40411,
+        42792,
+        42687,
+        42984
+      ]
+    ],
+    "starIds": [
+      43939,
+      42792,
+      40411,
+      42687,
+      42984
+    ],
+    "lineSegments": [
+      {
+        "starId1": 43939,
+        "starId2": 42792,
+        "hr1": 3572,
+        "hr2": 3461
+      },
+      {
+        "starId1": 42792,
+        "starId2": 40411,
+        "hr1": 3461,
+        "hr2": 3249
+      },
+      {
+        "starId1": 40411,
+        "starId2": 42792,
+        "hr1": 3249,
+        "hr2": 3461
+      },
+      {
+        "starId1": 42792,
+        "starId2": 42687,
+        "hr1": 3461,
+        "hr2": 3449
+      },
+      {
+        "starId1": 42687,
+        "starId2": 42984,
+        "hr1": 3449,
+        "hr2": 3475
+      }
+    ]
+  },
+  {
+    "id": "CVn",
+    "name": "Canes Venatici",
+    "genitive": "Canum Venaticorum",
+    "englishName": "Hunting Dogs",
+    "area": 465,
+    "raCenter": 196.5,
+    "decCenter": 40.1,
+    "brightestStar": "Cor Caroli",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        62925,
+        61124
+      ]
+    ],
+    "starIds": [
+      62925,
+      61124
+    ],
+    "lineSegments": [
+      {
+        "starId1": 62925,
+        "starId2": 61124,
+        "hr1": 4915,
+        "hr2": 4785
+      }
+    ]
+  },
+  {
+    "id": "CMa",
+    "name": "Canis Major",
+    "genitive": "Canis Majoris",
+    "englishName": "Great Dog",
+    "area": 380,
+    "raCenter": 102,
+    "decCenter": -22.1,
+    "brightestStar": "Sirius",
+    "family": "Orion",
+    "polylines": [
+      [
+        33260,
+        33073,
+        33956,
+        33260,
+        32263,
+        30251,
+        31512,
+        33065,
+        33492,
+        33769,
+        34354,
+        35806,
+        34354,
+        33888,
+        32263
+      ]
+    ],
+    "starIds": [
+      33260,
+      33073,
+      33956,
+      32263,
+      30251,
+      31512,
+      33065,
+      33492,
+      33769,
+      34354,
+      35806,
+      33888
+    ],
+    "lineSegments": [
+      {
+        "starId1": 33260,
+        "starId2": 33073,
+        "hr1": 2596,
+        "hr2": 2574
+      },
+      {
+        "starId1": 33073,
+        "starId2": 33956,
+        "hr1": 2574,
+        "hr2": 2657
+      },
+      {
+        "starId1": 33956,
+        "starId2": 33260,
+        "hr1": 2657,
+        "hr2": 2596
+      },
+      {
+        "starId1": 33260,
+        "starId2": 32263,
+        "hr1": 2596,
+        "hr2": 2491
+      },
+      {
+        "starId1": 32263,
+        "starId2": 30251,
+        "hr1": 2491,
+        "hr2": 2294
+      },
+      {
+        "starId1": 30251,
+        "starId2": 31512,
+        "hr1": 2294,
+        "hr2": 2429
+      },
+      {
+        "starId1": 31512,
+        "starId2": 33065,
+        "hr1": 2429,
+        "hr2": 2580
+      },
+      {
+        "starId1": 33065,
+        "starId2": 33492,
+        "hr1": 2580,
+        "hr2": 2618
+      },
+      {
+        "starId1": 33492,
+        "starId2": 33769,
+        "hr1": 2618,
+        "hr2": 2646
+      },
+      {
+        "starId1": 33769,
+        "starId2": 34354,
+        "hr1": 2646,
+        "hr2": 2693
+      },
+      {
+        "starId1": 34354,
+        "starId2": 35806,
+        "hr1": 2693,
+        "hr2": 2827
+      },
+      {
+        "starId1": 35806,
+        "starId2": 34354,
+        "hr1": 2827,
+        "hr2": 2693
+      },
+      {
+        "starId1": 34354,
+        "starId2": 33888,
+        "hr1": 2693,
+        "hr2": 2653
+      },
+      {
+        "starId1": 33888,
+        "starId2": 32263,
+        "hr1": 2653,
+        "hr2": 2491
+      }
+    ]
+  },
+  {
+    "id": "CMi",
+    "name": "Canis Minor",
+    "genitive": "Canis Minoris",
+    "englishName": "Lesser Dog",
+    "area": 183,
+    "raCenter": 115.5,
+    "decCenter": 6.4,
+    "brightestStar": "Procyon",
+    "family": "Orion",
+    "polylines": [
+      [
+        37173,
+        36087
+      ]
+    ],
+    "starIds": [
+      37173,
+      36087
+    ],
+    "lineSegments": [
+      {
+        "starId1": 37173,
+        "starId2": 36087,
+        "hr1": 2943,
+        "hr2": 2845
+      }
+    ]
+  },
+  {
+    "id": "Cap",
+    "name": "Capricornus",
+    "genitive": "Capricorni",
+    "englishName": "Sea Goat",
+    "area": 414,
+    "raCenter": 315,
+    "decCenter": -18,
+    "brightestStar": "Deneb Algedi",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        99743,
+        100020,
+        102154,
+        102647,
+        105540,
+        106642,
+        107213,
+        106642,
+        105175,
+        103804,
+        100020
+      ]
+    ],
+    "starIds": [
+      99743,
+      100020,
+      102154,
+      102647,
+      105540,
+      106642,
+      107213,
+      105175,
+      103804
+    ],
+    "lineSegments": [
+      {
+        "starId1": 99743,
+        "starId2": 100020,
+        "hr1": 7754,
+        "hr2": 7776
+      },
+      {
+        "starId1": 100020,
+        "starId2": 102154,
+        "hr1": 7776,
+        "hr2": 7936
+      },
+      {
+        "starId1": 102154,
+        "starId2": 102647,
+        "hr1": 7936,
+        "hr2": 7980
+      },
+      {
+        "starId1": 102647,
+        "starId2": 105540,
+        "hr1": 7980,
+        "hr2": 8204
+      },
+      {
+        "starId1": 105540,
+        "starId2": 106642,
+        "hr1": 8204,
+        "hr2": 8278
+      },
+      {
+        "starId1": 106642,
+        "starId2": 107213,
+        "hr1": 8278,
+        "hr2": 8322
+      },
+      {
+        "starId1": 107213,
+        "starId2": 106642,
+        "hr1": 8322,
+        "hr2": 8278
+      },
+      {
+        "starId1": 106642,
+        "starId2": 105175,
+        "hr1": 8278,
+        "hr2": 8167
+      },
+      {
+        "starId1": 105175,
+        "starId2": 103804,
+        "hr1": 8167,
+        "hr2": 8075
+      },
+      {
+        "starId1": 103804,
+        "starId2": 100020,
+        "hr1": 8075,
+        "hr2": 7776
+      }
+    ]
+  },
+  {
+    "id": "Car",
+    "name": "Carina",
+    "genitive": "Carinae",
+    "englishName": "Keel",
+    "area": 494,
+    "raCenter": 130.5,
+    "decCenter": -63.2,
+    "brightestStar": "Canopus",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        30365,
+        32675,
+        38713,
+        40921,
+        45425,
+        50229,
+        51428,
+        52268,
+        49958,
+        45106,
+        47866
+      ]
+    ],
+    "starIds": [
+      30365,
+      32675,
+      38713,
+      40921,
+      45425,
+      50229,
+      51428,
+      52268,
+      49958,
+      45106,
+      47866
+    ],
+    "lineSegments": [
+      {
+        "starId1": 30365,
+        "starId2": 32675,
+        "hr1": 2326,
+        "hr2": 2554
+      },
+      {
+        "starId1": 32675,
+        "starId2": 38713,
+        "hr1": 2554,
+        "hr2": 3117
+      },
+      {
+        "starId1": 38713,
+        "starId2": 40921,
+        "hr1": 3117,
+        "hr2": 3307
+      },
+      {
+        "starId1": 40921,
+        "starId2": 45425,
+        "hr1": 3307,
+        "hr2": 3699
+      },
+      {
+        "starId1": 45425,
+        "starId2": 50229,
+        "hr1": 3699,
+        "hr2": 4050
+      },
+      {
+        "starId1": 50229,
+        "starId2": 51428,
+        "hr1": 4050,
+        "hr2": 4140
+      },
+      {
+        "starId1": 51428,
+        "starId2": 52268,
+        "hr1": 4140,
+        "hr2": 4199
+      },
+      {
+        "starId1": 52268,
+        "starId2": 49958,
+        "hr1": 4199,
+        "hr2": 4037
+      },
+      {
+        "starId1": 49958,
+        "starId2": 45106,
+        "hr1": 4037,
+        "hr2": 3685
+      },
+      {
+        "starId1": 45106,
+        "starId2": 47866,
+        "hr1": 3685,
+        "hr2": 3890
+      }
+    ]
+  },
+  {
+    "id": "Cas",
+    "name": "Cassiopeia",
+    "genitive": "Cassiopeiae",
+    "englishName": "Queen",
+    "area": 598,
+    "raCenter": 19.5,
+    "decCenter": 62.2,
+    "brightestStar": "Cih",
+    "family": "Perseus",
+    "polylines": [
+      [
+        8867,
+        6672,
+        4417,
+        3172,
+        744
+      ]
+    ],
+    "starIds": [
+      8867,
+      6672,
+      4417,
+      3172,
+      744
+    ],
+    "lineSegments": [
+      {
+        "starId1": 8867,
+        "starId2": 6672,
+        "hr1": 542,
+        "hr2": 403
+      },
+      {
+        "starId1": 6672,
+        "starId2": 4417,
+        "hr1": 403,
+        "hr2": 264
+      },
+      {
+        "starId1": 4417,
+        "starId2": 3172,
+        "hr1": 264,
+        "hr2": 168
+      },
+      {
+        "starId1": 3172,
+        "starId2": 744,
+        "hr1": 168,
+        "hr2": 21
+      }
+    ]
+  },
+  {
+    "id": "Cen",
+    "name": "Centaurus",
+    "genitive": "Centauri",
+    "englishName": "Centaur",
+    "area": 1060,
+    "raCenter": 196.5,
+    "decCenter": -47.3,
+    "brightestStar": "Rigil Kentaurus",
+    "family": "Hercules",
+    "polylines": [
+      [
+        56392,
+        57266,
+        55260,
+        59267,
+        59016,
+        60635,
+        61429,
+        61739,
+        66447,
+        68483,
+        66447,
+        71456,
+        66447,
+        67786,
+        67259,
+        67251,
+        64904,
+        67251,
+        68714,
+        67251,
+        68027,
+        71125,
+        73107
+      ]
+    ],
+    "starIds": [
+      56392,
+      57266,
+      55260,
+      59267,
+      59016,
+      60635,
+      61429,
+      61739,
+      66447,
+      68483,
+      71456,
+      67786,
+      67259,
+      67251,
+      64904,
+      68714,
+      68027,
+      71125,
+      73107
+    ],
+    "lineSegments": [
+      {
+        "starId1": 56392,
+        "starId2": 57266,
+        "hr1": 4467,
+        "hr2": 4522
+      },
+      {
+        "starId1": 57266,
+        "starId2": 55260,
+        "hr1": 4522,
+        "hr2": 4390
+      },
+      {
+        "starId1": 55260,
+        "starId2": 59267,
+        "hr1": 4390,
+        "hr2": 4638
+      },
+      {
+        "starId1": 59267,
+        "starId2": 59016,
+        "hr1": 4638,
+        "hr2": 4621
+      },
+      {
+        "starId1": 59016,
+        "starId2": 60635,
+        "hr1": 4621,
+        "hr2": 4743
+      },
+      {
+        "starId1": 60635,
+        "starId2": 61429,
+        "hr1": 4743,
+        "hr2": 4802
+      },
+      {
+        "starId1": 61429,
+        "starId2": 61739,
+        "hr1": 4802,
+        "hr2": 4819
+      },
+      {
+        "starId1": 61739,
+        "starId2": 66447,
+        "hr1": 4819,
+        "hr2": 5132
+      },
+      {
+        "starId1": 66447,
+        "starId2": 68483,
+        "hr1": 5132,
+        "hr2": 5267
+      },
+      {
+        "starId1": 68483,
+        "starId2": 66447,
+        "hr1": 5267,
+        "hr2": 5132
+      },
+      {
+        "starId1": 66447,
+        "starId2": 71456,
+        "hr1": 5132,
+        "hr2": 5459
+      },
+      {
+        "starId1": 71456,
+        "starId2": 66447,
+        "hr1": 5459,
+        "hr2": 5132
+      },
+      {
+        "starId1": 66447,
+        "starId2": 67786,
+        "hr1": 5132,
+        "hr2": 5231
+      },
+      {
+        "starId1": 67786,
+        "starId2": 67259,
+        "hr1": 5231,
+        "hr2": 5193
+      },
+      {
+        "starId1": 67259,
+        "starId2": 67251,
+        "hr1": 5193,
+        "hr2": 5190
+      },
+      {
+        "starId1": 67251,
+        "starId2": 64904,
+        "hr1": 5190,
+        "hr2": 5028
+      },
+      {
+        "starId1": 64904,
+        "starId2": 67251,
+        "hr1": 5028,
+        "hr2": 5190
+      },
+      {
+        "starId1": 67251,
+        "starId2": 68714,
+        "hr1": 5190,
+        "hr2": 5288
+      },
+      {
+        "starId1": 68714,
+        "starId2": 67251,
+        "hr1": 5288,
+        "hr2": 5190
+      },
+      {
+        "starId1": 67251,
+        "starId2": 68027,
+        "hr1": 5190,
+        "hr2": 5248
+      },
+      {
+        "starId1": 68027,
+        "starId2": 71125,
+        "hr1": 5248,
+        "hr2": 5440
+      },
+      {
+        "starId1": 71125,
+        "starId2": 73107,
+        "hr1": 5440,
+        "hr2": 5576
+      }
+    ]
+  },
+  {
+    "id": "Cep",
+    "name": "Cepheus",
+    "genitive": "Cephei",
+    "englishName": "King",
+    "area": 588,
+    "raCenter": 330,
+    "decCenter": 71,
+    "brightestStar": "Alderamin",
+    "family": "Perseus",
+    "polylines": [
+      [
+        116361,
+        105691,
+        104861,
+        109146,
+        112364,
+        116361
+      ]
+    ],
+    "starIds": [
+      116361,
+      105691,
+      104861,
+      109146,
+      112364
+    ],
+    "lineSegments": [
+      {
+        "starId1": 116361,
+        "starId2": 105691,
+        "hr1": 8974,
+        "hr2": 8238
+      },
+      {
+        "starId1": 105691,
+        "starId2": 104861,
+        "hr1": 8238,
+        "hr2": 8162
+      },
+      {
+        "starId1": 104861,
+        "starId2": 109146,
+        "hr1": 8162,
+        "hr2": 8465
+      },
+      {
+        "starId1": 109146,
+        "starId2": 112364,
+        "hr1": 8465,
+        "hr2": 8694
+      },
+      {
+        "starId1": 112364,
+        "starId2": 116361,
+        "hr1": 8694,
+        "hr2": 8974
+      }
+    ]
+  },
+  {
+    "id": "Cet",
+    "name": "Cetus",
+    "genitive": "Ceti",
+    "englishName": "Sea Monster",
+    "area": 1231,
+    "raCenter": 25.5,
+    "decCenter": -7.2,
+    "brightestStar": "Diphda",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        12673,
+        11457,
+        12795,
+        13920,
+        14100,
+        12673,
+        12355,
+        10800,
+        8628,
+        6523,
+        5353,
+        3413,
+        6946,
+        9328,
+        8628
+      ]
+    ],
+    "starIds": [
+      12673,
+      11457,
+      12795,
+      13920,
+      14100,
+      12355,
+      10800,
+      8628,
+      6523,
+      5353,
+      3413,
+      6946,
+      9328
+    ],
+    "lineSegments": [
+      {
+        "starId1": 12673,
+        "starId2": 11457,
+        "hr1": 804,
+        "hr2": 718
+      },
+      {
+        "starId1": 11457,
+        "starId2": 12795,
+        "hr1": 718,
+        "hr2": 813
+      },
+      {
+        "starId1": 12795,
+        "starId2": 13920,
+        "hr1": 813,
+        "hr2": 896
+      },
+      {
+        "starId1": 13920,
+        "starId2": 14100,
+        "hr1": 896,
+        "hr2": 911
+      },
+      {
+        "starId1": 14100,
+        "starId2": 12673,
+        "hr1": 911,
+        "hr2": 804
+      },
+      {
+        "starId1": 12673,
+        "starId2": 12355,
+        "hr1": 804,
+        "hr2": 779
+      },
+      {
+        "starId1": 12355,
+        "starId2": 10800,
+        "hr1": 779,
+        "hr2": 681
+      },
+      {
+        "starId1": 10800,
+        "starId2": 8628,
+        "hr1": 681,
+        "hr2": 539
+      },
+      {
+        "starId1": 8628,
+        "starId2": 6523,
+        "hr1": 539,
+        "hr2": 402
+      },
+      {
+        "starId1": 6523,
+        "starId2": 5353,
+        "hr1": 402,
+        "hr2": 334
+      },
+      {
+        "starId1": 5353,
+        "starId2": 3413,
+        "hr1": 334,
+        "hr2": 188
+      },
+      {
+        "starId1": 3413,
+        "starId2": 6946,
+        "hr1": 188,
+        "hr2": 433
+      },
+      {
+        "starId1": 6946,
+        "starId2": 9328,
+        "hr1": 433,
+        "hr2": 585
+      },
+      {
+        "starId1": 9328,
+        "starId2": 8628,
+        "hr1": 585,
+        "hr2": 539
+      }
+    ]
+  },
+  {
+    "id": "Cha",
+    "name": "Chamaeleon",
+    "genitive": "Chamaeleontis",
+    "englishName": "Chameleon",
+    "area": 132,
+    "raCenter": 166.5,
+    "decCenter": -79.2,
+    "brightestStar": "Alp Cha",
+    "family": "Bayer",
+    "polylines": [
+      [
+        40587,
+        40773,
+        52443,
+        59816,
+        51690,
+        40587
+      ]
+    ],
+    "starIds": [
+      40587,
+      40773,
+      52443,
+      59816,
+      51690
+    ],
+    "lineSegments": [
+      {
+        "starId1": 40587,
+        "starId2": 40773,
+        "hr1": 3318,
+        "hr2": 3340
+      },
+      {
+        "starId1": 40773,
+        "starId2": 52443,
+        "hr1": 3340,
+        "hr2": 4231
+      },
+      {
+        "starId1": 52443,
+        "starId2": 59816,
+        "hr1": 4231,
+        "hr2": 4674
+      },
+      {
+        "starId1": 59816,
+        "starId2": 51690,
+        "hr1": 4674,
+        "hr2": 4174
+      },
+      {
+        "starId1": 51690,
+        "starId2": 40587,
+        "hr1": 4174,
+        "hr2": 3318
+      }
+    ]
+  },
+  {
+    "id": "Cir",
+    "name": "Circinus",
+    "genitive": "Circini",
+    "englishName": "Compasses",
+    "area": 93,
+    "raCenter": 229.5,
+    "decCenter": -63.1,
+    "brightestStar": "Alp Cir",
+    "family": "La Caille",
+    "polylines": [
+      [
+        74595,
+        71682,
+        75094
+      ]
+    ],
+    "starIds": [
+      74595,
+      71682,
+      75094
+    ],
+    "lineSegments": [
+      {
+        "starId1": 74595,
+        "starId2": 71682,
+        "hr1": 5670,
+        "hr2": 5463
+      },
+      {
+        "starId1": 71682,
+        "starId2": 75094,
+        "hr1": 5463,
+        "hr2": 5704
+      }
+    ]
+  },
+  {
+    "id": "Col",
+    "name": "Columba",
+    "genitive": "Columbae",
+    "englishName": "Dove",
+    "area": 270,
+    "raCenter": 88.5,
+    "decCenter": -35.1,
+    "brightestStar": "Phact",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        30204,
+        29734,
+        28127,
+        27559,
+        28256,
+        27559,
+        26569,
+        24599
+      ]
+    ],
+    "starIds": [
+      30204,
+      29734,
+      28127,
+      27559,
+      28256,
+      26569,
+      24599
+    ],
+    "lineSegments": [
+      {
+        "starId1": 30204,
+        "starId2": 29734,
+        "hr1": 2296,
+        "hr2": 2256
+      },
+      {
+        "starId1": 29734,
+        "starId2": 28127,
+        "hr1": 2256,
+        "hr2": 2106
+      },
+      {
+        "starId1": 28127,
+        "starId2": 27559,
+        "hr1": 2106,
+        "hr2": 2040
+      },
+      {
+        "starId1": 27559,
+        "starId2": 28256,
+        "hr1": 2040,
+        "hr2": 2120
+      },
+      {
+        "starId1": 28256,
+        "starId2": 27559,
+        "hr1": 2120,
+        "hr2": 2040
+      },
+      {
+        "starId1": 27559,
+        "starId2": 26569,
+        "hr1": 2040,
+        "hr2": 1956
+      },
+      {
+        "starId1": 26569,
+        "starId2": 24599,
+        "hr1": 1956,
+        "hr2": 1743
+      }
+    ]
+  },
+  {
+    "id": "Com",
+    "name": "Coma Berenices",
+    "genitive": "Comae Berenices",
+    "englishName": "Berenice's Hair",
+    "area": 386,
+    "raCenter": 192,
+    "decCenter": 23.3,
+    "brightestStar": "Bet Com",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        64037,
+        64189,
+        60554
+      ]
+    ],
+    "starIds": [
+      64037,
+      64189,
+      60554
+    ],
+    "lineSegments": [
+      {
+        "starId1": 64037,
+        "starId2": 64189,
+        "hr1": 4968,
+        "hr2": 4983
+      },
+      {
+        "starId1": 64189,
+        "starId2": 60554,
+        "hr1": 4983,
+        "hr2": 4737
+      }
+    ]
+  },
+  {
+    "id": "CrA",
+    "name": "Corona Australis",
+    "genitive": "Coronae Australis",
+    "englishName": "Southern Crown",
+    "area": 128,
+    "raCenter": 289.5,
+    "decCenter": -40.1,
+    "brightestStar": "Bet CrA",
+    "family": "Hercules",
+    "polylines": [
+      [
+        92881,
+        93530,
+        93819,
+        93865,
+        93710,
+        93248
+      ]
+    ],
+    "starIds": [
+      92881,
+      93530,
+      93819,
+      93865,
+      93710,
+      93248
+    ],
+    "lineSegments": [
+      {
+        "starId1": 92881,
+        "starId2": 93530,
+        "hr1": 7152,
+        "hr2": 7226
+      },
+      {
+        "starId1": 93530,
+        "starId2": 93819,
+        "hr1": 7226,
+        "hr2": 7254
+      },
+      {
+        "starId1": 93819,
+        "starId2": 93865,
+        "hr1": 7254,
+        "hr2": 7259
+      },
+      {
+        "starId1": 93865,
+        "starId2": 93710,
+        "hr1": 7259,
+        "hr2": 7242
+      },
+      {
+        "starId1": 93710,
+        "starId2": 93248,
+        "hr1": 7242,
+        "hr2": 7188
+      }
+    ]
+  },
+  {
+    "id": "CrB",
+    "name": "Corona Borealis",
+    "genitive": "Coronae Borealis",
+    "englishName": "Northern Crown",
+    "area": 179,
+    "raCenter": 237,
+    "decCenter": 32.6,
+    "brightestStar": "Alphecca",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        78256,
+        77923,
+        77276,
+        76716,
+        76035,
+        75466,
+        75895
+      ]
+    ],
+    "starIds": [
+      78256,
+      77923,
+      77276,
+      76716,
+      76035,
+      75466,
+      75895
+    ],
+    "lineSegments": [
+      {
+        "starId1": 78256,
+        "starId2": 77923,
+        "hr1": 5971,
+        "hr2": 5947
+      },
+      {
+        "starId1": 77923,
+        "starId2": 77276,
+        "hr1": 5947,
+        "hr2": 5889
+      },
+      {
+        "starId1": 77276,
+        "starId2": 76716,
+        "hr1": 5889,
+        "hr2": 5849
+      },
+      {
+        "starId1": 76716,
+        "starId2": 76035,
+        "hr1": 5849,
+        "hr2": 5793
+      },
+      {
+        "starId1": 76035,
+        "starId2": 75466,
+        "hr1": 5793,
+        "hr2": 5747
+      },
+      {
+        "starId1": 75466,
+        "starId2": 75895,
+        "hr1": 5747,
+        "hr2": 5778
+      }
+    ]
+  },
+  {
+    "id": "Crv",
+    "name": "Corvus",
+    "genitive": "Corvi",
+    "englishName": "Crow",
+    "area": 184,
+    "raCenter": 186,
+    "decCenter": -18.4,
+    "brightestStar": "Gienah",
+    "family": "Hercules",
+    "polylines": [
+      [
+        59020,
+        59134,
+        59621,
+        60776,
+        61166,
+        59134
+      ]
+    ],
+    "starIds": [
+      59020,
+      59134,
+      59621,
+      60776,
+      61166
+    ],
+    "lineSegments": [
+      {
+        "starId1": 59020,
+        "starId2": 59134,
+        "hr1": 4623,
+        "hr2": 4630
+      },
+      {
+        "starId1": 59134,
+        "starId2": 59621,
+        "hr1": 4630,
+        "hr2": 4662
+      },
+      {
+        "starId1": 59621,
+        "starId2": 60776,
+        "hr1": 4662,
+        "hr2": 4757
+      },
+      {
+        "starId1": 60776,
+        "starId2": 61166,
+        "hr1": 4757,
+        "hr2": 4786
+      },
+      {
+        "starId1": 61166,
+        "starId2": 59134,
+        "hr1": 4786,
+        "hr2": 4630
+      }
+    ]
+  },
+  {
+    "id": "Crt",
+    "name": "Crater",
+    "genitive": "Crateris",
+    "englishName": "Cup",
+    "area": 282,
+    "raCenter": 171,
+    "decCenter": -15.9,
+    "brightestStar": "Del Crt",
+    "family": "Hercules",
+    "polylines": [
+      [
+        58014,
+        57111,
+        55539,
+        54522,
+        53584,
+        55118,
+        55539,
+        55118,
+        55521,
+        56464
+      ]
+    ],
+    "starIds": [
+      58014,
+      57111,
+      55539,
+      54522,
+      53584,
+      55118,
+      55521,
+      56464
+    ],
+    "lineSegments": [
+      {
+        "starId1": 58014,
+        "starId2": 57111,
+        "hr1": 4567,
+        "hr2": 4514
+      },
+      {
+        "starId1": 57111,
+        "starId2": 55539,
+        "hr1": 4514,
+        "hr2": 4405
+      },
+      {
+        "starId1": 55539,
+        "starId2": 54522,
+        "hr1": 4405,
+        "hr2": 4343
+      },
+      {
+        "starId1": 54522,
+        "starId2": 53584,
+        "hr1": 4343,
+        "hr2": 4287
+      },
+      {
+        "starId1": 53584,
+        "starId2": 55118,
+        "hr1": 4287,
+        "hr2": 4382
+      },
+      {
+        "starId1": 55118,
+        "starId2": 55539,
+        "hr1": 4382,
+        "hr2": 4405
+      },
+      {
+        "starId1": 55539,
+        "starId2": 55118,
+        "hr1": 4405,
+        "hr2": 4382
+      },
+      {
+        "starId1": 55118,
+        "starId2": 55521,
+        "hr1": 4382,
+        "hr2": 4402
+      },
+      {
+        "starId1": 55521,
+        "starId2": 56464,
+        "hr1": 4402,
+        "hr2": 4468
+      }
+    ]
+  },
+  {
+    "id": "Cru",
+    "name": "Crux",
+    "genitive": "Crucis",
+    "englishName": "Southern Cross",
+    "area": 68,
+    "raCenter": 186,
+    "decCenter": -60.2,
+    "brightestStar": "Mimosa",
+    "family": "Hercules",
+    "polylines": [
+      [
+        62239,
+        59565
+      ]
+    ],
+    "starIds": [
+      62239,
+      59565
+    ],
+    "lineSegments": [
+      {
+        "starId1": 62239,
+        "starId2": 59565,
+        "hr1": 4853,
+        "hr2": 4656
+      }
+    ]
+  },
+  {
+    "id": "Cyg",
+    "name": "Cygnus",
+    "genitive": "Cygni",
+    "englishName": "Swan",
+    "area": 804,
+    "raCenter": 309,
+    "decCenter": 44.5,
+    "brightestStar": "Deneb",
+    "family": "Hercules",
+    "polylines": [
+      [
+        95648,
+        97799,
+        100128,
+        102157,
+        104394,
+        102157,
+        100128,
+        101767,
+        100128,
+        96858,
+        95554
+      ]
+    ],
+    "starIds": [
+      95648,
+      97799,
+      100128,
+      102157,
+      104394,
+      101767,
+      96858,
+      95554
+    ],
+    "lineSegments": [
+      {
+        "starId1": 95648,
+        "starId2": 97799,
+        "hr1": 7417,
+        "hr2": 7615
+      },
+      {
+        "starId1": 97799,
+        "starId2": 100128,
+        "hr1": 7615,
+        "hr2": 7796
+      },
+      {
+        "starId1": 100128,
+        "starId2": 102157,
+        "hr1": 7796,
+        "hr2": 7949
+      },
+      {
+        "starId1": 102157,
+        "starId2": 104394,
+        "hr1": 7949,
+        "hr2": 8115
+      },
+      {
+        "starId1": 104394,
+        "starId2": 102157,
+        "hr1": 8115,
+        "hr2": 7949
+      },
+      {
+        "starId1": 102157,
+        "starId2": 100128,
+        "hr1": 7949,
+        "hr2": 7796
+      },
+      {
+        "starId1": 100128,
+        "starId2": 101767,
+        "hr1": 7796,
+        "hr2": 7924
+      },
+      {
+        "starId1": 101767,
+        "starId2": 100128,
+        "hr1": 7924,
+        "hr2": 7796
+      },
+      {
+        "starId1": 100128,
+        "starId2": 96858,
+        "hr1": 7796,
+        "hr2": 7528
+      },
+      {
+        "starId1": 96858,
+        "starId2": 95554,
+        "hr1": 7528,
+        "hr2": 7420
+      }
+    ]
+  },
+  {
+    "id": "Del",
+    "name": "Delphinus",
+    "genitive": "Delphini",
+    "englishName": "Dolphin",
+    "area": 189,
+    "raCenter": 310.5,
+    "decCenter": 11.7,
+    "brightestStar": "Rotanev",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        101095,
+        101442,
+        101629,
+        102201,
+        101950,
+        101442
+      ]
+    ],
+    "starIds": [
+      101095,
+      101442,
+      101629,
+      102201,
+      101950
+    ],
+    "lineSegments": [
+      {
+        "starId1": 101095,
+        "starId2": 101442,
+        "hr1": 7852,
+        "hr2": 7882
+      },
+      {
+        "starId1": 101442,
+        "starId2": 101629,
+        "hr1": 7882,
+        "hr2": 7906
+      },
+      {
+        "starId1": 101629,
+        "starId2": 102201,
+        "hr1": 7906,
+        "hr2": 7948
+      },
+      {
+        "starId1": 102201,
+        "starId2": 101950,
+        "hr1": 7948,
+        "hr2": 7928
+      },
+      {
+        "starId1": 101950,
+        "starId2": 101442,
+        "hr1": 7928,
+        "hr2": 7882
+      }
+    ]
+  },
+  {
+    "id": "Dor",
+    "name": "Dorado",
+    "genitive": "Doradus",
+    "englishName": "Dolphinfish",
+    "area": 179,
+    "raCenter": 78,
+    "decCenter": -59.3,
+    "brightestStar": "Alp Dor",
+    "family": "Bayer",
+    "polylines": [
+      [
+        19843,
+        21228,
+        23638,
+        26004,
+        27034,
+        26004,
+        27821
+      ]
+    ],
+    "starIds": [
+      19843,
+      21228,
+      23638,
+      26004,
+      27034,
+      27821
+    ],
+    "lineSegments": [
+      {
+        "starId1": 19843,
+        "starId2": 21228,
+        "hr1": 1338,
+        "hr2": 1465
+      },
+      {
+        "starId1": 21228,
+        "starId2": 23638,
+        "hr1": 1465,
+        "hr2": 1674
+      },
+      {
+        "starId1": 23638,
+        "starId2": 26004,
+        "hr1": 1674,
+        "hr2": 1922
+      },
+      {
+        "starId1": 26004,
+        "starId2": 27034,
+        "hr1": 1922,
+        "hr2": 2015
+      },
+      {
+        "starId1": 27034,
+        "starId2": 26004,
+        "hr1": 2015,
+        "hr2": 1922
+      },
+      {
+        "starId1": 26004,
+        "starId2": 27821,
+        "hr1": 1922,
+        "hr2": 2102
+      }
+    ]
+  },
+  {
+    "id": "Dra",
+    "name": "Draco",
+    "genitive": "Draconis",
+    "englishName": "Dragon",
+    "area": 1083,
+    "raCenter": 256.5,
+    "decCenter": 65.8,
+    "brightestStar": "Eltanin",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        87314,
+        87561,
+        85410,
+        85557,
+        87314,
+        94081,
+        97124,
+        89660,
+        86347,
+        83638,
+        80089,
+        78290,
+        75229,
+        68537,
+        61088,
+        56044,
+        47060
+      ]
+    ],
+    "starIds": [
+      87314,
+      87561,
+      85410,
+      85557,
+      94081,
+      97124,
+      89660,
+      86347,
+      83638,
+      80089,
+      78290,
+      75229,
+      68537,
+      61088,
+      56044,
+      47060
+    ],
+    "lineSegments": [
+      {
+        "starId1": 87314,
+        "starId2": 87561,
+        "hr1": 6688,
+        "hr2": 6705
+      },
+      {
+        "starId1": 87561,
+        "starId2": 85410,
+        "hr1": 6705,
+        "hr2": 6536
+      },
+      {
+        "starId1": 85410,
+        "starId2": 85557,
+        "hr1": 6536,
+        "hr2": 6554
+      },
+      {
+        "starId1": 85557,
+        "starId2": 87314,
+        "hr1": 6554,
+        "hr2": 6688
+      },
+      {
+        "starId1": 87314,
+        "starId2": 94081,
+        "hr1": 6688,
+        "hr2": 7310
+      },
+      {
+        "starId1": 94081,
+        "starId2": 97124,
+        "hr1": 7310,
+        "hr2": 7582
+      },
+      {
+        "starId1": 97124,
+        "starId2": 89660,
+        "hr1": 7582,
+        "hr2": 6927
+      },
+      {
+        "starId1": 89660,
+        "starId2": 86347,
+        "hr1": 6927,
+        "hr2": 6636
+      },
+      {
+        "starId1": 86347,
+        "starId2": 83638,
+        "hr1": 6636,
+        "hr2": 6396
+      },
+      {
+        "starId1": 83638,
+        "starId2": 80089,
+        "hr1": 6396,
+        "hr2": 6132
+      },
+      {
+        "starId1": 80089,
+        "starId2": 78290,
+        "hr1": 6132,
+        "hr2": 5986
+      },
+      {
+        "starId1": 78290,
+        "starId2": 75229,
+        "hr1": 5986,
+        "hr2": 5744
+      },
+      {
+        "starId1": 75229,
+        "starId2": 68537,
+        "hr1": 5744,
+        "hr2": 5291
+      },
+      {
+        "starId1": 68537,
+        "starId2": 61088,
+        "hr1": 5291,
+        "hr2": 4787
+      },
+      {
+        "starId1": 61088,
+        "starId2": 56044,
+        "hr1": 4787,
+        "hr2": 4434
+      },
+      {
+        "starId1": 56044,
+        "starId2": 47060,
+        "hr1": 4434,
+        "hr2": 3751
+      }
+    ]
+  },
+  {
+    "id": "Equ",
+    "name": "Equuleus",
+    "genitive": "Equulei",
+    "englishName": "Pony",
+    "area": 72,
+    "raCenter": 319.5,
+    "decCenter": 7.8,
+    "brightestStar": "Kitalpha",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        104649,
+        105229,
+        104520,
+        104184
+      ]
+    ],
+    "starIds": [
+      104649,
+      105229,
+      104520,
+      104184
+    ],
+    "lineSegments": [
+      {
+        "starId1": 104649,
+        "starId2": 105229,
+        "hr1": 8131,
+        "hr2": 8178
+      },
+      {
+        "starId1": 105229,
+        "starId2": 104520,
+        "hr1": 8178,
+        "hr2": 8123
+      },
+      {
+        "starId1": 104520,
+        "starId2": 104184,
+        "hr1": 8123,
+        "hr2": 8097
+      }
+    ]
+  },
+  {
+    "id": "Eri",
+    "name": "Eridanus",
+    "genitive": "Eridani",
+    "englishName": "River",
+    "area": 1138,
+    "raCenter": 49.5,
+    "decCenter": -28.8,
+    "brightestStar": "Achernar",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        23820,
+        22648,
+        22056,
+        21391,
+        19538,
+        18497,
+        17336,
+        16496,
+        13667,
+        12737,
+        12810,
+        14112,
+        15436,
+        16570,
+        17609,
+        18171,
+        18626,
+        21340,
+        20483,
+        19992,
+        17833,
+        16829,
+        15471,
+        12452,
+        12381,
+        11380,
+        10578,
+        8989,
+        7574
+      ]
+    ],
+    "starIds": [
+      23820,
+      22648,
+      22056,
+      21391,
+      19538,
+      18497,
+      17336,
+      16496,
+      13667,
+      12737,
+      12810,
+      14112,
+      15436,
+      16570,
+      17609,
+      18171,
+      18626,
+      21340,
+      20483,
+      19992,
+      17833,
+      16829,
+      15471,
+      12452,
+      12381,
+      11380,
+      10578,
+      8989,
+      7574
+    ],
+    "lineSegments": [
+      {
+        "starId1": 23820,
+        "starId2": 22648,
+        "hr1": 1666,
+        "hr2": 1560
+      },
+      {
+        "starId1": 22648,
+        "starId2": 22056,
+        "hr1": 1560,
+        "hr2": 1520
+      },
+      {
+        "starId1": 22056,
+        "starId2": 21391,
+        "hr1": 1520,
+        "hr2": 1463
+      },
+      {
+        "starId1": 21391,
+        "starId2": 19538,
+        "hr1": 1463,
+        "hr2": 1298
+      },
+      {
+        "starId1": 19538,
+        "starId2": 18497,
+        "hr1": 1298,
+        "hr2": 1231
+      },
+      {
+        "starId1": 18497,
+        "starId2": 17336,
+        "hr1": 1231,
+        "hr2": 1136
+      },
+      {
+        "starId1": 17336,
+        "starId2": 16496,
+        "hr1": 1136,
+        "hr2": 1084
+      },
+      {
+        "starId1": 16496,
+        "starId2": 13667,
+        "hr1": 1084,
+        "hr2": 874
+      },
+      {
+        "starId1": 13667,
+        "starId2": 12737,
+        "hr1": 874,
+        "hr2": 811
+      },
+      {
+        "starId1": 12737,
+        "starId2": 12810,
+        "hr1": 811,
+        "hr2": 818
+      },
+      {
+        "starId1": 12810,
+        "starId2": 14112,
+        "hr1": 818,
+        "hr2": 919
+      },
+      {
+        "starId1": 14112,
+        "starId2": 15436,
+        "hr1": 919,
+        "hr2": 1003
+      },
+      {
+        "starId1": 15436,
+        "starId2": 16570,
+        "hr1": 1003,
+        "hr2": 1088
+      },
+      {
+        "starId1": 16570,
+        "starId2": 17609,
+        "hr1": 1088,
+        "hr2": 1173
+      },
+      {
+        "starId1": 17609,
+        "starId2": 18171,
+        "hr1": 1173,
+        "hr2": 1213
+      },
+      {
+        "starId1": 18171,
+        "starId2": 18626,
+        "hr1": 1213,
+        "hr2": 1240
+      },
+      {
+        "starId1": 18626,
+        "starId2": 21340,
+        "hr1": 1240,
+        "hr2": 1464
+      },
+      {
+        "starId1": 21340,
+        "starId2": 20483,
+        "hr1": 1464,
+        "hr2": 1393
+      },
+      {
+        "starId1": 20483,
+        "starId2": 19992,
+        "hr1": 1393,
+        "hr2": 1347
+      },
+      {
+        "starId1": 19992,
+        "starId2": 17833,
+        "hr1": 1347,
+        "hr2": 1195
+      },
+      {
+        "starId1": 17833,
+        "starId2": 16829,
+        "hr1": 1195,
+        "hr2": 1106
+      },
+      {
+        "starId1": 16829,
+        "starId2": 15471,
+        "hr1": 1106,
+        "hr2": 1008
+      },
+      {
+        "starId1": 15471,
+        "starId2": 12452,
+        "hr1": 1008,
+        "hr2": 794
+      },
+      {
+        "starId1": 12452,
+        "starId2": 12381,
+        "hr1": 794,
+        "hr2": 789
+      },
+      {
+        "starId1": 12381,
+        "starId2": 11380,
+        "hr1": 789,
+        "hr2": 721
+      },
+      {
+        "starId1": 11380,
+        "starId2": 10578,
+        "hr1": 721,
+        "hr2": 674
+      },
+      {
+        "starId1": 10578,
+        "starId2": 8989,
+        "hr1": 674,
+        "hr2": 566
+      },
+      {
+        "starId1": 8989,
+        "starId2": 7574,
+        "hr1": 566,
+        "hr2": 472
+      }
+    ]
+  },
+  {
+    "id": "For",
+    "name": "Fornax",
+    "genitive": "Fornacis",
+    "englishName": "Furnace",
+    "area": 398,
+    "raCenter": 42,
+    "decCenter": -31.6,
+    "brightestStar": "Dalim",
+    "family": "La Caille",
+    "polylines": [
+      [
+        14843,
+        13114,
+        9655
+      ]
+    ],
+    "starIds": [
+      14843,
+      13114,
+      9655
+    ],
+    "lineSegments": [
+      {
+        "starId1": 14843,
+        "starId2": 13114,
+        "hr1": 963,
+        "hr2": 841
+      },
+      {
+        "starId1": 13114,
+        "starId2": 9655,
+        "hr1": 841,
+        "hr2": 612
+      }
+    ]
+  },
+  {
+    "id": "Gem",
+    "name": "Gemini",
+    "genitive": "Geminorum",
+    "englishName": "Twins",
+    "area": 514,
+    "raCenter": 106.5,
+    "decCenter": 22.6,
+    "brightestStar": "Pollux",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        28664,
+        29582,
+        30270,
+        32161,
+        30810,
+        32161,
+        34601,
+        36263,
+        118485,
+        36263,
+        34601,
+        32932,
+        34601,
+        35946,
+        36856,
+        37718,
+        36856,
+        37633,
+        36856,
+        35453,
+        34000,
+        31601,
+        34000,
+        35453,
+        35253,
+        32276
+      ]
+    ],
+    "starIds": [
+      28664,
+      29582,
+      30270,
+      32161,
+      30810,
+      34601,
+      36263,
+      118485,
+      32932,
+      35946,
+      36856,
+      37718,
+      37633,
+      35453,
+      34000,
+      31601,
+      35253,
+      32276
+    ],
+    "lineSegments": [
+      {
+        "starId1": 28664,
+        "starId2": 29582,
+        "hr1": 2134,
+        "hr2": 2216
+      },
+      {
+        "starId1": 29582,
+        "starId2": 30270,
+        "hr1": 2216,
+        "hr2": 2286
+      },
+      {
+        "starId1": 30270,
+        "starId2": 32161,
+        "hr1": 2286,
+        "hr2": 2473
+      },
+      {
+        "starId1": 32161,
+        "starId2": 30810,
+        "hr1": 2473,
+        "hr2": 2343
+      },
+      {
+        "starId1": 30810,
+        "starId2": 32161,
+        "hr1": 2343,
+        "hr2": 2473
+      },
+      {
+        "starId1": 32161,
+        "starId2": 34601,
+        "hr1": 2473,
+        "hr2": 2697
+      },
+      {
+        "starId1": 34601,
+        "starId2": 36263,
+        "hr1": 2697,
+        "hr2": 2852
+      },
+      {
+        "starId1": 36263,
+        "starId2": 118485,
+        "hr1": 2852,
+        "hr2": 2890
+      },
+      {
+        "starId1": 118485,
+        "starId2": 36263,
+        "hr1": 2890,
+        "hr2": 2852
+      },
+      {
+        "starId1": 36263,
+        "starId2": 34601,
+        "hr1": 2852,
+        "hr2": 2697
+      },
+      {
+        "starId1": 34601,
+        "starId2": 32932,
+        "hr1": 2697,
+        "hr2": 2540
+      },
+      {
+        "starId1": 32932,
+        "starId2": 34601,
+        "hr1": 2540,
+        "hr2": 2697
+      },
+      {
+        "starId1": 34601,
+        "starId2": 35946,
+        "hr1": 2697,
+        "hr2": 2821
+      },
+      {
+        "starId1": 35946,
+        "starId2": 36856,
+        "hr1": 2821,
+        "hr2": 2905
+      },
+      {
+        "starId1": 36856,
+        "starId2": 37718,
+        "hr1": 2905,
+        "hr2": 2990
+      },
+      {
+        "starId1": 37718,
+        "starId2": 36856,
+        "hr1": 2990,
+        "hr2": 2905
+      },
+      {
+        "starId1": 36856,
+        "starId2": 37633,
+        "hr1": 2905,
+        "hr2": 2985
+      },
+      {
+        "starId1": 37633,
+        "starId2": 36856,
+        "hr1": 2985,
+        "hr2": 2905
+      },
+      {
+        "starId1": 36856,
+        "starId2": 35453,
+        "hr1": 2905,
+        "hr2": 2777
+      },
+      {
+        "starId1": 35453,
+        "starId2": 34000,
+        "hr1": 2777,
+        "hr2": 2650
+      },
+      {
+        "starId1": 34000,
+        "starId2": 31601,
+        "hr1": 2650,
+        "hr2": 2421
+      },
+      {
+        "starId1": 31601,
+        "starId2": 34000,
+        "hr1": 2421,
+        "hr2": 2650
+      },
+      {
+        "starId1": 34000,
+        "starId2": 35453,
+        "hr1": 2650,
+        "hr2": 2777
+      },
+      {
+        "starId1": 35453,
+        "starId2": 35253,
+        "hr1": 2777,
+        "hr2": 2763
+      },
+      {
+        "starId1": 35253,
+        "starId2": 32276,
+        "hr1": 2763,
+        "hr2": 2484
+      }
+    ]
+  },
+  {
+    "id": "Gru",
+    "name": "Grus",
+    "genitive": "Gruis",
+    "englishName": "Crane",
+    "area": 366,
+    "raCenter": 337.5,
+    "decCenter": -46.4,
+    "brightestStar": "Alnair",
+    "family": "Bayer",
+    "polylines": [
+      [
+        107742,
+        108765,
+        110650,
+        111768,
+        108922,
+        111768,
+        112263,
+        113278,
+        112263,
+        114059,
+        113770
+      ]
+    ],
+    "starIds": [
+      107742,
+      108765,
+      110650,
+      111768,
+      108922,
+      112263,
+      113278,
+      114059,
+      113770
+    ],
+    "lineSegments": [
+      {
+        "starId1": 107742,
+        "starId2": 108765,
+        "hr1": 8353,
+        "hr2": 8411
+      },
+      {
+        "starId1": 108765,
+        "starId2": 110650,
+        "hr1": 8411,
+        "hr2": 8556
+      },
+      {
+        "starId1": 110650,
+        "starId2": 111768,
+        "hr1": 8556,
+        "hr2": 8636
+      },
+      {
+        "starId1": 111768,
+        "starId2": 108922,
+        "hr1": 8636,
+        "hr2": 8425
+      },
+      {
+        "starId1": 108922,
+        "starId2": 111768,
+        "hr1": 8425,
+        "hr2": 8636
+      },
+      {
+        "starId1": 111768,
+        "starId2": 112263,
+        "hr1": 8636,
+        "hr2": 8675
+      },
+      {
+        "starId1": 112263,
+        "starId2": 113278,
+        "hr1": 8675,
+        "hr2": 8747
+      },
+      {
+        "starId1": 113278,
+        "starId2": 112263,
+        "hr1": 8747,
+        "hr2": 8675
+      },
+      {
+        "starId1": 112263,
+        "starId2": 114059,
+        "hr1": 8675,
+        "hr2": 8820
+      },
+      {
+        "starId1": 114059,
+        "starId2": 113770,
+        "hr1": 8820,
+        "hr2": 8787
+      }
+    ]
+  },
+  {
+    "id": "Her",
+    "name": "Hercules",
+    "genitive": "Herculis",
+    "englishName": "Strongman",
+    "area": 1225,
+    "raCenter": 261,
+    "decCenter": 27.5,
+    "brightestStar": "Kornephoros",
+    "family": "Hercules",
+    "polylines": [
+      [
+        82952,
+        84122,
+        87537,
+        86148,
+        87537,
+        84122,
+        81583,
+        80880,
+        79750,
+        80880,
+        81583,
+        81444,
+        80571,
+        81444,
+        82952,
+        84121,
+        86705,
+        87661,
+        88517
+      ]
+    ],
+    "starIds": [
+      82952,
+      84122,
+      87537,
+      86148,
+      81583,
+      80880,
+      79750,
+      81444,
+      80571,
+      84121,
+      86705,
+      87661,
+      88517
+    ],
+    "lineSegments": [
+      {
+        "starId1": 82952,
+        "starId2": 84122,
+        "hr1": 6324,
+        "hr2": 6418
+      },
+      {
+        "starId1": 84122,
+        "starId2": 87537,
+        "hr1": 6418,
+        "hr2": 6695
+      },
+      {
+        "starId1": 87537,
+        "starId2": 86148,
+        "hr1": 6695,
+        "hr2": 6588
+      },
+      {
+        "starId1": 86148,
+        "starId2": 87537,
+        "hr1": 6588,
+        "hr2": 6695
+      },
+      {
+        "starId1": 87537,
+        "starId2": 84122,
+        "hr1": 6695,
+        "hr2": 6418
+      },
+      {
+        "starId1": 84122,
+        "starId2": 81583,
+        "hr1": 6418,
+        "hr2": 6220
+      },
+      {
+        "starId1": 81583,
+        "starId2": 80880,
+        "hr1": 6220,
+        "hr2": 6168
+      },
+      {
+        "starId1": 80880,
+        "starId2": 79750,
+        "hr1": 6168,
+        "hr2": 6092
+      },
+      {
+        "starId1": 79750,
+        "starId2": 80880,
+        "hr1": 6092,
+        "hr2": 6168
+      },
+      {
+        "starId1": 80880,
+        "starId2": 81583,
+        "hr1": 6168,
+        "hr2": 6220
+      },
+      {
+        "starId1": 81583,
+        "starId2": 81444,
+        "hr1": 6220,
+        "hr2": 6212
+      },
+      {
+        "starId1": 81444,
+        "starId2": 80571,
+        "hr1": 6212,
+        "hr2": 6148
+      },
+      {
+        "starId1": 80571,
+        "starId2": 81444,
+        "hr1": 6148,
+        "hr2": 6212
+      },
+      {
+        "starId1": 81444,
+        "starId2": 82952,
+        "hr1": 6212,
+        "hr2": 6324
+      },
+      {
+        "starId1": 82952,
+        "starId2": 84121,
+        "hr1": 6324,
+        "hr2": 6410
+      },
+      {
+        "starId1": 84121,
+        "starId2": 86705,
+        "hr1": 6410,
+        "hr2": 6623
+      },
+      {
+        "starId1": 86705,
+        "starId2": 87661,
+        "hr1": 6623,
+        "hr2": 6703
+      },
+      {
+        "starId1": 87661,
+        "starId2": 88517,
+        "hr1": 6703,
+        "hr2": 6779
+      }
+    ]
+  },
+  {
+    "id": "Hor",
+    "name": "Horologium",
+    "genitive": "Horologii",
+    "englishName": "Clock",
+    "area": 249,
+    "raCenter": 49.5,
+    "decCenter": -53.6,
+    "brightestStar": "Alp Hor",
+    "family": "La Caille",
+    "polylines": [
+      [
+        13850,
+        14206,
+        12451,
+        12193,
+        12620,
+        13468,
+        19697,
+        19465
+      ]
+    ],
+    "starIds": [
+      13850,
+      14206,
+      12451,
+      12193,
+      12620,
+      13468,
+      19697,
+      19465
+    ],
+    "lineSegments": [
+      {
+        "starId1": 13850,
+        "starId2": 14206,
+        "hr1": 909,
+        "hr2": 934
+      },
+      {
+        "starId1": 14206,
+        "starId2": 12451,
+        "hr1": 934,
+        "hr2": 802
+      },
+      {
+        "starId1": 12451,
+        "starId2": 12193,
+        "hr1": 802,
+        "hr2": 778
+      },
+      {
+        "starId1": 12193,
+        "starId2": 12620,
+        "hr1": 778,
+        "hr2": 810
+      },
+      {
+        "starId1": 12620,
+        "starId2": 13468,
+        "hr1": 810,
+        "hr2": 868
+      },
+      {
+        "starId1": 13468,
+        "starId2": 19697,
+        "hr1": 868,
+        "hr2": 1326
+      },
+      {
+        "starId1": 19697,
+        "starId2": 19465,
+        "hr1": 1326,
+        "hr2": 1302
+      }
+    ]
+  },
+  {
+    "id": "Hya",
+    "name": "Hydra",
+    "genitive": "Hydrae",
+    "englishName": "Female Water Snake",
+    "area": 1303,
+    "raCenter": 174,
+    "decCenter": -14.5,
+    "brightestStar": "Alphard",
+    "family": "Hercules",
+    "polylines": [
+      [
+        43113,
+        42990,
+        42195,
+        42283,
+        42680,
+        43113,
+        43689,
+        45204,
+        47297,
+        46259,
+        48219,
+        49700,
+        50924,
+        52789,
+        56174,
+        57763,
+        64758,
+        68675
+      ]
+    ],
+    "starIds": [
+      43113,
+      42990,
+      42195,
+      42283,
+      42680,
+      43689,
+      45204,
+      47297,
+      46259,
+      48219,
+      49700,
+      50924,
+      52789,
+      56174,
+      57763,
+      64758,
+      68675
+    ],
+    "lineSegments": [
+      {
+        "starId1": 43113,
+        "starId2": 42990,
+        "hr1": 3492,
+        "hr2": 3482
+      },
+      {
+        "starId1": 42990,
+        "starId2": 42195,
+        "hr1": 3482,
+        "hr2": 3410
+      },
+      {
+        "starId1": 42195,
+        "starId2": 42283,
+        "hr1": 3410,
+        "hr2": 3418
+      },
+      {
+        "starId1": 42283,
+        "starId2": 42680,
+        "hr1": 3418,
+        "hr2": 3454
+      },
+      {
+        "starId1": 42680,
+        "starId2": 43113,
+        "hr1": 3454,
+        "hr2": 3492
+      },
+      {
+        "starId1": 43113,
+        "starId2": 43689,
+        "hr1": 3492,
+        "hr2": 3547
+      },
+      {
+        "starId1": 43689,
+        "starId2": 45204,
+        "hr1": 3547,
+        "hr2": 3665
+      },
+      {
+        "starId1": 45204,
+        "starId2": 47297,
+        "hr1": 3665,
+        "hr2": 3845
+      },
+      {
+        "starId1": 47297,
+        "starId2": 46259,
+        "hr1": 3845,
+        "hr2": 3748
+      },
+      {
+        "starId1": 46259,
+        "starId2": 48219,
+        "hr1": 3748,
+        "hr2": 3903
+      },
+      {
+        "starId1": 48219,
+        "starId2": 49700,
+        "hr1": 3903,
+        "hr2": 3994
+      },
+      {
+        "starId1": 49700,
+        "starId2": 50924,
+        "hr1": 3994,
+        "hr2": 4094
+      },
+      {
+        "starId1": 50924,
+        "starId2": 52789,
+        "hr1": 4094,
+        "hr2": 4232
+      },
+      {
+        "starId1": 52789,
+        "starId2": 56174,
+        "hr1": 4232,
+        "hr2": 4450
+      },
+      {
+        "starId1": 56174,
+        "starId2": 57763,
+        "hr1": 4450,
+        "hr2": 4552
+      },
+      {
+        "starId1": 57763,
+        "starId2": 64758,
+        "hr1": 4552,
+        "hr2": 5020
+      },
+      {
+        "starId1": 64758,
+        "starId2": 68675,
+        "hr1": 5020,
+        "hr2": 5287
+      }
+    ]
+  },
+  {
+    "id": "Hyi",
+    "name": "Hydrus",
+    "genitive": "Hydri",
+    "englishName": "Male Water Snake",
+    "area": 243,
+    "raCenter": 34.5,
+    "decCenter": -69.9,
+    "brightestStar": "Bet Hyi",
+    "family": "Bayer",
+    "polylines": [
+      [
+        9217,
+        12360,
+        17637,
+        2016,
+        9217
+      ]
+    ],
+    "starIds": [
+      9217,
+      12360,
+      17637,
+      2016
+    ],
+    "lineSegments": [
+      {
+        "starId1": 9217,
+        "starId2": 12360,
+        "hr1": 591,
+        "hr2": 806
+      },
+      {
+        "starId1": 12360,
+        "starId2": 17637,
+        "hr1": 806,
+        "hr2": 1208
+      },
+      {
+        "starId1": 17637,
+        "starId2": 2016,
+        "hr1": 1208,
+        "hr2": 98
+      },
+      {
+        "starId1": 2016,
+        "starId2": 9217,
+        "hr1": 98,
+        "hr2": 591
+      }
+    ]
+  },
+  {
+    "id": "Ind",
+    "name": "Indus",
+    "genitive": "Indi",
+    "englishName": "Indian",
+    "area": 294,
+    "raCenter": 324,
+    "decCenter": -56.7,
+    "brightestStar": "Alp Ind",
+    "family": "Bayer",
+    "polylines": [
+      [
+        101445,
+        104979,
+        108086,
+        108526,
+        108086,
+        104979,
+        103750,
+        102895
+      ]
+    ],
+    "starIds": [
+      101445,
+      104979,
+      108086,
+      108526,
+      103750,
+      102895
+    ],
+    "lineSegments": [
+      {
+        "starId1": 101445,
+        "starId2": 104979,
+        "hr1": 7869,
+        "hr2": 8140
+      },
+      {
+        "starId1": 104979,
+        "starId2": 108086,
+        "hr1": 8140,
+        "hr2": 8368
+      },
+      {
+        "starId1": 108086,
+        "starId2": 108526,
+        "hr1": 8368,
+        "hr2": 8387
+      },
+      {
+        "starId1": 108526,
+        "starId2": 108086,
+        "hr1": 8387,
+        "hr2": 8368
+      },
+      {
+        "starId1": 108086,
+        "starId2": 104979,
+        "hr1": 8368,
+        "hr2": 8140
+      },
+      {
+        "starId1": 104979,
+        "starId2": 103750,
+        "hr1": 8140,
+        "hr2": 8055
+      },
+      {
+        "starId1": 103750,
+        "starId2": 102895,
+        "hr1": 8055,
+        "hr2": 7986
+      }
+    ]
+  },
+  {
+    "id": "Lac",
+    "name": "Lacerta",
+    "genitive": "Lacertae",
+    "englishName": "Lizard",
+    "area": 201,
+    "raCenter": 337.5,
+    "decCenter": 46,
+    "brightestStar": "Alp Lac",
+    "family": "Perseus",
+    "polylines": [
+      [
+        109591,
+        109408,
+        110757,
+        111591,
+        110757,
+        110005,
+        110757,
+        110675,
+        110263,
+        110192,
+        110822,
+        110675
+      ]
+    ],
+    "starIds": [
+      109591,
+      109408,
+      110757,
+      111591,
+      110005,
+      110675,
+      110263,
+      110192,
+      110822
+    ],
+    "lineSegments": [
+      {
+        "starId1": 109591,
+        "starId2": 109408,
+        "hr1": 8498,
+        "hr2": 8485
+      },
+      {
+        "starId1": 109408,
+        "starId2": 110757,
+        "hr1": 8485,
+        "hr2": 8579
+      },
+      {
+        "starId1": 110757,
+        "starId2": 111591,
+        "hr1": 8579,
+        "hr2": 8632
+      },
+      {
+        "starId1": 111591,
+        "starId2": 110757,
+        "hr1": 8632,
+        "hr2": 8579
+      },
+      {
+        "starId1": 110757,
+        "starId2": 110005,
+        "hr1": 8579,
+        "hr2": 8523
+      },
+      {
+        "starId1": 110005,
+        "starId2": 110757,
+        "hr1": 8523,
+        "hr2": 8579
+      },
+      {
+        "starId1": 110757,
+        "starId2": 110675,
+        "hr1": 8579,
+        "hr2": 8572
+      },
+      {
+        "starId1": 110675,
+        "starId2": 110263,
+        "hr1": 8572,
+        "hr2": 8541
+      },
+      {
+        "starId1": 110263,
+        "starId2": 110192,
+        "hr1": 8541,
+        "hr2": 8538
+      },
+      {
+        "starId1": 110192,
+        "starId2": 110822,
+        "hr1": 8538,
+        "hr2": 8585
+      },
+      {
+        "starId1": 110822,
+        "starId2": 110675,
+        "hr1": 8585,
+        "hr2": 8572
+      }
+    ]
+  },
+  {
+    "id": "Leo",
+    "name": "Leo",
+    "genitive": "Leonis",
+    "englishName": "Lion",
+    "area": 947,
+    "raCenter": 160.5,
+    "decCenter": 13.1,
+    "brightestStar": "Regulus",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        47772,
+        48318,
+        50193,
+        49441,
+        49528,
+        47373,
+        49528,
+        54718,
+        55476,
+        55269,
+        55476,
+        54718,
+        57459,
+        54712
+      ]
+    ],
+    "starIds": [
+      47772,
+      48318,
+      50193,
+      49441,
+      49528,
+      47373,
+      54718,
+      55476,
+      55269,
+      57459,
+      54712
+    ],
+    "lineSegments": [
+      {
+        "starId1": 47772,
+        "starId2": 48318,
+        "hr1": 3873,
+        "hr2": 3905
+      },
+      {
+        "starId1": 48318,
+        "starId2": 50193,
+        "hr1": 3905,
+        "hr2": 4031
+      },
+      {
+        "starId1": 50193,
+        "starId2": 49441,
+        "hr1": 4031,
+        "hr2": 3975
+      },
+      {
+        "starId1": 49441,
+        "starId2": 49528,
+        "hr1": 3975,
+        "hr2": 3982
+      },
+      {
+        "starId1": 49528,
+        "starId2": 47373,
+        "hr1": 3982,
+        "hr2": 3852
+      },
+      {
+        "starId1": 47373,
+        "starId2": 49528,
+        "hr1": 3852,
+        "hr2": 3982
+      },
+      {
+        "starId1": 49528,
+        "starId2": 54718,
+        "hr1": 3982,
+        "hr2": 4359
+      },
+      {
+        "starId1": 54718,
+        "starId2": 55476,
+        "hr1": 4359,
+        "hr2": 4399
+      },
+      {
+        "starId1": 55476,
+        "starId2": 55269,
+        "hr1": 4399,
+        "hr2": 4386
+      },
+      {
+        "starId1": 55269,
+        "starId2": 55476,
+        "hr1": 4386,
+        "hr2": 4399
+      },
+      {
+        "starId1": 55476,
+        "starId2": 54718,
+        "hr1": 4399,
+        "hr2": 4359
+      },
+      {
+        "starId1": 54718,
+        "starId2": 57459,
+        "hr1": 4359,
+        "hr2": 4534
+      },
+      {
+        "starId1": 57459,
+        "starId2": 54712,
+        "hr1": 4534,
+        "hr2": 4357
+      }
+    ]
+  },
+  {
+    "id": "LMi",
+    "name": "Leo Minor",
+    "genitive": "Leonis Minoris",
+    "englishName": "Lesser Lion",
+    "area": 232,
+    "raCenter": 153,
+    "decCenter": 33.5,
+    "brightestStar": "Praecipua",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        53075,
+        51089,
+        49451
+      ]
+    ],
+    "starIds": [
+      53075,
+      51089,
+      49451
+    ],
+    "lineSegments": [
+      {
+        "starId1": 53075,
+        "starId2": 51089,
+        "hr1": 4247,
+        "hr2": 4100
+      },
+      {
+        "starId1": 51089,
+        "starId2": 49451,
+        "hr1": 4100,
+        "hr2": 3974
+      }
+    ]
+  },
+  {
+    "id": "Lep",
+    "name": "Lepus",
+    "genitive": "Leporis",
+    "englishName": "Hare",
+    "area": 290,
+    "raCenter": 84,
+    "decCenter": -19,
+    "brightestStar": "Arneb",
+    "family": "Orion",
+    "polylines": [
+      [
+        23630,
+        25542,
+        25920,
+        24249,
+        25920,
+        27220,
+        28032
+      ]
+    ],
+    "starIds": [
+      23630,
+      25542,
+      25920,
+      24249,
+      27220,
+      28032
+    ],
+    "lineSegments": [
+      {
+        "starId1": 23630,
+        "starId2": 25542,
+        "hr1": 1654,
+        "hr2": 1829
+      },
+      {
+        "starId1": 25542,
+        "starId2": 25920,
+        "hr1": 1829,
+        "hr2": 1865
+      },
+      {
+        "starId1": 25920,
+        "starId2": 24249,
+        "hr1": 1865,
+        "hr2": 1702
+      },
+      {
+        "starId1": 24249,
+        "starId2": 25920,
+        "hr1": 1702,
+        "hr2": 1865
+      },
+      {
+        "starId1": 25920,
+        "starId2": 27220,
+        "hr1": 1865,
+        "hr2": 1998
+      },
+      {
+        "starId1": 27220,
+        "starId2": 28032,
+        "hr1": 1998,
+        "hr2": 2085
+      }
+    ]
+  },
+  {
+    "id": "Lib",
+    "name": "Libra",
+    "genitive": "Librae",
+    "englishName": "Scales",
+    "area": 538,
+    "raCenter": 228,
+    "decCenter": -15.6,
+    "brightestStar": "Zubeneschamali",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        77617,
+        76100,
+        74556,
+        72396,
+        73486,
+        74556,
+        73486,
+        76235,
+        76365
+      ]
+    ],
+    "starIds": [
+      77617,
+      76100,
+      74556,
+      72396,
+      73486,
+      76235,
+      76365
+    ],
+    "lineSegments": [
+      {
+        "starId1": 77617,
+        "starId2": 76100,
+        "hr1": 5908,
+        "hr2": 5787
+      },
+      {
+        "starId1": 76100,
+        "starId2": 74556,
+        "hr1": 5787,
+        "hr2": 5685
+      },
+      {
+        "starId1": 74556,
+        "starId2": 72396,
+        "hr1": 5685,
+        "hr2": 5531
+      },
+      {
+        "starId1": 72396,
+        "starId2": 73486,
+        "hr1": 5531,
+        "hr2": 5603
+      },
+      {
+        "starId1": 73486,
+        "starId2": 74556,
+        "hr1": 5603,
+        "hr2": 5685
+      },
+      {
+        "starId1": 74556,
+        "starId2": 73486,
+        "hr1": 5685,
+        "hr2": 5603
+      },
+      {
+        "starId1": 73486,
+        "starId2": 76235,
+        "hr1": 5603,
+        "hr2": 5794
+      },
+      {
+        "starId1": 76235,
+        "starId2": 76365,
+        "hr1": 5794,
+        "hr2": 5812
+      }
+    ]
+  },
+  {
+    "id": "Lup",
+    "name": "Lupus",
+    "genitive": "Lupi",
+    "englishName": "Wolf",
+    "area": 334,
+    "raCenter": 228,
+    "decCenter": -42.8,
+    "brightestStar": "Alp Lup",
+    "family": "Hercules",
+    "polylines": [
+      [
+        78678,
+        78148,
+        76065,
+        75035,
+        74148,
+        74167,
+        71634,
+        73046,
+        74912,
+        76065,
+        74912,
+        74948,
+        77398
+      ]
+    ],
+    "starIds": [
+      78678,
+      78148,
+      76065,
+      75035,
+      74148,
+      74167,
+      71634,
+      73046,
+      74912,
+      74948,
+      77398
+    ],
+    "lineSegments": [
+      {
+        "starId1": 78678,
+        "starId2": 78148,
+        "hr1": 5987,
+        "hr2": 5948
+      },
+      {
+        "starId1": 78148,
+        "starId2": 76065,
+        "hr1": 5948,
+        "hr2": 5776
+      },
+      {
+        "starId1": 76065,
+        "starId2": 75035,
+        "hr1": 5776,
+        "hr2": 5708
+      },
+      {
+        "starId1": 75035,
+        "starId2": 74148,
+        "hr1": 5708,
+        "hr2": 5646
+      },
+      {
+        "starId1": 74148,
+        "starId2": 74167,
+        "hr1": 5646,
+        "hr2": 5649
+      },
+      {
+        "starId1": 74167,
+        "starId2": 71634,
+        "hr1": 5649,
+        "hr2": 5469
+      },
+      {
+        "starId1": 71634,
+        "starId2": 73046,
+        "hr1": 5469,
+        "hr2": 5571
+      },
+      {
+        "starId1": 73046,
+        "starId2": 74912,
+        "hr1": 5571,
+        "hr2": 5695
+      },
+      {
+        "starId1": 74912,
+        "starId2": 76065,
+        "hr1": 5695,
+        "hr2": 5776
+      },
+      {
+        "starId1": 76065,
+        "starId2": 74912,
+        "hr1": 5776,
+        "hr2": 5695
+      },
+      {
+        "starId1": 74912,
+        "starId2": 74948,
+        "hr1": 5695,
+        "hr2": 5705
+      },
+      {
+        "starId1": 74948,
+        "starId2": 77398,
+        "hr1": 5705,
+        "hr2": 5883
+      }
+    ]
+  },
+  {
+    "id": "Lyn",
+    "name": "Lynx",
+    "genitive": "Lyncis",
+    "englishName": "Lynx",
+    "area": 545,
+    "raCenter": 120,
+    "decCenter": 44.8,
+    "brightestStar": "Alp Lyn",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        45728,
+        45557,
+        44572,
+        44120,
+        40959,
+        36044,
+        33362,
+        29987
+      ]
+    ],
+    "starIds": [
+      45728,
+      45557,
+      44572,
+      44120,
+      40959,
+      36044,
+      33362,
+      29987
+    ],
+    "lineSegments": [
+      {
+        "starId1": 45728,
+        "starId2": 45557,
+        "hr1": 3705,
+        "hr2": 3690
+      },
+      {
+        "starId1": 45557,
+        "starId2": 44572,
+        "hr1": 3690,
+        "hr2": 3612
+      },
+      {
+        "starId1": 44572,
+        "starId2": 44120,
+        "hr1": 3612,
+        "hr2": 3579
+      },
+      {
+        "starId1": 44120,
+        "starId2": 40959,
+        "hr1": 3579,
+        "hr2": 3275
+      },
+      {
+        "starId1": 40959,
+        "starId2": 36044,
+        "hr1": 3275,
+        "hr2": 2818
+      },
+      {
+        "starId1": 36044,
+        "starId2": 33362,
+        "hr1": 2818,
+        "hr2": 2560
+      },
+      {
+        "starId1": 33362,
+        "starId2": 29987,
+        "hr1": 2560,
+        "hr2": 2238
+      }
+    ]
+  },
+  {
+    "id": "Lyr",
+    "name": "Lyra",
+    "genitive": "Lyrae",
+    "englishName": "Lyre",
+    "area": 286,
+    "raCenter": 283.5,
+    "decCenter": 36.7,
+    "brightestStar": "Vega",
+    "family": "Hercules",
+    "polylines": [
+      [
+        90979,
+        91684,
+        92133,
+        92902,
+        92502,
+        91684
+      ]
+    ],
+    "starIds": [
+      90979,
+      91684,
+      92133,
+      92902,
+      92502
+    ],
+    "lineSegments": [
+      {
+        "starId1": 90979,
+        "starId2": 91684,
+        "hr1": 7001,
+        "hr2": 7056
+      },
+      {
+        "starId1": 91684,
+        "starId2": 92133,
+        "hr1": 7056,
+        "hr2": 7106
+      },
+      {
+        "starId1": 92133,
+        "starId2": 92902,
+        "hr1": 7106,
+        "hr2": 7178
+      },
+      {
+        "starId1": 92902,
+        "starId2": 92502,
+        "hr1": 7178,
+        "hr2": 7139
+      },
+      {
+        "starId1": 92502,
+        "starId2": 91684,
+        "hr1": 7139,
+        "hr2": 7056
+      }
+    ]
+  },
+  {
+    "id": "Men",
+    "name": "Mensa",
+    "genitive": "Mensae",
+    "englishName": "Table Mountain",
+    "area": 153,
+    "raCenter": 81,
+    "decCenter": -77.5,
+    "brightestStar": "Alp Men",
+    "family": "La Caille",
+    "polylines": [
+      [
+        29198,
+        25853,
+        22818,
+        23412
+      ]
+    ],
+    "starIds": [
+      29198,
+      25853,
+      22818,
+      23412
+    ],
+    "lineSegments": [
+      {
+        "starId1": 29198,
+        "starId2": 25853,
+        "hr1": 2261,
+        "hr2": 1953
+      },
+      {
+        "starId1": 25853,
+        "starId2": 22818,
+        "hr1": 1953,
+        "hr2": 1629
+      },
+      {
+        "starId1": 22818,
+        "starId2": 23412,
+        "hr1": 1629,
+        "hr2": 1677
+      }
+    ]
+  },
+  {
+    "id": "Mic",
+    "name": "Microscopium",
+    "genitive": "Microscopii",
+    "englishName": "Microscope",
+    "area": 210,
+    "raCenter": 313.5,
+    "decCenter": -36.3,
+    "brightestStar": "Gam Mic",
+    "family": "La Caille",
+    "polylines": [
+      [
+        105041,
+        104802,
+        103406,
+        102500
+      ]
+    ],
+    "starIds": [
+      105041,
+      104802,
+      103406,
+      102500
+    ],
+    "lineSegments": [
+      {
+        "starId1": 105041,
+        "starId2": 104802,
+        "hr1": 8151,
+        "hr2": 8135
+      },
+      {
+        "starId1": 104802,
+        "starId2": 103406,
+        "hr1": 8135,
+        "hr2": 8039
+      },
+      {
+        "starId1": 103406,
+        "starId2": 102500,
+        "hr1": 8039,
+        "hr2": 7965
+      }
+    ]
+  },
+  {
+    "id": "Mon",
+    "name": "Monoceros",
+    "genitive": "Monocerotis",
+    "englishName": "Unicorn",
+    "area": 482,
+    "raCenter": 106.5,
+    "decCenter": -3.3,
+    "brightestStar": "Bet Mon",
+    "family": "Orion",
+    "polylines": [
+      [
+        31139,
+        30346,
+        32492,
+        34677,
+        30794,
+        29578,
+        30794,
+        34677,
+        37340,
+        39750
+      ]
+    ],
+    "starIds": [
+      31139,
+      30346,
+      32492,
+      34677,
+      30794,
+      29578,
+      37340,
+      39750
+    ],
+    "lineSegments": [
+      {
+        "starId1": 31139,
+        "starId2": 30346,
+        "hr1": 2385,
+        "hr2": 2298
+      },
+      {
+        "starId1": 30346,
+        "starId2": 32492,
+        "hr1": 2298,
+        "hr2": 2506
+      },
+      {
+        "starId1": 32492,
+        "starId2": 34677,
+        "hr1": 2506,
+        "hr2": 2714
+      },
+      {
+        "starId1": 34677,
+        "starId2": 30794,
+        "hr1": 2714,
+        "hr2": 2356
+      },
+      {
+        "starId1": 30794,
+        "starId2": 29578,
+        "hr1": 2356,
+        "hr2": 2227
+      },
+      {
+        "starId1": 29578,
+        "starId2": 30794,
+        "hr1": 2227,
+        "hr2": 2356
+      },
+      {
+        "starId1": 30794,
+        "starId2": 34677,
+        "hr1": 2356,
+        "hr2": 2714
+      },
+      {
+        "starId1": 34677,
+        "starId2": 37340,
+        "hr1": 2714,
+        "hr2": 2970
+      },
+      {
+        "starId1": 37340,
+        "starId2": 39750,
+        "hr1": 2970,
+        "hr2": 3188
+      }
+    ]
+  },
+  {
+    "id": "Mus",
+    "name": "Musca",
+    "genitive": "Muscae",
+    "englishName": "Fly",
+    "area": 138,
+    "raCenter": 189,
+    "decCenter": -70.2,
+    "brightestStar": "Alp Mus",
+    "family": "Bayer",
+    "polylines": [
+      [
+        62127,
+        61392,
+        63411,
+        61392,
+        61008,
+        61392,
+        59746,
+        57190
+      ]
+    ],
+    "starIds": [
+      62127,
+      61392,
+      63411,
+      61008,
+      59746,
+      57190
+    ],
+    "lineSegments": [
+      {
+        "starId1": 62127,
+        "starId2": 61392,
+        "hr1": 4844,
+        "hr2": 4798
+      },
+      {
+        "starId1": 61392,
+        "starId2": 63411,
+        "hr1": 4798,
+        "hr2": 4923
+      },
+      {
+        "starId1": 63411,
+        "starId2": 61392,
+        "hr1": 4923,
+        "hr2": 4798
+      },
+      {
+        "starId1": 61392,
+        "starId2": 61008,
+        "hr1": 4798,
+        "hr2": 4773
+      },
+      {
+        "starId1": 61008,
+        "starId2": 61392,
+        "hr1": 4773,
+        "hr2": 4798
+      },
+      {
+        "starId1": 61392,
+        "starId2": 59746,
+        "hr1": 4798,
+        "hr2": 4671
+      },
+      {
+        "starId1": 59746,
+        "starId2": 57190,
+        "hr1": 4671,
+        "hr2": 4520
+      }
+    ]
+  },
+  {
+    "id": "Nor",
+    "name": "Norma",
+    "genitive": "Normae",
+    "englishName": "Carpenter Level",
+    "area": 165,
+    "raCenter": 238.5,
+    "decCenter": -51.9,
+    "brightestStar": "Gam-2 Nor",
+    "family": "La Caille",
+    "polylines": [
+      [
+        80339,
+        79759,
+        78400
+      ]
+    ],
+    "starIds": [
+      80339,
+      79759,
+      78400
+    ],
+    "lineSegments": [
+      {
+        "starId1": 80339,
+        "starId2": 79759,
+        "hr1": 6115,
+        "hr2": 6072
+      },
+      {
+        "starId1": 79759,
+        "starId2": 78400,
+        "hr1": 6072,
+        "hr2": 5962
+      }
+    ]
+  },
+  {
+    "id": "Oct",
+    "name": "Octans",
+    "genitive": "Octantis",
+    "englishName": "Octant",
+    "area": 291,
+    "raCenter": 345,
+    "decCenter": -82.2,
+    "brightestStar": "Nu Oct",
+    "family": "La Caille",
+    "polylines": [
+      [
+        112050,
+        70415,
+        106746,
+        112050
+      ]
+    ],
+    "starIds": [
+      112050,
+      70415,
+      106746
+    ],
+    "lineSegments": [
+      {
+        "starId1": 112050,
+        "starId2": 70415,
+        "hr1": 8630,
+        "hr2": 5339
+      },
+      {
+        "starId1": 70415,
+        "starId2": 106746,
+        "hr1": 5339,
+        "hr2": 8254
+      },
+      {
+        "starId1": 106746,
+        "starId2": 112050,
+        "hr1": 8254,
+        "hr2": 8630
+      }
+    ]
+  },
+  {
+    "id": "Oph",
+    "name": "Ophiuchus",
+    "genitive": "Ophiuchi",
+    "englishName": "Serpent Bearer",
+    "area": 948,
+    "raCenter": 261,
+    "decCenter": -4.2,
+    "brightestStar": "Rasalhague",
+    "family": "Hercules",
+    "polylines": [
+      [
+        85769,
+        82745,
+        80637,
+        79352,
+        79640,
+        81130,
+        83755,
+        86475,
+        85769
+      ]
+    ],
+    "starIds": [
+      85769,
+      82745,
+      80637,
+      79352,
+      79640,
+      81130,
+      83755,
+      86475
+    ],
+    "lineSegments": [
+      {
+        "starId1": 85769,
+        "starId2": 82745,
+        "hr1": 6556,
+        "hr2": 6299
+      },
+      {
+        "starId1": 82745,
+        "starId2": 80637,
+        "hr1": 6299,
+        "hr2": 6149
+      },
+      {
+        "starId1": 80637,
+        "starId2": 79352,
+        "hr1": 6149,
+        "hr2": 6056
+      },
+      {
+        "starId1": 79352,
+        "starId2": 79640,
+        "hr1": 6056,
+        "hr2": 6075
+      },
+      {
+        "starId1": 79640,
+        "starId2": 81130,
+        "hr1": 6075,
+        "hr2": 6175
+      },
+      {
+        "starId1": 81130,
+        "starId2": 83755,
+        "hr1": 6175,
+        "hr2": 6378
+      },
+      {
+        "starId1": 83755,
+        "starId2": 86475,
+        "hr1": 6378,
+        "hr2": 6603
+      },
+      {
+        "starId1": 86475,
+        "starId2": 85769,
+        "hr1": 6603,
+        "hr2": 6556
+      }
+    ]
+  },
+  {
+    "id": "Ori",
+    "name": "Orion",
+    "genitive": "Orionis",
+    "englishName": "Hunter",
+    "area": 594,
+    "raCenter": 84,
+    "decCenter": 1.4,
+    "brightestStar": "Rigel",
+    "family": "Orion",
+    "polylines": [
+      [
+        26662,
+        27298,
+        24378,
+        25865,
+        25273,
+        26142,
+        27919,
+        28543,
+        29353,
+        28966,
+        27844,
+        28645,
+        29353,
+        28543,
+        27919,
+        26662,
+        26246,
+        25865,
+        25273,
+        22396,
+        22496,
+        22744,
+        23069,
+        22744,
+        22496,
+        22396,
+        22456,
+        22904,
+        23552,
+        23955
+      ]
+    ],
+    "starIds": [
+      26662,
+      27298,
+      24378,
+      25865,
+      25273,
+      26142,
+      27919,
+      28543,
+      29353,
+      28966,
+      27844,
+      28645,
+      26246,
+      22396,
+      22496,
+      22744,
+      23069,
+      22456,
+      22904,
+      23552,
+      23955
+    ],
+    "lineSegments": [
+      {
+        "starId1": 26662,
+        "starId2": 27298,
+        "hr1": 1948,
+        "hr2": 2004
+      },
+      {
+        "starId1": 27298,
+        "starId2": 24378,
+        "hr1": 2004,
+        "hr2": 1713
+      },
+      {
+        "starId1": 24378,
+        "starId2": 25865,
+        "hr1": 1713,
+        "hr2": 1852
+      },
+      {
+        "starId1": 25865,
+        "starId2": 25273,
+        "hr1": 1852,
+        "hr2": 1790
+      },
+      {
+        "starId1": 25273,
+        "starId2": 26142,
+        "hr1": 1790,
+        "hr2": 1879
+      },
+      {
+        "starId1": 26142,
+        "starId2": 27919,
+        "hr1": 1879,
+        "hr2": 2061
+      },
+      {
+        "starId1": 27919,
+        "starId2": 28543,
+        "hr1": 2061,
+        "hr2": 2124
+      },
+      {
+        "starId1": 28543,
+        "starId2": 29353,
+        "hr1": 2124,
+        "hr2": 2199
+      },
+      {
+        "starId1": 29353,
+        "starId2": 28966,
+        "hr1": 2199,
+        "hr2": 2159
+      },
+      {
+        "starId1": 28966,
+        "starId2": 27844,
+        "hr1": 2159,
+        "hr2": 2047
+      },
+      {
+        "starId1": 27844,
+        "starId2": 28645,
+        "hr1": 2047,
+        "hr2": 2135
+      },
+      {
+        "starId1": 28645,
+        "starId2": 29353,
+        "hr1": 2135,
+        "hr2": 2199
+      },
+      {
+        "starId1": 29353,
+        "starId2": 28543,
+        "hr1": 2199,
+        "hr2": 2124
+      },
+      {
+        "starId1": 28543,
+        "starId2": 27919,
+        "hr1": 2124,
+        "hr2": 2061
+      },
+      {
+        "starId1": 27919,
+        "starId2": 26662,
+        "hr1": 2061,
+        "hr2": 1948
+      },
+      {
+        "starId1": 26662,
+        "starId2": 26246,
+        "hr1": 1948,
+        "hr2": 1903
+      },
+      {
+        "starId1": 26246,
+        "starId2": 25865,
+        "hr1": 1903,
+        "hr2": 1852
+      },
+      {
+        "starId1": 25865,
+        "starId2": 25273,
+        "hr1": 1852,
+        "hr2": 1790
+      },
+      {
+        "starId1": 25273,
+        "starId2": 22396,
+        "hr1": 1790,
+        "hr2": 1543
+      },
+      {
+        "starId1": 22396,
+        "starId2": 22496,
+        "hr1": 1543,
+        "hr2": 1552
+      },
+      {
+        "starId1": 22496,
+        "starId2": 22744,
+        "hr1": 1552,
+        "hr2": 1567
+      },
+      {
+        "starId1": 22744,
+        "starId2": 23069,
+        "hr1": 1567,
+        "hr2": 1601
+      },
+      {
+        "starId1": 23069,
+        "starId2": 22744,
+        "hr1": 1601,
+        "hr2": 1567
+      },
+      {
+        "starId1": 22744,
+        "starId2": 22496,
+        "hr1": 1567,
+        "hr2": 1552
+      },
+      {
+        "starId1": 22496,
+        "starId2": 22396,
+        "hr1": 1552,
+        "hr2": 1543
+      },
+      {
+        "starId1": 22396,
+        "starId2": 22456,
+        "hr1": 1543,
+        "hr2": 1544
+      },
+      {
+        "starId1": 22456,
+        "starId2": 22904,
+        "hr1": 1544,
+        "hr2": 1580
+      },
+      {
+        "starId1": 22904,
+        "starId2": 23552,
+        "hr1": 1580,
+        "hr2": 1638
+      },
+      {
+        "starId1": 23552,
+        "starId2": 23955,
+        "hr1": 1638,
+        "hr2": 1676
+      }
+    ]
+  },
+  {
+    "id": "Pav",
+    "name": "Pavo",
+    "genitive": "Pavonis",
+    "englishName": "Peacock",
+    "area": 378,
+    "raCenter": 294,
+    "decCenter": -65.8,
+    "brightestStar": "Peacock",
+    "family": "Bayer",
+    "polylines": [
+      [
+        100425,
+        102064,
+        105519,
+        102064,
+        98184,
+        91507,
+        86661,
+        88589,
+        89819,
+        92319,
+        98924,
+        102064
+      ]
+    ],
+    "starIds": [
+      100425,
+      102064,
+      105519,
+      98184,
+      91507,
+      86661,
+      88589,
+      89819,
+      92319,
+      98924
+    ],
+    "lineSegments": [
+      {
+        "starId1": 100425,
+        "starId2": 102064,
+        "hr1": 7790,
+        "hr2": 7913
+      },
+      {
+        "starId1": 102064,
+        "starId2": 105519,
+        "hr1": 7913,
+        "hr2": 8181
+      },
+      {
+        "starId1": 105519,
+        "starId2": 102064,
+        "hr1": 8181,
+        "hr2": 7913
+      },
+      {
+        "starId1": 102064,
+        "starId2": 98184,
+        "hr1": 7913,
+        "hr2": 7590
+      },
+      {
+        "starId1": 98184,
+        "starId2": 91507,
+        "hr1": 7590,
+        "hr2": 6982
+      },
+      {
+        "starId1": 91507,
+        "starId2": 86661,
+        "hr1": 6982,
+        "hr2": 6582
+      },
+      {
+        "starId1": 86661,
+        "starId2": 88589,
+        "hr1": 6582,
+        "hr2": 6745
+      },
+      {
+        "starId1": 88589,
+        "starId2": 89819,
+        "hr1": 6745,
+        "hr2": 6855
+      },
+      {
+        "starId1": 89819,
+        "starId2": 92319,
+        "hr1": 6855,
+        "hr2": 7074
+      },
+      {
+        "starId1": 92319,
+        "starId2": 98924,
+        "hr1": 7074,
+        "hr2": 7665
+      },
+      {
+        "starId1": 98924,
+        "starId2": 102064,
+        "hr1": 7665,
+        "hr2": 7913
+      }
+    ]
+  },
+  {
+    "id": "Peg",
+    "name": "Pegasus",
+    "genitive": "Pegasi",
+    "englishName": "Winged Horse",
+    "area": 1121,
+    "raCenter": 340.5,
+    "decCenter": 19.5,
+    "brightestStar": "Alpheratz",
+    "family": "Perseus",
+    "polylines": [
+      [
+        109064,
+        111804,
+        113521,
+        676,
+        113521,
+        113603,
+        1065,
+        676,
+        1065,
+        113603,
+        111676,
+        109081,
+        106972
+      ]
+    ],
+    "starIds": [
+      109064,
+      111804,
+      113521,
+      676,
+      113603,
+      1065,
+      111676,
+      109081,
+      106972
+    ],
+    "lineSegments": [
+      {
+        "starId1": 109064,
+        "starId2": 111804,
+        "hr1": 8454,
+        "hr2": 8650
+      },
+      {
+        "starId1": 111804,
+        "starId2": 113521,
+        "hr1": 8650,
+        "hr2": 8775
+      },
+      {
+        "starId1": 113521,
+        "starId2": 676,
+        "hr1": 8775,
+        "hr2": 15
+      },
+      {
+        "starId1": 676,
+        "starId2": 113521,
+        "hr1": 15,
+        "hr2": 8775
+      },
+      {
+        "starId1": 113521,
+        "starId2": 113603,
+        "hr1": 8775,
+        "hr2": 8781
+      },
+      {
+        "starId1": 113603,
+        "starId2": 1065,
+        "hr1": 8781,
+        "hr2": 39
+      },
+      {
+        "starId1": 1065,
+        "starId2": 676,
+        "hr1": 39,
+        "hr2": 15
+      },
+      {
+        "starId1": 676,
+        "starId2": 1065,
+        "hr1": 15,
+        "hr2": 39
+      },
+      {
+        "starId1": 1065,
+        "starId2": 113603,
+        "hr1": 39,
+        "hr2": 8781
+      },
+      {
+        "starId1": 113603,
+        "starId2": 111676,
+        "hr1": 8781,
+        "hr2": 8634
+      },
+      {
+        "starId1": 111676,
+        "starId2": 109081,
+        "hr1": 8634,
+        "hr2": 8450
+      },
+      {
+        "starId1": 109081,
+        "starId2": 106972,
+        "hr1": 8450,
+        "hr2": 8308
+      }
+    ]
+  },
+  {
+    "id": "Per",
+    "name": "Perseus",
+    "genitive": "Persei",
+    "englishName": "Hero",
+    "area": 615,
+    "raCenter": 48,
+    "decCenter": 42.5,
+    "brightestStar": "Mirfak",
+    "family": "Perseus",
+    "polylines": [
+      [
+        14540,
+        14632,
+        15824,
+        14292,
+        15824,
+        17316,
+        18485,
+        18567,
+        18201
+      ]
+    ],
+    "starIds": [
+      14540,
+      14632,
+      15824,
+      14292,
+      17316,
+      18485,
+      18567,
+      18201
+    ],
+    "lineSegments": [
+      {
+        "starId1": 14540,
+        "starId2": 14632,
+        "hr1": 936,
+        "hr2": 941
+      },
+      {
+        "starId1": 14632,
+        "starId2": 15824,
+        "hr1": 941,
+        "hr2": 1017
+      },
+      {
+        "starId1": 15824,
+        "starId2": 14292,
+        "hr1": 1017,
+        "hr2": 915
+      },
+      {
+        "starId1": 14292,
+        "starId2": 15824,
+        "hr1": 915,
+        "hr2": 1017
+      },
+      {
+        "starId1": 15824,
+        "starId2": 17316,
+        "hr1": 1017,
+        "hr2": 1122
+      },
+      {
+        "starId1": 17316,
+        "starId2": 18485,
+        "hr1": 1122,
+        "hr2": 1220
+      },
+      {
+        "starId1": 18485,
+        "starId2": 18567,
+        "hr1": 1220,
+        "hr2": 1228
+      },
+      {
+        "starId1": 18567,
+        "starId2": 18201,
+        "hr1": 1228,
+        "hr2": 1203
+      }
+    ]
+  },
+  {
+    "id": "Phe",
+    "name": "Phoenix",
+    "genitive": "Phoenicis",
+    "englishName": "Phoenix",
+    "area": 469,
+    "raCenter": 6,
+    "decCenter": -42.3,
+    "brightestStar": "Ankaa",
+    "family": "Bayer",
+    "polylines": [
+      [
+        2076,
+        5154,
+        6853,
+        7068,
+        6853,
+        5154,
+        5337,
+        3398,
+        763,
+        2076
+      ]
+    ],
+    "starIds": [
+      2076,
+      5154,
+      6853,
+      7068,
+      5337,
+      3398,
+      763
+    ],
+    "lineSegments": [
+      {
+        "starId1": 2076,
+        "starId2": 5154,
+        "hr1": 99,
+        "hr2": 322
+      },
+      {
+        "starId1": 5154,
+        "starId2": 6853,
+        "hr1": 322,
+        "hr2": 429
+      },
+      {
+        "starId1": 6853,
+        "starId2": 7068,
+        "hr1": 429,
+        "hr2": 440
+      },
+      {
+        "starId1": 7068,
+        "starId2": 6853,
+        "hr1": 440,
+        "hr2": 429
+      },
+      {
+        "starId1": 6853,
+        "starId2": 5154,
+        "hr1": 429,
+        "hr2": 322
+      },
+      {
+        "starId1": 5154,
+        "starId2": 5337,
+        "hr1": 322,
+        "hr2": 338
+      },
+      {
+        "starId1": 5337,
+        "starId2": 3398,
+        "hr1": 338,
+        "hr2": 191
+      },
+      {
+        "starId1": 3398,
+        "starId2": 763,
+        "hr1": 191,
+        "hr2": 25
+      },
+      {
+        "starId1": 763,
+        "starId2": 2076,
+        "hr1": 25,
+        "hr2": 99
+      }
+    ]
+  },
+  {
+    "id": "Pic",
+    "name": "Pictor",
+    "genitive": "Pictoris",
+    "englishName": "Easel",
+    "area": 247,
+    "raCenter": 85.5,
+    "decCenter": -53.5,
+    "brightestStar": "Alp Pic",
+    "family": "La Caille",
+    "polylines": [
+      [
+        32521,
+        27461,
+        27253
+      ]
+    ],
+    "starIds": [
+      32521,
+      27461,
+      27253
+    ],
+    "lineSegments": [
+      {
+        "starId1": 32521,
+        "starId2": 27461,
+        "hr1": 2550,
+        "hr2": 2042
+      },
+      {
+        "starId1": 27461,
+        "starId2": 27253,
+        "hr1": 2042,
+        "hr2": 2020
+      }
+    ]
+  },
+  {
+    "id": "Psc",
+    "name": "Pisces",
+    "genitive": "Piscium",
+    "englishName": "Fishes",
+    "area": 889,
+    "raCenter": 7.5,
+    "decCenter": 13.7,
+    "brightestStar": "Alpherg",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        5730,
+        6179,
+        5574,
+        5730,
+        7083,
+        8183,
+        7869,
+        4896,
+        3778,
+        117900,
+        116405,
+        115465,
+        114864,
+        114609,
+        115376,
+        116562,
+        116878,
+        116405
+      ]
+    ],
+    "starIds": [
+      5730,
+      6179,
+      5574,
+      7083,
+      8183,
+      7869,
+      4896,
+      3778,
+      117900,
+      116405,
+      115465,
+      114864,
+      114609,
+      115376,
+      116562,
+      116878
+    ],
+    "lineSegments": [
+      {
+        "starId1": 5730,
+        "starId2": 6179,
+        "hr1": 360,
+        "hr2": 383
+      },
+      {
+        "starId1": 6179,
+        "starId2": 5574,
+        "hr1": 383,
+        "hr2": 352
+      },
+      {
+        "starId1": 5574,
+        "starId2": 5730,
+        "hr1": 352,
+        "hr2": 360
+      },
+      {
+        "starId1": 5730,
+        "starId2": 7083,
+        "hr1": 360,
+        "hr2": 437
+      },
+      {
+        "starId1": 7083,
+        "starId2": 8183,
+        "hr1": 437,
+        "hr2": 510
+      },
+      {
+        "starId1": 8183,
+        "starId2": 7869,
+        "hr1": 510,
+        "hr2": 489
+      },
+      {
+        "starId1": 7869,
+        "starId2": 4896,
+        "hr1": 489,
+        "hr2": 294
+      },
+      {
+        "starId1": 4896,
+        "starId2": 3778,
+        "hr1": 294,
+        "hr2": 224
+      },
+      {
+        "starId1": 3778,
+        "starId2": 117900,
+        "hr1": 224,
+        "hr2": 9072
+      },
+      {
+        "starId1": 117900,
+        "starId2": 116405,
+        "hr1": 9072,
+        "hr2": 8969
+      },
+      {
+        "starId1": 116405,
+        "starId2": 115465,
+        "hr1": 8969,
+        "hr2": 8916
+      },
+      {
+        "starId1": 115465,
+        "starId2": 114864,
+        "hr1": 8916,
+        "hr2": 8878
+      },
+      {
+        "starId1": 114864,
+        "starId2": 114609,
+        "hr1": 8878,
+        "hr2": 8852
+      },
+      {
+        "starId1": 114609,
+        "starId2": 115376,
+        "hr1": 8852,
+        "hr2": 8911
+      },
+      {
+        "starId1": 115376,
+        "starId2": 116562,
+        "hr1": 8911,
+        "hr2": 8984
+      },
+      {
+        "starId1": 116562,
+        "starId2": 116878,
+        "hr1": 8984,
+        "hr2": 9004
+      },
+      {
+        "starId1": 116878,
+        "starId2": 116405,
+        "hr1": 9004,
+        "hr2": 8969
+      }
+    ]
+  },
+  {
+    "id": "PsA",
+    "name": "Piscis Austrinus",
+    "genitive": "Piscis Austrini",
+    "englishName": "Southern Fish",
+    "area": 245,
+    "raCenter": 334.5,
+    "decCenter": -30.6,
+    "brightestStar": "Fomalhaut",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        113008,
+        111601,
+        109443,
+        108316,
+        107265,
+        107037,
+        108939,
+        110841,
+        112588,
+        112886,
+        113008
+      ]
+    ],
+    "starIds": [
+      113008,
+      111601,
+      109443,
+      108316,
+      107265,
+      107037,
+      108939,
+      110841,
+      112588,
+      112886
+    ],
+    "lineSegments": [
+      {
+        "starId1": 113008,
+        "starId2": 111601,
+        "hr1": 8728,
+        "hr2": 8628
+      },
+      {
+        "starId1": 111601,
+        "starId2": 109443,
+        "hr1": 8628,
+        "hr2": 8478
+      },
+      {
+        "starId1": 109443,
+        "starId2": 108316,
+        "hr1": 8478,
+        "hr2": 8386
+      },
+      {
+        "starId1": 108316,
+        "starId2": 107265,
+        "hr1": 8386,
+        "hr2": 8326
+      },
+      {
+        "starId1": 107265,
+        "starId2": 107037,
+        "hr1": 8326,
+        "hr2": 8305
+      },
+      {
+        "starId1": 107037,
+        "starId2": 108939,
+        "hr1": 8305,
+        "hr2": 8431
+      },
+      {
+        "starId1": 108939,
+        "starId2": 110841,
+        "hr1": 8431,
+        "hr2": 8576
+      },
+      {
+        "starId1": 110841,
+        "starId2": 112588,
+        "hr1": 8576,
+        "hr2": 8695
+      },
+      {
+        "starId1": 112588,
+        "starId2": 112886,
+        "hr1": 8695,
+        "hr2": 8720
+      },
+      {
+        "starId1": 112886,
+        "starId2": 113008,
+        "hr1": 8720,
+        "hr2": 8728
+      }
+    ]
+  },
+  {
+    "id": "Pup",
+    "name": "Puppis",
+    "genitive": "Puppis",
+    "englishName": "Stern",
+    "area": 673,
+    "raCenter": 109.5,
+    "decCenter": -31.2,
+    "brightestStar": "Naos",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        39644,
+        38062,
+        37124,
+        36811,
+        35169,
+        31605,
+        32682,
+        36274,
+        39318,
+        39644
+      ]
+    ],
+    "starIds": [
+      39644,
+      38062,
+      37124,
+      36811,
+      35169,
+      31605,
+      32682,
+      36274,
+      39318
+    ],
+    "lineSegments": [
+      {
+        "starId1": 39644,
+        "starId2": 38062,
+        "hr1": 3185,
+        "hr2": 3045
+      },
+      {
+        "starId1": 38062,
+        "starId2": 37124,
+        "hr1": 3045,
+        "hr2": 2948
+      },
+      {
+        "starId1": 37124,
+        "starId2": 36811,
+        "hr1": 2948,
+        "hr2": 2922
+      },
+      {
+        "starId1": 36811,
+        "starId2": 35169,
+        "hr1": 2922,
+        "hr2": 2773
+      },
+      {
+        "starId1": 35169,
+        "starId2": 31605,
+        "hr1": 2773,
+        "hr2": 2451
+      },
+      {
+        "starId1": 31605,
+        "starId2": 32682,
+        "hr1": 2451,
+        "hr2": 2553
+      },
+      {
+        "starId1": 32682,
+        "starId2": 36274,
+        "hr1": 2553,
+        "hr2": 2878
+      },
+      {
+        "starId1": 36274,
+        "starId2": 39318,
+        "hr1": 2878,
+        "hr2": 3165
+      },
+      {
+        "starId1": 39318,
+        "starId2": 39644,
+        "hr1": 3165,
+        "hr2": 3185
+      }
+    ]
+  },
+  {
+    "id": "Pyx",
+    "name": "Pyxis",
+    "genitive": "Pyxidis",
+    "englishName": "Mariner Compass",
+    "area": 221,
+    "raCenter": 133.5,
+    "decCenter": -27.4,
+    "brightestStar": "Alp Pyx",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        42396,
+        42709,
+        43286
+      ]
+    ],
+    "starIds": [
+      42396,
+      42709,
+      43286
+    ],
+    "lineSegments": [
+      {
+        "starId1": 42396,
+        "starId2": 42709,
+        "hr1": 3438,
+        "hr2": 3468
+      },
+      {
+        "starId1": 42709,
+        "starId2": 43286,
+        "hr1": 3468,
+        "hr2": 3518
+      }
+    ]
+  },
+  {
+    "id": "Ret",
+    "name": "Reticulum",
+    "genitive": "Reticuli",
+    "englishName": "Reticle",
+    "area": 114,
+    "raCenter": 58.5,
+    "decCenter": -59.9,
+    "brightestStar": "Alp Ret",
+    "family": "La Caille",
+    "polylines": [
+      [
+        19730,
+        19871,
+        18550,
+        18697,
+        17398,
+        19730
+      ]
+    ],
+    "starIds": [
+      19730,
+      19871,
+      18550,
+      18697,
+      17398
+    ],
+    "lineSegments": [
+      {
+        "starId1": 19730,
+        "starId2": 19871,
+        "hr1": 1336,
+        "hr2": 1355
+      },
+      {
+        "starId1": 19871,
+        "starId2": 18550,
+        "hr1": 1355,
+        "hr2": 1247
+      },
+      {
+        "starId1": 18550,
+        "starId2": 18697,
+        "hr1": 1247,
+        "hr2": 1264
+      },
+      {
+        "starId1": 18697,
+        "starId2": 17398,
+        "hr1": 1264,
+        "hr2": 1175
+      },
+      {
+        "starId1": 17398,
+        "starId2": 19730,
+        "hr1": 1175,
+        "hr2": 1336
+      }
+    ]
+  },
+  {
+    "id": "Sge",
+    "name": "Sagitta",
+    "genitive": "Sagittae",
+    "englishName": "Arrow",
+    "area": 80,
+    "raCenter": 295.5,
+    "decCenter": 18.9,
+    "brightestStar": "Gam Sge",
+    "family": "Hercules",
+    "polylines": [
+      [
+        98026,
+        97056,
+        96450,
+        97056,
+        96530
+      ]
+    ],
+    "starIds": [
+      98026,
+      97056,
+      96450,
+      96530
+    ],
+    "lineSegments": [
+      {
+        "starId1": 98026,
+        "starId2": 97056,
+        "hr1": 7635,
+        "hr2": 7536
+      },
+      {
+        "starId1": 97056,
+        "starId2": 96450,
+        "hr1": 7536,
+        "hr2": 7479
+      },
+      {
+        "starId1": 96450,
+        "starId2": 97056,
+        "hr1": 7479,
+        "hr2": 7536
+      },
+      {
+        "starId1": 97056,
+        "starId2": 96530,
+        "hr1": 7536,
+        "hr2": 7488
+      }
+    ]
+  },
+  {
+    "id": "Sgr",
+    "name": "Sagittarius",
+    "genitive": "Sagittarii",
+    "englishName": "Archer",
+    "area": 867,
+    "raCenter": 286.5,
+    "decCenter": -28.5,
+    "brightestStar": "Kaus Australis",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        95052,
+        97721,
+        94946,
+        97721,
+        98101,
+        98375,
+        97851,
+        96162,
+        93569,
+        92564,
+        93388,
+        93846,
+        94873,
+        94881,
+        94873,
+        93846,
+        93388,
+        92793,
+        93388,
+        92564,
+        91754,
+        93213,
+        93569,
+        93213,
+        91754,
+        90217,
+        89653,
+        88361,
+        89653,
+        89906,
+        89364
+      ]
+    ],
+    "starIds": [
+      95052,
+      97721,
+      94946,
+      98101,
+      98375,
+      97851,
+      96162,
+      93569,
+      92564,
+      93388,
+      93846,
+      94873,
+      94881,
+      92793,
+      91754,
+      93213,
+      90217,
+      89653,
+      88361,
+      89906,
+      89364
+    ],
+    "lineSegments": [
+      {
+        "starId1": 95052,
+        "starId2": 97721,
+        "hr1": 7348,
+        "hr2": 7581
+      },
+      {
+        "starId1": 97721,
+        "starId2": 94946,
+        "hr1": 7581,
+        "hr2": 7337
+      },
+      {
+        "starId1": 94946,
+        "starId2": 97721,
+        "hr1": 7337,
+        "hr2": 7581
+      },
+      {
+        "starId1": 97721,
+        "starId2": 98101,
+        "hr1": 7581,
+        "hr2": 7623
+      },
+      {
+        "starId1": 98101,
+        "starId2": 98375,
+        "hr1": 7623,
+        "hr2": 7650
+      },
+      {
+        "starId1": 98375,
+        "starId2": 97851,
+        "hr1": 7650,
+        "hr2": 7604
+      },
+      {
+        "starId1": 97851,
+        "starId2": 96162,
+        "hr1": 7604,
+        "hr2": 7440
+      },
+      {
+        "starId1": 96162,
+        "starId2": 93569,
+        "hr1": 7440,
+        "hr2": 7234
+      },
+      {
+        "starId1": 93569,
+        "starId2": 92564,
+        "hr1": 7234,
+        "hr2": 7121
+      },
+      {
+        "starId1": 92564,
+        "starId2": 93388,
+        "hr1": 7121,
+        "hr2": 7217
+      },
+      {
+        "starId1": 93388,
+        "starId2": 93846,
+        "hr1": 7217,
+        "hr2": 7264
+      },
+      {
+        "starId1": 93846,
+        "starId2": 94873,
+        "hr1": 7264,
+        "hr2": 7340
+      },
+      {
+        "starId1": 94873,
+        "starId2": 94881,
+        "hr1": 7340,
+        "hr2": 7342
+      },
+      {
+        "starId1": 94881,
+        "starId2": 94873,
+        "hr1": 7342,
+        "hr2": 7340
+      },
+      {
+        "starId1": 94873,
+        "starId2": 93846,
+        "hr1": 7340,
+        "hr2": 7264
+      },
+      {
+        "starId1": 93846,
+        "starId2": 93388,
+        "hr1": 7264,
+        "hr2": 7217
+      },
+      {
+        "starId1": 93388,
+        "starId2": 92793,
+        "hr1": 7217,
+        "hr2": 7150
+      },
+      {
+        "starId1": 92793,
+        "starId2": 93388,
+        "hr1": 7150,
+        "hr2": 7217
+      },
+      {
+        "starId1": 93388,
+        "starId2": 92564,
+        "hr1": 7217,
+        "hr2": 7121
+      },
+      {
+        "starId1": 92564,
+        "starId2": 91754,
+        "hr1": 7121,
+        "hr2": 7039
+      },
+      {
+        "starId1": 91754,
+        "starId2": 93213,
+        "hr1": 7039,
+        "hr2": 7194
+      },
+      {
+        "starId1": 93213,
+        "starId2": 93569,
+        "hr1": 7194,
+        "hr2": 7234
+      },
+      {
+        "starId1": 93569,
+        "starId2": 93213,
+        "hr1": 7234,
+        "hr2": 7194
+      },
+      {
+        "starId1": 93213,
+        "starId2": 91754,
+        "hr1": 7194,
+        "hr2": 7039
+      },
+      {
+        "starId1": 91754,
+        "starId2": 90217,
+        "hr1": 7039,
+        "hr2": 6913
+      },
+      {
+        "starId1": 90217,
+        "starId2": 89653,
+        "hr1": 6913,
+        "hr2": 6859
+      },
+      {
+        "starId1": 89653,
+        "starId2": 88361,
+        "hr1": 6859,
+        "hr2": 6746
+      },
+      {
+        "starId1": 88361,
+        "starId2": 89653,
+        "hr1": 6746,
+        "hr2": 6859
+      },
+      {
+        "starId1": 89653,
+        "starId2": 89906,
+        "hr1": 6859,
+        "hr2": 6879
+      },
+      {
+        "starId1": 89906,
+        "starId2": 89364,
+        "hr1": 6879,
+        "hr2": 6832
+      }
+    ]
+  },
+  {
+    "id": "Sco",
+    "name": "Scorpius",
+    "genitive": "Scorpii",
+    "englishName": "Scorpion",
+    "area": 497,
+    "raCenter": 253.5,
+    "decCenter": -30.7,
+    "brightestStar": "Antares",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        78581,
+        79870,
+        78165,
+        79870,
+        78029,
+        79870,
+        80519,
+        81020,
+        82144,
+        82263,
+        82477,
+        83885,
+        85965,
+        86804,
+        86403,
+        85665,
+        85436
+      ]
+    ],
+    "starIds": [
+      78581,
+      79870,
+      78165,
+      78029,
+      80519,
+      81020,
+      82144,
+      82263,
+      82477,
+      83885,
+      85965,
+      86804,
+      86403,
+      85665,
+      85436
+    ],
+    "lineSegments": [
+      {
+        "starId1": 78581,
+        "starId2": 79870,
+        "hr1": 5985,
+        "hr2": 6084
+      },
+      {
+        "starId1": 79870,
+        "starId2": 78165,
+        "hr1": 6084,
+        "hr2": 5953
+      },
+      {
+        "starId1": 78165,
+        "starId2": 79870,
+        "hr1": 5953,
+        "hr2": 6084
+      },
+      {
+        "starId1": 79870,
+        "starId2": 78029,
+        "hr1": 6084,
+        "hr2": 5944
+      },
+      {
+        "starId1": 78029,
+        "starId2": 79870,
+        "hr1": 5944,
+        "hr2": 6084
+      },
+      {
+        "starId1": 79870,
+        "starId2": 80519,
+        "hr1": 6084,
+        "hr2": 6134
+      },
+      {
+        "starId1": 80519,
+        "starId2": 81020,
+        "hr1": 6134,
+        "hr2": 6165
+      },
+      {
+        "starId1": 81020,
+        "starId2": 82144,
+        "hr1": 6165,
+        "hr2": 6241
+      },
+      {
+        "starId1": 82144,
+        "starId2": 82263,
+        "hr1": 6241,
+        "hr2": 6247
+      },
+      {
+        "starId1": 82263,
+        "starId2": 82477,
+        "hr1": 6247,
+        "hr2": 6271
+      },
+      {
+        "starId1": 82477,
+        "starId2": 83885,
+        "hr1": 6271,
+        "hr2": 6380
+      },
+      {
+        "starId1": 83885,
+        "starId2": 85965,
+        "hr1": 6380,
+        "hr2": 6553
+      },
+      {
+        "starId1": 85965,
+        "starId2": 86804,
+        "hr1": 6553,
+        "hr2": 6615
+      },
+      {
+        "starId1": 86804,
+        "starId2": 86403,
+        "hr1": 6615,
+        "hr2": 6580
+      },
+      {
+        "starId1": 86403,
+        "starId2": 85665,
+        "hr1": 6580,
+        "hr2": 6527
+      },
+      {
+        "starId1": 85665,
+        "starId2": 85436,
+        "hr1": 6527,
+        "hr2": 6508
+      }
+    ]
+  },
+  {
+    "id": "Scl",
+    "name": "Sculptor",
+    "genitive": "Sculptoris",
+    "englishName": "Sculptor",
+    "area": 475,
+    "raCenter": 6,
+    "decCenter": -32.1,
+    "brightestStar": "Alp Scl",
+    "family": "La Caille",
+    "polylines": [
+      [
+        4567,
+        117085,
+        114740,
+        115865
+      ]
+    ],
+    "starIds": [
+      4567,
+      117085,
+      114740,
+      115865
+    ],
+    "lineSegments": [
+      {
+        "starId1": 4567,
+        "starId2": 117085,
+        "hr1": 280,
+        "hr2": 9016
+      },
+      {
+        "starId1": 117085,
+        "starId2": 114740,
+        "hr1": 9016,
+        "hr2": 8863
+      },
+      {
+        "starId1": 114740,
+        "starId2": 115865,
+        "hr1": 8863,
+        "hr2": 8937
+      }
+    ]
+  },
+  {
+    "id": "Sct",
+    "name": "Scutum",
+    "genitive": "Scuti",
+    "englishName": "Shield",
+    "area": 109,
+    "raCenter": 280.5,
+    "decCenter": -9.9,
+    "brightestStar": "Alp Sct",
+    "family": "Hercules",
+    "polylines": [
+      [
+        91888,
+        90835,
+        90315,
+        90835,
+        89856
+      ]
+    ],
+    "starIds": [
+      91888,
+      90835,
+      90315,
+      89856
+    ],
+    "lineSegments": [
+      {
+        "starId1": 91888,
+        "starId2": 90835,
+        "hr1": 7063,
+        "hr2": 6973
+      },
+      {
+        "starId1": 90835,
+        "starId2": 90315,
+        "hr1": 6973,
+        "hr2": 6930
+      },
+      {
+        "starId1": 90315,
+        "starId2": 90835,
+        "hr1": 6930,
+        "hr2": 6973
+      },
+      {
+        "starId1": 90835,
+        "starId2": 89856,
+        "hr1": 6973,
+        "hr2": 6884
+      }
+    ]
+  },
+  {
+    "id": "Ser",
+    "name": "Serpens",
+    "genitive": "Serpentis",
+    "englishName": "Serpent",
+    "area": 637,
+    "raCenter": 255,
+    "decCenter": 6,
+    "brightestStar": "Unukalhai",
+    "family": "Hercules",
+    "polylines": [
+      [
+        84622,
+        85998,
+        86298,
+        89684,
+        92659
+      ],
+      [
+        76997,
+        77214,
+        77836,
+        76997,
+        76044,
+        76835,
+        77386,
+        77280,
+        84622
+      ]
+    ],
+    "starIds": [
+      84622,
+      85998,
+      86298,
+      89684,
+      92659,
+      76997,
+      77214,
+      77836,
+      76044,
+      76835,
+      77386,
+      77280
+    ],
+    "lineSegments": [
+      {
+        "starId1": 84622,
+        "starId2": 85998,
+        "hr1": 6446,
+        "hr2": 6561
+      },
+      {
+        "starId1": 85998,
+        "starId2": 86298,
+        "hr1": 6561,
+        "hr2": 6581
+      },
+      {
+        "starId1": 86298,
+        "starId2": 89684,
+        "hr1": 6581,
+        "hr2": 6869
+      },
+      {
+        "starId1": 89684,
+        "starId2": 92659,
+        "hr1": 6869,
+        "hr2": 7142
+      },
+      {
+        "starId1": 76997,
+        "starId2": 77214,
+        "hr1": 5867,
+        "hr2": 5879
+      },
+      {
+        "starId1": 77214,
+        "starId2": 77836,
+        "hr1": 5879,
+        "hr2": 5933
+      },
+      {
+        "starId1": 77836,
+        "starId2": 76997,
+        "hr1": 5933,
+        "hr2": 5867
+      },
+      {
+        "starId1": 76997,
+        "starId2": 76044,
+        "hr1": 5867,
+        "hr2": 5788
+      },
+      {
+        "starId1": 76044,
+        "starId2": 76835,
+        "hr1": 5788,
+        "hr2": 5854
+      },
+      {
+        "starId1": 76835,
+        "starId2": 77386,
+        "hr1": 5854,
+        "hr2": 5892
+      },
+      {
+        "starId1": 77386,
+        "starId2": 77280,
+        "hr1": 5892,
+        "hr2": 5881
+      },
+      {
+        "starId1": 77280,
+        "starId2": 84622,
+        "hr1": 5881,
+        "hr2": 6446
+      }
+    ]
+  },
+  {
+    "id": "Sex",
+    "name": "Sextans",
+    "genitive": "Sextantis",
+    "englishName": "Sextant",
+    "area": 314,
+    "raCenter": 154.5,
+    "decCenter": -1.6,
+    "brightestStar": "Alp Sex",
+    "family": "Hercules",
+    "polylines": [
+      [
+        51290,
+        49500,
+        48300
+      ]
+    ],
+    "starIds": [
+      51290,
+      49500,
+      48300
+    ],
+    "lineSegments": [
+      {
+        "starId1": 51290,
+        "starId2": 49500,
+        "hr1": 4119,
+        "hr2": 3981
+      },
+      {
+        "starId1": 49500,
+        "starId2": 48300,
+        "hr1": 3981,
+        "hr2": 3909
+      }
+    ]
+  },
+  {
+    "id": "Tau",
+    "name": "Taurus",
+    "genitive": "Tauri",
+    "englishName": "Bull",
+    "area": 797,
+    "raCenter": 70.5,
+    "decCenter": 16,
+    "brightestStar": "Aldebaran",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        26386,
+        21368,
+        20155,
+        18677,
+        15861,
+        18677,
+        20155,
+        20405,
+        20837,
+        25364
+      ]
+    ],
+    "starIds": [
+      26386,
+      21368,
+      20155,
+      18677,
+      15861,
+      20405,
+      20837,
+      25364
+    ],
+    "lineSegments": [
+      {
+        "starId1": 26386,
+        "starId2": 21368,
+        "hr1": 1910,
+        "hr2": 1457
+      },
+      {
+        "starId1": 21368,
+        "starId2": 20155,
+        "hr1": 1457,
+        "hr2": 1346
+      },
+      {
+        "starId1": 20155,
+        "starId2": 18677,
+        "hr1": 1346,
+        "hr2": 1239
+      },
+      {
+        "starId1": 18677,
+        "starId2": 15861,
+        "hr1": 1239,
+        "hr2": 1030
+      },
+      {
+        "starId1": 15861,
+        "starId2": 18677,
+        "hr1": 1030,
+        "hr2": 1239
+      },
+      {
+        "starId1": 18677,
+        "starId2": 20155,
+        "hr1": 1239,
+        "hr2": 1346
+      },
+      {
+        "starId1": 20155,
+        "starId2": 20405,
+        "hr1": 1346,
+        "hr2": 1373
+      },
+      {
+        "starId1": 20405,
+        "starId2": 20837,
+        "hr1": 1373,
+        "hr2": 1409
+      },
+      {
+        "starId1": 20837,
+        "starId2": 25364,
+        "hr1": 1409,
+        "hr2": 1791
+      }
+    ]
+  },
+  {
+    "id": "Tel",
+    "name": "Telescopium",
+    "genitive": "Telescopii",
+    "englishName": "Telescope",
+    "area": 252,
+    "raCenter": 289.5,
+    "decCenter": -51,
+    "brightestStar": "Alp Tel",
+    "family": "La Caille",
+    "polylines": [
+      [
+        88835,
+        90143,
+        90288
+      ]
+    ],
+    "starIds": [
+      88835,
+      90143,
+      90288
+    ],
+    "lineSegments": [
+      {
+        "starId1": 88835,
+        "starId2": 90143,
+        "hr1": 6783,
+        "hr2": 6897
+      },
+      {
+        "starId1": 90143,
+        "starId2": 90288,
+        "hr1": 6897,
+        "hr2": 6905
+      }
+    ]
+  },
+  {
+    "id": "Tri",
+    "name": "Triangulum",
+    "genitive": "Trianguli",
+    "englishName": "Triangle",
+    "area": 132,
+    "raCenter": 33,
+    "decCenter": 31.5,
+    "brightestStar": "Bet Tri",
+    "family": "Perseus",
+    "polylines": [
+      [
+        10041,
+        10645,
+        8777,
+        10041
+      ]
+    ],
+    "starIds": [
+      10041,
+      10645,
+      8777
+    ],
+    "lineSegments": [
+      {
+        "starId1": 10041,
+        "starId2": 10645,
+        "hr1": 622,
+        "hr2": 664
+      },
+      {
+        "starId1": 10645,
+        "starId2": 8777,
+        "hr1": 664,
+        "hr2": 544
+      },
+      {
+        "starId1": 8777,
+        "starId2": 10041,
+        "hr1": 544,
+        "hr2": 622
+      }
+    ]
+  },
+  {
+    "id": "TrA",
+    "name": "Triangulum Australe",
+    "genitive": "Trianguli Australis",
+    "englishName": "Southern Triangle",
+    "area": 110,
+    "raCenter": 241.5,
+    "decCenter": -65.4,
+    "brightestStar": "Atria",
+    "family": "Hercules",
+    "polylines": [
+      [
+        82022,
+        74717,
+        76206,
+        77716,
+        82022
+      ]
+    ],
+    "starIds": [
+      82022,
+      74717,
+      76206,
+      77716
+    ],
+    "lineSegments": [
+      {
+        "starId1": 82022,
+        "starId2": 74717,
+        "hr1": 6217,
+        "hr2": 5671
+      },
+      {
+        "starId1": 74717,
+        "starId2": 76206,
+        "hr1": 5671,
+        "hr2": 5771
+      },
+      {
+        "starId1": 76206,
+        "starId2": 77716,
+        "hr1": 5771,
+        "hr2": 5897
+      },
+      {
+        "starId1": 77716,
+        "starId2": 82022,
+        "hr1": 5897,
+        "hr2": 6217
+      }
+    ]
+  },
+  {
+    "id": "Tuc",
+    "name": "Tucana",
+    "genitive": "Tucanae",
+    "englishName": "Toucan",
+    "area": 295,
+    "raCenter": 357,
+    "decCenter": -65.8,
+    "brightestStar": "Alp Tuc",
+    "family": "Bayer",
+    "polylines": [
+      [
+        110492,
+        109784,
+        114634,
+        117954,
+        1595,
+        2478,
+        114634
+      ]
+    ],
+    "starIds": [
+      110492,
+      109784,
+      114634,
+      117954,
+      1595,
+      2478
+    ],
+    "lineSegments": [
+      {
+        "starId1": 110492,
+        "starId2": 109784,
+        "hr1": 8540,
+        "hr2": 8502
+      },
+      {
+        "starId1": 109784,
+        "starId2": 114634,
+        "hr1": 8502,
+        "hr2": 8848
+      },
+      {
+        "starId1": 114634,
+        "starId2": 117954,
+        "hr1": 8848,
+        "hr2": 9076
+      },
+      {
+        "starId1": 117954,
+        "starId2": 1595,
+        "hr1": 9076,
+        "hr2": 77
+      },
+      {
+        "starId1": 1595,
+        "starId2": 2478,
+        "hr1": 77,
+        "hr2": 126
+      },
+      {
+        "starId1": 2478,
+        "starId2": 114634,
+        "hr1": 126,
+        "hr2": 8848
+      }
+    ]
+  },
+  {
+    "id": "UMa",
+    "name": "Ursa Major",
+    "genitive": "Ursae Majoris",
+    "englishName": "Great Bear",
+    "area": 1280,
+    "raCenter": 160.5,
+    "decCenter": 55.4,
+    "brightestStar": "Alioth",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        67088,
+        65173,
+        62757,
+        59592,
+        57828,
+        57226,
+        55055,
+        118742,
+        55055,
+        57226,
+        54380,
+        50655,
+        50230,
+        50655,
+        54380,
+        57226,
+        57828,
+        53754,
+        53905,
+        59592,
+        53905,
+        46600,
+        41586,
+        48182,
+        53754,
+        48182,
+        46720,
+        44343,
+        44000
+      ]
+    ],
+    "starIds": [
+      67088,
+      65173,
+      62757,
+      59592,
+      57828,
+      57226,
+      55055,
+      118742,
+      54380,
+      50655,
+      50230,
+      53754,
+      53905,
+      46600,
+      41586,
+      48182,
+      46720,
+      44343,
+      44000
+    ],
+    "lineSegments": [
+      {
+        "starId1": 67088,
+        "starId2": 65173,
+        "hr1": 5191,
+        "hr2": 5054
+      },
+      {
+        "starId1": 65173,
+        "starId2": 62757,
+        "hr1": 5054,
+        "hr2": 4905
+      },
+      {
+        "starId1": 62757,
+        "starId2": 59592,
+        "hr1": 4905,
+        "hr2": 4660
+      },
+      {
+        "starId1": 59592,
+        "starId2": 57828,
+        "hr1": 4660,
+        "hr2": 4554
+      },
+      {
+        "starId1": 57828,
+        "starId2": 57226,
+        "hr1": 4554,
+        "hr2": 4518
+      },
+      {
+        "starId1": 57226,
+        "starId2": 55055,
+        "hr1": 4518,
+        "hr2": 4377
+      },
+      {
+        "starId1": 55055,
+        "starId2": 118742,
+        "hr1": 4377,
+        "hr2": 4375
+      },
+      {
+        "starId1": 118742,
+        "starId2": 55055,
+        "hr1": 4375,
+        "hr2": 4377
+      },
+      {
+        "starId1": 55055,
+        "starId2": 57226,
+        "hr1": 4377,
+        "hr2": 4518
+      },
+      {
+        "starId1": 57226,
+        "starId2": 54380,
+        "hr1": 4518,
+        "hr2": 4335
+      },
+      {
+        "starId1": 54380,
+        "starId2": 50655,
+        "hr1": 4335,
+        "hr2": 4069
+      },
+      {
+        "starId1": 50655,
+        "starId2": 50230,
+        "hr1": 4069,
+        "hr2": 4033
+      },
+      {
+        "starId1": 50230,
+        "starId2": 50655,
+        "hr1": 4033,
+        "hr2": 4069
+      },
+      {
+        "starId1": 50655,
+        "starId2": 54380,
+        "hr1": 4069,
+        "hr2": 4335
+      },
+      {
+        "starId1": 54380,
+        "starId2": 57226,
+        "hr1": 4335,
+        "hr2": 4518
+      },
+      {
+        "starId1": 57226,
+        "starId2": 57828,
+        "hr1": 4518,
+        "hr2": 4554
+      },
+      {
+        "starId1": 57828,
+        "starId2": 53754,
+        "hr1": 4554,
+        "hr2": 4295
+      },
+      {
+        "starId1": 53754,
+        "starId2": 53905,
+        "hr1": 4295,
+        "hr2": 4301
+      },
+      {
+        "starId1": 53905,
+        "starId2": 59592,
+        "hr1": 4301,
+        "hr2": 4660
+      },
+      {
+        "starId1": 59592,
+        "starId2": 53905,
+        "hr1": 4660,
+        "hr2": 4301
+      },
+      {
+        "starId1": 53905,
+        "starId2": 46600,
+        "hr1": 4301,
+        "hr2": 3757
+      },
+      {
+        "starId1": 46600,
+        "starId2": 41586,
+        "hr1": 3757,
+        "hr2": 3323
+      },
+      {
+        "starId1": 41586,
+        "starId2": 48182,
+        "hr1": 3323,
+        "hr2": 3888
+      },
+      {
+        "starId1": 48182,
+        "starId2": 53754,
+        "hr1": 3888,
+        "hr2": 4295
+      },
+      {
+        "starId1": 53754,
+        "starId2": 48182,
+        "hr1": 4295,
+        "hr2": 3888
+      },
+      {
+        "starId1": 48182,
+        "starId2": 46720,
+        "hr1": 3888,
+        "hr2": 3775
+      },
+      {
+        "starId1": 46720,
+        "starId2": 44343,
+        "hr1": 3775,
+        "hr2": 3594
+      },
+      {
+        "starId1": 44343,
+        "starId2": 44000,
+        "hr1": 3594,
+        "hr2": 3569
+      }
+    ]
+  },
+  {
+    "id": "UMi",
+    "name": "Ursa Minor",
+    "genitive": "Ursae Minoris",
+    "englishName": "Lesser Bear",
+    "area": 256,
+    "raCenter": 225,
+    "decCenter": 77.8,
+    "brightestStar": "Polaris",
+    "family": "Ursa Major",
+    "polylines": [
+      [
+        11734,
+        85560,
+        81830,
+        76819,
+        72380,
+        74868,
+        79580,
+        76819
+      ]
+    ],
+    "starIds": [
+      11734,
+      85560,
+      81830,
+      76819,
+      72380,
+      74868,
+      79580
+    ],
+    "lineSegments": [
+      {
+        "starId1": 11734,
+        "starId2": 85560,
+        "hr1": 424,
+        "hr2": 6789
+      },
+      {
+        "starId1": 85560,
+        "starId2": 81830,
+        "hr1": 6789,
+        "hr2": 6322
+      },
+      {
+        "starId1": 81830,
+        "starId2": 76819,
+        "hr1": 6322,
+        "hr2": 5903
+      },
+      {
+        "starId1": 76819,
+        "starId2": 72380,
+        "hr1": 5903,
+        "hr2": 5563
+      },
+      {
+        "starId1": 72380,
+        "starId2": 74868,
+        "hr1": 5563,
+        "hr2": 5735
+      },
+      {
+        "starId1": 74868,
+        "starId2": 79580,
+        "hr1": 5735,
+        "hr2": 6116
+      },
+      {
+        "starId1": 79580,
+        "starId2": 76819,
+        "hr1": 6116,
+        "hr2": 5903
+      }
+    ]
+  },
+  {
+    "id": "Vel",
+    "name": "Vela",
+    "genitive": "Velorum",
+    "englishName": "Sails",
+    "area": 500,
+    "raCenter": 144,
+    "decCenter": -47.2,
+    "brightestStar": "Alsephina",
+    "family": "Heavenly Waters",
+    "polylines": [
+      [
+        42794,
+        45809,
+        48635,
+        52575,
+        51837,
+        50050,
+        46518,
+        44689,
+        42765,
+        42193
+      ]
+    ],
+    "starIds": [
+      42794,
+      45809,
+      48635,
+      52575,
+      51837,
+      50050,
+      46518,
+      44689,
+      42765,
+      42193
+    ],
+    "lineSegments": [
+      {
+        "starId1": 42794,
+        "starId2": 45809,
+        "hr1": 3485,
+        "hr2": 3734
+      },
+      {
+        "starId1": 45809,
+        "starId2": 48635,
+        "hr1": 3734,
+        "hr2": 3940
+      },
+      {
+        "starId1": 48635,
+        "starId2": 52575,
+        "hr1": 3940,
+        "hr2": 4216
+      },
+      {
+        "starId1": 52575,
+        "starId2": 51837,
+        "hr1": 4216,
+        "hr2": 4167
+      },
+      {
+        "starId1": 51837,
+        "starId2": 50050,
+        "hr1": 4167,
+        "hr2": 4023
+      },
+      {
+        "starId1": 50050,
+        "starId2": 46518,
+        "hr1": 4023,
+        "hr2": 3786
+      },
+      {
+        "starId1": 46518,
+        "starId2": 44689,
+        "hr1": 3786,
+        "hr2": 3634
+      },
+      {
+        "starId1": 44689,
+        "starId2": 42765,
+        "hr1": 3634,
+        "hr2": 3477
+      },
+      {
+        "starId1": 42765,
+        "starId2": 42193,
+        "hr1": 3477,
+        "hr2": 3426
+      }
+    ]
+  },
+  {
+    "id": "Vir",
+    "name": "Virgo",
+    "genitive": "Virginis",
+    "englishName": "Maiden",
+    "area": 1294,
+    "raCenter": 201,
+    "decCenter": -4.2,
+    "brightestStar": "Spica",
+    "family": "Zodiacal",
+    "polylines": [
+      [
+        65269,
+        64034,
+        118838,
+        62890,
+        66040,
+        65269
+      ]
+    ],
+    "starIds": [
+      65269,
+      64034,
+      118838,
+      62890,
+      66040
+    ],
+    "lineSegments": [
+      {
+        "starId1": 65269,
+        "starId2": 64034,
+        "hr1": 5056,
+        "hr2": 4963
+      },
+      {
+        "starId1": 64034,
+        "starId2": 118838,
+        "hr1": 4963,
+        "hr2": 4826
+      },
+      {
+        "starId1": 118838,
+        "starId2": 62890,
+        "hr1": 4826,
+        "hr2": 4910
+      },
+      {
+        "starId1": 62890,
+        "starId2": 66040,
+        "hr1": 4910,
+        "hr2": 5107
+      },
+      {
+        "starId1": 66040,
+        "starId2": 65269,
+        "hr1": 5107,
+        "hr2": 5056
+      }
+    ]
+  },
+  {
+    "id": "Vol",
+    "name": "Volans",
+    "genitive": "Volantis",
+    "englishName": "Flying Fish",
+    "area": 141,
+    "raCenter": 117,
+    "decCenter": -69.8,
+    "brightestStar": "Bet Vol",
+    "family": "Bayer",
+    "polylines": [
+      [
+        44254,
+        41195,
+        39681,
+        35132,
+        34389,
+        37397,
+        39681
+      ]
+    ],
+    "starIds": [
+      44254,
+      41195,
+      39681,
+      35132,
+      34389,
+      37397
+    ],
+    "lineSegments": [
+      {
+        "starId1": 44254,
+        "starId2": 41195,
+        "hr1": 3615,
+        "hr2": 3347
+      },
+      {
+        "starId1": 41195,
+        "starId2": 39681,
+        "hr1": 3347,
+        "hr2": 3223
+      },
+      {
+        "starId1": 39681,
+        "starId2": 35132,
+        "hr1": 3223,
+        "hr2": 2803
+      },
+      {
+        "starId1": 35132,
+        "starId2": 34389,
+        "hr1": 2803,
+        "hr2": 2736
+      },
+      {
+        "starId1": 34389,
+        "starId2": 37397,
+        "hr1": 2736,
+        "hr2": 3024
+      },
+      {
+        "starId1": 37397,
+        "starId2": 39681,
+        "hr1": 3024,
+        "hr2": 3223
+      }
+    ]
+  },
+  {
+    "id": "Vul",
+    "name": "Vulpecula",
+    "genitive": "Vulpeculae",
+    "englishName": "Fox",
+    "area": 268,
+    "raCenter": 303,
+    "decCenter": 24.5,
+    "brightestStar": "Anser",
+    "family": "Hercules",
+    "polylines": [
+      [
+        94408,
+        95473,
+        97575
+      ]
+    ],
+    "starIds": [
+      94408,
+      95473,
+      97575
+    ],
+    "lineSegments": [
+      {
+        "starId1": 94408,
+        "starId2": 95473,
+        "hr1": 7306,
+        "hr2": 7405
+      },
+      {
+        "starId1": 95473,
+        "starId2": 97575,
+        "hr1": 7405,
+        "hr2": 7592
+      }
+    ]
+  }
+]

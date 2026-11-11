@@ -1,0 +1,2103 @@
+[
+  {
+    "id": "Ori_fwd",
+    "constellationId": "Ori",
+    "name": "Orion (Hourglass) (Normal)",
+    "description": "Betelgeuse to Bellatrix across to Rigel, Saiph and returning to Betelgeuse",
+    "orderedStarIds": [
+      27919,
+      25273,
+      24378,
+      27298,
+      27919
+    ],
+    "orderedHrIds": [
+      2061,
+      1790,
+      1713,
+      2004,
+      2061
+    ],
+    "starNames": [
+      "Betelgeuse",
+      "Bellatrix",
+      "Rigel",
+      "Saiph",
+      "Betelgeuse"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 88.79293,
+        "dec": 7.40706
+      },
+      {
+        "ra": 81.28276,
+        "dec": 6.3497
+      },
+      {
+        "ra": 78.63447,
+        "dec": -8.20164
+      },
+      {
+        "ra": 86.93912,
+        "dec": -9.66961
+      },
+      {
+        "ra": 88.79293,
+        "dec": 7.40706
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 3.9048540729861685,
+        "y": 6.785056515135216
+      },
+      {
+        "x": -3.6059935744018508,
+        "y": 5.71049096847452
+      },
+      {
+        "x": -6.290033587682356,
+        "y": -8.993349645250813
+      },
+      {
+        "x": 2.055794240515836,
+        "y": -10.460126297129992
+      },
+      {
+        "x": 3.9048540729861685,
+        "y": 6.785056515135216
+      }
+    ],
+    "encodedSymbols": [
+      "LL:G",
+      "LL:S",
+      "LL:G"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "L:G"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Ori_rev",
+    "constellationId": "Ori",
+    "name": "Orion (Hourglass) (Reversed)",
+    "description": "Betelgeuse to Bellatrix across to Rigel, Saiph and returning to Betelgeuse",
+    "orderedStarIds": [
+      27919,
+      27298,
+      24378,
+      25273,
+      27919
+    ],
+    "orderedHrIds": [
+      2061,
+      2004,
+      1713,
+      1790,
+      2061
+    ],
+    "starNames": [
+      "Betelgeuse",
+      "Saiph",
+      "Rigel",
+      "Bellatrix",
+      "Betelgeuse"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 88.79293,
+        "dec": 7.40706
+      },
+      {
+        "ra": 86.93912,
+        "dec": -9.66961
+      },
+      {
+        "ra": 78.63447,
+        "dec": -8.20164
+      },
+      {
+        "ra": 81.28276,
+        "dec": 6.3497
+      },
+      {
+        "ra": 88.79293,
+        "dec": 7.40706
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 3.9048540729861685,
+        "y": 6.785056515135216
+      },
+      {
+        "x": 2.055794240515836,
+        "y": -10.460126297129992
+      },
+      {
+        "x": -6.290033587682356,
+        "y": -8.993349645250813
+      },
+      {
+        "x": -3.6059935744018508,
+        "y": 5.71049096847452
+      },
+      {
+        "x": 3.9048540729861685,
+        "y": 6.785056515135216
+      }
+    ],
+    "encodedSymbols": [
+      "RR:S",
+      "RR:G",
+      "RR:S"
+    ],
+    "toleranceAlternates": {
+      "2": [
+        "R:S"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "UMa_fwd",
+    "constellationId": "UMa",
+    "name": "Ursa Major (Big Dipper) (Normal)",
+    "description": "The 7 prominent stars of the Big Dipper / Plough from handle Alkaid to pointer Dubhe",
+    "orderedStarIds": [
+      67088,
+      65173,
+      62757,
+      59592,
+      57828,
+      53754,
+      53905
+    ],
+    "orderedHrIds": [
+      5191,
+      5054,
+      4905,
+      4660,
+      4554,
+      4295,
+      4301
+    ],
+    "starNames": [
+      "Alkaid",
+      "Mizar",
+      "Alioth",
+      "Megrez",
+      "Phecda",
+      "Merak",
+      "Dubhe"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 206.88531,
+        "dec": 49.31327
+      },
+      {
+        "ra": 200.9812,
+        "dec": 54.92536
+      },
+      {
+        "ra": 193.50708,
+        "dec": 55.95982
+      },
+      {
+        "ra": 183.85629,
+        "dec": 57.03262
+      },
+      {
+        "ra": 178.45752,
+        "dec": 53.69476
+      },
+      {
+        "ra": 165.46016,
+        "dec": 56.38243
+      },
+      {
+        "ra": 165.93233,
+        "dec": 61.75103
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 13.755819897575021,
+        "y": -5.300501761457527
+      },
+      {
+        "x": 8.612661844540646,
+        "y": -0.6615511985155568
+      },
+      {
+        "x": 4.206953124756873,
+        "y": -0.3254437700826097
+      },
+      {
+        "x": -1.1613142355972998,
+        "y": 0.5365258370717677
+      },
+      {
+        "x": -4.465267886583628,
+        "y": -2.5845963417169497
+      },
+      {
+        "x": -11.34495506714264,
+        "y": 1.5791430070377472
+      },
+      {
+        "x": -9.490764406704333,
+        "y": 6.736135168474785
+      }
+    ],
+    "encodedSymbols": [
+      "L:S",
+      "S:M",
+      "L:M",
+      "RR:G",
+      "RR:S"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "L:M"
+      ],
+      "1": [
+        "S:G"
+      ],
+      "2": [
+        "L:S"
+      ],
+      "4": [
+        "RR:M"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "UMa_rev",
+    "constellationId": "UMa",
+    "name": "Ursa Major (Big Dipper) (Reversed)",
+    "description": "The 7 prominent stars of the Big Dipper / Plough from handle Alkaid to pointer Dubhe",
+    "orderedStarIds": [
+      53905,
+      53754,
+      57828,
+      59592,
+      62757,
+      65173,
+      67088
+    ],
+    "orderedHrIds": [
+      4301,
+      4295,
+      4554,
+      4660,
+      4905,
+      5054,
+      5191
+    ],
+    "starNames": [
+      "Dubhe",
+      "Merak",
+      "Phecda",
+      "Megrez",
+      "Alioth",
+      "Mizar",
+      "Alkaid"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 165.93233,
+        "dec": 61.75103
+      },
+      {
+        "ra": 165.46016,
+        "dec": 56.38243
+      },
+      {
+        "ra": 178.45752,
+        "dec": 53.69476
+      },
+      {
+        "ra": 183.85629,
+        "dec": 57.03262
+      },
+      {
+        "ra": 193.50708,
+        "dec": 55.95982
+      },
+      {
+        "ra": 200.9812,
+        "dec": 54.92536
+      },
+      {
+        "ra": 206.88531,
+        "dec": 49.31327
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -9.490764406704335,
+        "y": 6.736135168474796
+      },
+      {
+        "x": -11.344955067142639,
+        "y": 1.5791430070377568
+      },
+      {
+        "x": -4.465267886583629,
+        "y": -2.5845963417169404
+      },
+      {
+        "x": -1.1613142355972998,
+        "y": 0.5365258370717773
+      },
+      {
+        "x": 4.206953124756873,
+        "y": -0.32544377008260333
+      },
+      {
+        "x": 8.612661844540646,
+        "y": -0.6615511985155471
+      },
+      {
+        "x": 13.755819897575021,
+        "y": -5.300501761457524
+      }
+    ],
+    "encodedSymbols": [
+      "LL:G",
+      "LL:S",
+      "R:M",
+      "S:M",
+      "R:G"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "LL:M"
+      ],
+      "3": [
+        "S:S"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "UMi_fwd",
+    "constellationId": "UMi",
+    "name": "Ursa Minor (Little Dipper) (Normal)",
+    "description": "From North Star Polaris through handle to bowl stars Kochab and Pherkad",
+    "orderedStarIds": [
+      11734,
+      85560,
+      81830,
+      76819,
+      72380,
+      74868
+    ],
+    "orderedHrIds": [
+      424,
+      6789,
+      6322,
+      5903,
+      5563,
+      5735
+    ],
+    "starNames": [
+      "Polaris",
+      "Yildun",
+      "Eps UMi",
+      "Zet UMi",
+      "Kochab",
+      "Pherkad"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 37.94625,
+        "dec": 89.26411
+      },
+      {
+        "ra": 263.05377,
+        "dec": 86.58646
+      },
+      {
+        "ra": 251.49238,
+        "dec": 82.03726
+      },
+      {
+        "ra": 236.01449,
+        "dec": 77.79449
+      },
+      {
+        "ra": 222.67658,
+        "dec": 74.15551
+      },
+      {
+        "ra": 230.18224,
+        "dec": 71.83402
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 0.21198467887213884,
+        "y": 10.102434932783432
+      },
+      {
+        "x": 1.6450494059384857,
+        "y": 6.3223867470460355
+      },
+      {
+        "x": 2.3321605649884845,
+        "y": 1.6781160155824457
+      },
+      {
+        "x": 0.33599033584474364,
+        "y": -2.909468222559738
+      },
+      {
+        "x": -3.209701838111314,
+        "y": -6.2593549797691255
+      },
+      {
+        "x": -1.3384247924048283,
+        "y": -8.895878225439366
+      }
+    ],
+    "encodedSymbols": [
+      "S:M",
+      "R:M",
+      "R:M",
+      "LL:S"
+    ],
+    "toleranceAlternates": {
+      "2": [
+        "S:M"
+      ],
+      "3": [
+        "LL:M"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "UMi_rev",
+    "constellationId": "UMi",
+    "name": "Ursa Minor (Little Dipper) (Reversed)",
+    "description": "From North Star Polaris through handle to bowl stars Kochab and Pherkad",
+    "orderedStarIds": [
+      74868,
+      72380,
+      76819,
+      81830,
+      85560,
+      11734
+    ],
+    "orderedHrIds": [
+      5735,
+      5563,
+      5903,
+      6322,
+      6789,
+      424
+    ],
+    "starNames": [
+      "Pherkad",
+      "Kochab",
+      "Zet UMi",
+      "Eps UMi",
+      "Yildun",
+      "Polaris"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 230.18224,
+        "dec": 71.83402
+      },
+      {
+        "ra": 222.67658,
+        "dec": 74.15551
+      },
+      {
+        "ra": 236.01449,
+        "dec": 77.79449
+      },
+      {
+        "ra": 251.49238,
+        "dec": 82.03726
+      },
+      {
+        "ra": 263.05377,
+        "dec": 86.58646
+      },
+      {
+        "ra": 37.94625,
+        "dec": 89.26411
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -1.3384247924048283,
+        "y": -8.895878225439366
+      },
+      {
+        "x": -3.209701838111314,
+        "y": -6.2593549797691255
+      },
+      {
+        "x": 0.33599033584474364,
+        "y": -2.909468222559738
+      },
+      {
+        "x": 2.3321605649884845,
+        "y": 1.6781160155824457
+      },
+      {
+        "x": 1.6450494059384857,
+        "y": 6.3223867470460355
+      },
+      {
+        "x": 0.21198467887213884,
+        "y": 10.102434932783432
+      }
+    ],
+    "encodedSymbols": [
+      "RR:G",
+      "L:M",
+      "L:M",
+      "S:M"
+    ],
+    "toleranceAlternates": {
+      "1": [
+        "S:M"
+      ],
+      "3": [
+        "S:S"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Cas_fwd",
+    "constellationId": "Cas",
+    "name": "Cassiopeia (The W) (Normal)",
+    "description": "The iconic 5-star W-asterism from Caph to Segin",
+    "orderedStarIds": [
+      744,
+      3172,
+      4417,
+      6672,
+      8867
+    ],
+    "orderedHrIds": [
+      21,
+      168,
+      264,
+      403,
+      542
+    ],
+    "starNames": [
+      "Caph",
+      "Schedar",
+      "Cih",
+      "Ruchbah",
+      "Segin"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 2.29331,
+        "dec": 59.14978
+      },
+      {
+        "ra": 10.12674,
+        "dec": 56.53733
+      },
+      {
+        "ra": 14.17714,
+        "dec": 60.71674
+      },
+      {
+        "ra": 21.45324,
+        "dec": 60.23528
+      },
+      {
+        "ra": 28.59876,
+        "dec": 63.6701
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -6.4264674481325725,
+        "y": -0.6060125818396158
+      },
+      {
+        "x": -2.607971849402989,
+        "y": -3.741084433459874
+      },
+      {
+        "x": -0.32762638769702707,
+        "y": 0.3558231064552907
+      },
+      {
+        "x": 3.2777129206713522,
+        "y": 0.03690344593765045
+      },
+      {
+        "x": 6.089500610168734,
+        "y": 3.9704163965225527
+      }
+    ],
+    "encodedSymbols": [
+      "LL:M",
+      "RR:M",
+      "L:M"
+    ],
+    "toleranceAlternates": {
+      "1": [
+        "RR:S",
+        "R:M",
+        "R:S"
+      ],
+      "2": [
+        "L:G",
+        "LL:M",
+        "LL:G"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Cas_rev",
+    "constellationId": "Cas",
+    "name": "Cassiopeia (The W) (Reversed)",
+    "description": "The iconic 5-star W-asterism from Caph to Segin",
+    "orderedStarIds": [
+      8867,
+      6672,
+      4417,
+      3172,
+      744
+    ],
+    "orderedHrIds": [
+      542,
+      403,
+      264,
+      168,
+      21
+    ],
+    "starNames": [
+      "Segin",
+      "Ruchbah",
+      "Cih",
+      "Schedar",
+      "Caph"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 28.59876,
+        "dec": 63.6701
+      },
+      {
+        "ra": 21.45324,
+        "dec": 60.23528
+      },
+      {
+        "ra": 14.17714,
+        "dec": 60.71674
+      },
+      {
+        "ra": 10.12674,
+        "dec": 56.53733
+      },
+      {
+        "ra": 2.29331,
+        "dec": 59.14978
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 6.089500610168734,
+        "y": 3.9704163965225527
+      },
+      {
+        "x": 3.2777129206713522,
+        "y": 0.03690344593765045
+      },
+      {
+        "x": -0.32762638769702707,
+        "y": 0.3558231064552907
+      },
+      {
+        "x": -2.607971849402989,
+        "y": -3.741084433459874
+      },
+      {
+        "x": -6.4264674481325725,
+        "y": -0.6060125818396158
+      }
+    ],
+    "encodedSymbols": [
+      "R:S",
+      "LL:M",
+      "RR:M"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "R:M",
+        "RR:S",
+        "RR:M"
+      ],
+      "1": [
+        "LL:G",
+        "L:M",
+        "L:G"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Cyg_fwd",
+    "constellationId": "Cyg",
+    "name": "Cygnus (Northern Cross) (Normal)",
+    "description": "The Northern Cross backbone from Albireo to Sadr and Deneb, crossed with Aljanah and Fawaris",
+    "orderedStarIds": [
+      95648,
+      100128,
+      101767,
+      102157,
+      96858
+    ],
+    "orderedHrIds": [
+      7417,
+      7796,
+      7924,
+      7949,
+      7528
+    ],
+    "starNames": [
+      "Albireo",
+      "Sadr",
+      "Deneb",
+      "Aljanah",
+      "Fawaris"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 292.68034,
+        "dec": 27.95968
+      },
+      {
+        "ra": 305.5571,
+        "dec": 40.25668
+      },
+      {
+        "ra": 310.35798,
+        "dec": 45.28034
+      },
+      {
+        "ra": 311.55267,
+        "dec": 33.97026
+      },
+      {
+        "ra": 296.24361,
+        "dec": 45.13081
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -9.42129331603986,
+        "y": -10.539999101870139
+      },
+      {
+        "x": 1.8813547085339308,
+        "y": 1.504157964171602
+      },
+      {
+        "x": 5.153867889344835,
+        "y": 6.763366184418116
+      },
+      {
+        "x": 7.064696214496582,
+        "y": -4.527091745939688
+      },
+      {
+        "x": -4.869893788026977,
+        "y": 6.585785116556971
+      }
+    ],
+    "encodedSymbols": [
+      "S:S",
+      "RR:G",
+      "RR:G"
+    ],
+    "toleranceAlternates": {
+      "2": [
+        "RR:M"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Cyg_rev",
+    "constellationId": "Cyg",
+    "name": "Cygnus (Northern Cross) (Reversed)",
+    "description": "The Northern Cross backbone from Albireo to Sadr and Deneb, crossed with Aljanah and Fawaris",
+    "orderedStarIds": [
+      96858,
+      102157,
+      101767,
+      100128,
+      95648
+    ],
+    "orderedHrIds": [
+      7528,
+      7949,
+      7924,
+      7796,
+      7417
+    ],
+    "starNames": [
+      "Fawaris",
+      "Aljanah",
+      "Deneb",
+      "Sadr",
+      "Albireo"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 296.24361,
+        "dec": 45.13081
+      },
+      {
+        "ra": 311.55267,
+        "dec": 33.97026
+      },
+      {
+        "ra": 310.35798,
+        "dec": 45.28034
+      },
+      {
+        "ra": 305.5571,
+        "dec": 40.25668
+      },
+      {
+        "ra": 292.68034,
+        "dec": 27.95968
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -4.869893788026977,
+        "y": 6.585785116556971
+      },
+      {
+        "x": 7.064696214496582,
+        "y": -4.527091745939688
+      },
+      {
+        "x": 5.153867889344835,
+        "y": 6.763366184418116
+      },
+      {
+        "x": 1.8813547085339308,
+        "y": 1.504157964171602
+      },
+      {
+        "x": -9.42129331603986,
+        "y": -10.539999101870139
+      }
+    ],
+    "encodedSymbols": [
+      "LL:S",
+      "LL:S",
+      "S:G"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "LL:M"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Sco_fwd",
+    "constellationId": "Sco",
+    "name": "Scorpius (Scorpion) (Normal)",
+    "description": "Curved path from head stars through red supergiant Antares to the stinger Shaula and Lesath",
+    "orderedStarIds": [
+      78580,
+      78165,
+      80519,
+      82144,
+      85965,
+      85665
+    ],
+    "orderedHrIds": [
+      5984,
+      5953,
+      6134,
+      6241,
+      6553,
+      6527
+    ],
+    "starNames": [
+      "Acrab",
+      "Dschubba",
+      "Antares",
+      "Larawag",
+      "Sargas",
+      "Shaula"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 241.3593,
+        "dec": -19.80545
+      },
+      {
+        "ra": 240.08335,
+        "dec": -22.62171
+      },
+      {
+        "ra": 247.35192,
+        "dec": -26.432
+      },
+      {
+        "ra": 252.5412,
+        "dec": -34.29323
+      },
+      {
+        "ra": 264.3297,
+        "dec": -42.99782
+      },
+      {
+        "ra": 263.40217,
+        "dec": -37.10382
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -9.004917821756077,
+        "y": 10.967906877097933
+      },
+      {
+        "x": -9.97417919520099,
+        "y": 7.963037421633935
+      },
+      {
+        "x": -3.0011723639194257,
+        "y": 4.424774412397216
+      },
+      {
+        "x": 1.5317072366965077,
+        "y": -3.4243798972968382
+      },
+      {
+        "x": 10.292490962004106,
+        "y": -13.153153814541152
+      },
+      {
+        "x": 10.287964440091862,
+        "y": -6.936882523061209
+      }
+    ],
+    "encodedSymbols": [
+      "LL:G",
+      "R:M",
+      "S:G",
+      "LL:S"
+    ],
+    "toleranceAlternates": {
+      "2": [
+        "S:M"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Sco_rev",
+    "constellationId": "Sco",
+    "name": "Scorpius (Scorpion) (Reversed)",
+    "description": "Curved path from head stars through red supergiant Antares to the stinger Shaula and Lesath",
+    "orderedStarIds": [
+      85665,
+      85965,
+      82144,
+      80519,
+      78165,
+      78580
+    ],
+    "orderedHrIds": [
+      6527,
+      6553,
+      6241,
+      6134,
+      5953,
+      5984
+    ],
+    "starNames": [
+      "Shaula",
+      "Sargas",
+      "Larawag",
+      "Antares",
+      "Dschubba",
+      "Acrab"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 263.40217,
+        "dec": -37.10382
+      },
+      {
+        "ra": 264.3297,
+        "dec": -42.99782
+      },
+      {
+        "ra": 252.5412,
+        "dec": -34.29323
+      },
+      {
+        "ra": 247.35192,
+        "dec": -26.432
+      },
+      {
+        "ra": 240.08335,
+        "dec": -22.62171
+      },
+      {
+        "ra": 241.3593,
+        "dec": -19.80545
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 10.287964440091862,
+        "y": -6.936882523061209
+      },
+      {
+        "x": 10.292490962004106,
+        "y": -13.153153814541152
+      },
+      {
+        "x": 1.5317072366965077,
+        "y": -3.4243798972968382
+      },
+      {
+        "x": -3.0011723639194257,
+        "y": 4.424774412397216
+      },
+      {
+        "x": -9.97417919520099,
+        "y": 7.963037421633935
+      },
+      {
+        "x": -9.004917821756077,
+        "y": 10.967906877097933
+      }
+    ],
+    "encodedSymbols": [
+      "RR:G",
+      "S:S",
+      "L:M",
+      "RR:S"
+    ],
+    "toleranceAlternates": {
+      "1": [
+        "S:M"
+      ],
+      "2": [
+        "L:S"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Leo_fwd",
+    "constellationId": "Leo",
+    "name": "Leo (Sickle & Triangle) (Normal)",
+    "description": "The sickle of Leo from Regulus up through Algieba and Rasalas to tail star Denebola",
+    "orderedStarIds": [
+      49528,
+      50440,
+      50193,
+      48318,
+      54712,
+      57459
+    ],
+    "orderedHrIds": [
+      3982,
+      4057,
+      4031,
+      3905,
+      4357,
+      4534
+    ],
+    "starNames": [
+      "Regulus",
+      "Algieba",
+      "Adhafera",
+      "Rasalas",
+      "Zosma",
+      "Denebola"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 152.09298,
+        "dec": 11.96721
+      },
+      {
+        "ra": 154.99309,
+        "dec": 19.84149
+      },
+      {
+        "ra": 154.17257,
+        "dec": 23.41731
+      },
+      {
+        "ra": 148.19097,
+        "dec": 26.00695
+      },
+      {
+        "ra": 168.52707,
+        "dec": 20.52372
+      },
+      {
+        "ra": 177.26494,
+        "dec": 14.57206
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -7.149936201988475,
+        "y": -7.666123297907803
+      },
+      {
+        "x": -4.058925166252084,
+        "y": 0.21268113282280643
+      },
+      {
+        "x": -4.726528095947107,
+        "y": 3.82629601824765
+      },
+      {
+        "x": -10.1456539699897,
+        "y": 6.787491392570701
+      },
+      {
+        "x": 8.702997947338904,
+        "y": 1.0893600778520378
+      },
+      {
+        "x": 17.971995643176662,
+        "y": -4.404608457226926
+      }
+    ],
+    "encodedSymbols": [
+      "L:S",
+      "L:G",
+      "RR:G",
+      "S:S"
+    ],
+    "toleranceAlternates": {
+      "3": [
+        "R:S"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Leo_rev",
+    "constellationId": "Leo",
+    "name": "Leo (Sickle & Triangle) (Reversed)",
+    "description": "The sickle of Leo from Regulus up through Algieba and Rasalas to tail star Denebola",
+    "orderedStarIds": [
+      57459,
+      54712,
+      48318,
+      50193,
+      50440,
+      49528
+    ],
+    "orderedHrIds": [
+      4534,
+      4357,
+      3905,
+      4031,
+      4057,
+      3982
+    ],
+    "starNames": [
+      "Denebola",
+      "Zosma",
+      "Rasalas",
+      "Adhafera",
+      "Algieba",
+      "Regulus"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 177.26494,
+        "dec": 14.57206
+      },
+      {
+        "ra": 168.52707,
+        "dec": 20.52372
+      },
+      {
+        "ra": 148.19097,
+        "dec": 26.00695
+      },
+      {
+        "ra": 154.17257,
+        "dec": 23.41731
+      },
+      {
+        "ra": 154.99309,
+        "dec": 19.84149
+      },
+      {
+        "ra": 152.09298,
+        "dec": 11.96721
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 17.971995643176662,
+        "y": -4.404608457226929
+      },
+      {
+        "x": 8.702997947338906,
+        "y": 1.0893600778520347
+      },
+      {
+        "x": -10.1456539699897,
+        "y": 6.7874913925707
+      },
+      {
+        "x": -4.726528095947108,
+        "y": 3.826296018247647
+      },
+      {
+        "x": -4.058925166252085,
+        "y": 0.21268113282280646
+      },
+      {
+        "x": -7.149936201988476,
+        "y": -7.666123297907805
+      }
+    ],
+    "encodedSymbols": [
+      "S:G",
+      "LL:S",
+      "R:S",
+      "R:G"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "L:G"
+      ]
+    },
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Gem_fwd",
+    "constellationId": "Gem",
+    "name": "Gemini (Twins) (Normal)",
+    "description": "The parallel path connecting twin heads Castor and Pollux down to Alhena",
+    "orderedStarIds": [
+      36744,
+      37718,
+      35453,
+      34000,
+      31601
+    ],
+    "orderedHrIds": [
+      2891,
+      2990,
+      2777,
+      2650,
+      2421
+    ],
+    "starNames": [
+      "Castor",
+      "Pollux",
+      "Wasat",
+      "Mekbuda",
+      "Alhena"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 113.64951,
+        "dec": 31.88828
+      },
+      {
+        "ra": 116.32916,
+        "dec": 28.0262
+      },
+      {
+        "ra": 110.03074,
+        "dec": 21.98232
+      },
+      {
+        "ra": 106.02721,
+        "dec": 20.5703
+      },
+      {
+        "ra": 99.42792,
+        "dec": 16.39925
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 4.101064744066122,
+        "y": 8.144975126530664
+      },
+      {
+        "x": 6.62483250283685,
+        "y": 4.349796709095397
+      },
+      {
+        "x": 1.073340893379237,
+        "y": -1.9012767613279382
+      },
+      {
+        "x": -2.6714932832176443,
+        "y": -3.296999693951679
+      },
+      {
+        "x": -9.208858642017782,
+        "y": -7.313969456428667
+      }
+    ],
+    "encodedSymbols": [
+      "RR:G",
+      "R:S",
+      "S:G"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Gem_rev",
+    "constellationId": "Gem",
+    "name": "Gemini (Twins) (Reversed)",
+    "description": "The parallel path connecting twin heads Castor and Pollux down to Alhena",
+    "orderedStarIds": [
+      31601,
+      34000,
+      35453,
+      37718,
+      36744
+    ],
+    "orderedHrIds": [
+      2421,
+      2650,
+      2777,
+      2990,
+      2891
+    ],
+    "starNames": [
+      "Alhena",
+      "Mekbuda",
+      "Wasat",
+      "Pollux",
+      "Castor"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 99.42792,
+        "dec": 16.39925
+      },
+      {
+        "ra": 106.02721,
+        "dec": 20.5703
+      },
+      {
+        "ra": 110.03074,
+        "dec": 21.98232
+      },
+      {
+        "ra": 116.32916,
+        "dec": 28.0262
+      },
+      {
+        "ra": 113.64951,
+        "dec": 31.88828
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -9.208858642017782,
+        "y": -7.31396945642867
+      },
+      {
+        "x": -2.6714932832176443,
+        "y": -3.296999693951682
+      },
+      {
+        "x": 1.073340893379237,
+        "y": -1.9012767613279413
+      },
+      {
+        "x": 6.624832502836849,
+        "y": 4.3497967090953935
+      },
+      {
+        "x": 4.101064744066122,
+        "y": 8.144975126530658
+      }
+    ],
+    "encodedSymbols": [
+      "S:S",
+      "L:G",
+      "LL:S"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Tau_fwd",
+    "constellationId": "Tau",
+    "name": "Taurus (Bull V-Shape) (Normal)",
+    "description": "The horns and head of Taurus through Elnath, Aldebaran, and the Hyades V",
+    "orderedStarIds": [
+      25364,
+      26386,
+      21368,
+      20837,
+      20405
+    ],
+    "orderedHrIds": [
+      1791,
+      1910,
+      1457,
+      1409,
+      1373
+    ],
+    "starNames": [
+      "Elnath",
+      "Tianguan",
+      "Aldebaran",
+      "Ain",
+      "Secunda Hyadum"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 81.57297,
+        "dec": 28.60745
+      },
+      {
+        "ra": 84.41119,
+        "dec": 21.14255
+      },
+      {
+        "ra": 68.98016,
+        "dec": 16.5093
+      },
+      {
+        "ra": 67.15414,
+        "dec": 19.18043
+      },
+      {
+        "ra": 65.7337,
+        "dec": 17.54251
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 7.289581380250767,
+        "y": 8.141082969381877
+      },
+      {
+        "x": 10.384269409835598,
+        "y": 0.7362310777920522
+      },
+      {
+        "x": -4.245850651533847,
+        "y": -4.219702201930204
+      },
+      {
+        "x": -5.910237067666477,
+        "y": -1.481897146351772
+      },
+      {
+        "x": -7.347558899932594,
+        "y": -3.080212004153004
+      }
+    ],
+    "encodedSymbols": [
+      "RR:G",
+      "RR:S",
+      "LL:S"
+    ],
+    "toleranceAlternates": {
+      "2": [
+        "LL:M"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Tau_rev",
+    "constellationId": "Tau",
+    "name": "Taurus (Bull V-Shape) (Reversed)",
+    "description": "The horns and head of Taurus through Elnath, Aldebaran, and the Hyades V",
+    "orderedStarIds": [
+      20405,
+      20837,
+      21368,
+      26386,
+      25364
+    ],
+    "orderedHrIds": [
+      1373,
+      1409,
+      1457,
+      1910,
+      1791
+    ],
+    "starNames": [
+      "Secunda Hyadum",
+      "Ain",
+      "Aldebaran",
+      "Tianguan",
+      "Elnath"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 65.7337,
+        "dec": 17.54251
+      },
+      {
+        "ra": 67.15414,
+        "dec": 19.18043
+      },
+      {
+        "ra": 68.98016,
+        "dec": 16.5093
+      },
+      {
+        "ra": 84.41119,
+        "dec": 21.14255
+      },
+      {
+        "ra": 81.57297,
+        "dec": 28.60745
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -7.347558899932594,
+        "y": -3.080212004153004
+      },
+      {
+        "x": -5.910237067666477,
+        "y": -1.481897146351772
+      },
+      {
+        "x": -4.245850651533847,
+        "y": -4.219702201930204
+      },
+      {
+        "x": 10.384269409835598,
+        "y": 0.7362310777920522
+      },
+      {
+        "x": 7.289581380250767,
+        "y": 8.141082969381877
+      }
+    ],
+    "encodedSymbols": [
+      "RR:G",
+      "LL:G",
+      "LL:S"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "CMa_fwd",
+    "constellationId": "CMa",
+    "name": "Canis Major (Great Dog) (Normal)",
+    "description": "Path from brightest star Sirius through Mirzam, Muliphein, Wezen to Adhara and Aludra",
+    "orderedStarIds": [
+      32263,
+      30251,
+      33956,
+      34354,
+      33492,
+      35806
+    ],
+    "orderedHrIds": [
+      2491,
+      2294,
+      2657,
+      2693,
+      2618,
+      2827
+    ],
+    "starNames": [
+      "Sirius",
+      "Mirzam",
+      "Muliphein",
+      "Wezen",
+      "Adhara",
+      "Aludra"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 101.28722,
+        "dec": -16.71612
+      },
+      {
+        "ra": 95.67494,
+        "dec": -17.95592
+      },
+      {
+        "ra": 105.93955,
+        "dec": -15.63329
+      },
+      {
+        "ra": 107.09785,
+        "dec": -26.3932
+      },
+      {
+        "ra": 104.65645,
+        "dec": -28.97208
+      },
+      {
+        "ra": 111.02376,
+        "dec": -29.3031
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -2.7601521390388104,
+        "y": 5.85164056587832
+      },
+      {
+        "x": -8.139395384773715,
+        "y": 4.434782192685969
+      },
+      {
+        "x": 1.734432889166998,
+        "y": 6.960708356088454
+      },
+      {
+        "x": 2.646279718359548,
+        "y": -3.8619185541383283
+      },
+      {
+        "x": 0.44396766035871627,
+        "y": -6.43255254262492
+      },
+      {
+        "x": 6.054798345812428,
+        "y": -6.946165815920547
+      }
+    ],
+    "encodedSymbols": [
+      "LL:G",
+      "RR:M",
+      "R:S",
+      "LL:G"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "CMa_rev",
+    "constellationId": "CMa",
+    "name": "Canis Major (Great Dog) (Reversed)",
+    "description": "Path from brightest star Sirius through Mirzam, Muliphein, Wezen to Adhara and Aludra",
+    "orderedStarIds": [
+      35806,
+      33492,
+      34354,
+      33956,
+      30251,
+      32263
+    ],
+    "orderedHrIds": [
+      2827,
+      2618,
+      2693,
+      2657,
+      2294,
+      2491
+    ],
+    "starNames": [
+      "Aludra",
+      "Adhara",
+      "Wezen",
+      "Muliphein",
+      "Mirzam",
+      "Sirius"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 111.02376,
+        "dec": -29.3031
+      },
+      {
+        "ra": 104.65645,
+        "dec": -28.97208
+      },
+      {
+        "ra": 107.09785,
+        "dec": -26.3932
+      },
+      {
+        "ra": 105.93955,
+        "dec": -15.63329
+      },
+      {
+        "ra": 95.67494,
+        "dec": -17.95592
+      },
+      {
+        "ra": 101.28722,
+        "dec": -16.71612
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 6.054798345812428,
+        "y": -6.946165815920547
+      },
+      {
+        "x": 0.44396766035871627,
+        "y": -6.43255254262492
+      },
+      {
+        "x": 2.646279718359548,
+        "y": -3.8619185541383283
+      },
+      {
+        "x": 1.734432889166998,
+        "y": 6.960708356088454
+      },
+      {
+        "x": -8.139395384773715,
+        "y": 4.434782192685969
+      },
+      {
+        "x": -2.7601521390388104,
+        "y": 5.85164056587832
+      }
+    ],
+    "encodedSymbols": [
+      "RR:S",
+      "L:G",
+      "LL:M",
+      "RR:S"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Lyr_fwd",
+    "constellationId": "Lyr",
+    "name": "Lyra (The Harp) (Normal)",
+    "description": "From brilliant Vega through Epsilon and Zeta Lyrae to parallelogram base stars Sheliak and Sulafat",
+    "orderedStarIds": [
+      90979,
+      91888,
+      92902,
+      92133,
+      94186
+    ],
+    "orderedHrIds": [
+      7001,
+      7063,
+      7178,
+      7106,
+      7298
+    ],
+    "starNames": [
+      "Vega",
+      "Bet Sct",
+      "Sulafat",
+      "Sheliak",
+      "Aladfar"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 279.2346,
+        "dec": 38.78369
+      },
+      {
+        "ra": 281.79363,
+        "dec": -4.74787
+      },
+      {
+        "ra": 284.73593,
+        "dec": 32.68956
+      },
+      {
+        "ra": 282.51998,
+        "dec": 33.36267
+      },
+      {
+        "ra": 288.43953,
+        "dec": 39.14597
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -3.2023089534740454,
+        "y": 10.769385914816525
+      },
+      {
+        "x": -1.7529494160486307,
+        "y": -37.14775273748981
+      },
+      {
+        "x": 1.2383419882023237,
+        "y": 4.49936477430769
+      },
+      {
+        "x": -0.6283398720308028,
+        "y": 5.1709466776156745
+      },
+      {
+        "x": 4.090013269830545,
+        "y": 11.191603907235807
+      }
+    ],
+    "encodedSymbols": [
+      "LL:M",
+      "LL:S",
+      "RR:G"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Lyr_rev",
+    "constellationId": "Lyr",
+    "name": "Lyra (The Harp) (Reversed)",
+    "description": "From brilliant Vega through Epsilon and Zeta Lyrae to parallelogram base stars Sheliak and Sulafat",
+    "orderedStarIds": [
+      94186,
+      92133,
+      92902,
+      91888,
+      90979
+    ],
+    "orderedHrIds": [
+      7298,
+      7106,
+      7178,
+      7063,
+      7001
+    ],
+    "starNames": [
+      "Aladfar",
+      "Sheliak",
+      "Sulafat",
+      "Bet Sct",
+      "Vega"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 288.43953,
+        "dec": 39.14597
+      },
+      {
+        "ra": 282.51998,
+        "dec": 33.36267
+      },
+      {
+        "ra": 284.73593,
+        "dec": 32.68956
+      },
+      {
+        "ra": 281.79363,
+        "dec": -4.74787
+      },
+      {
+        "ra": 279.2346,
+        "dec": 38.78369
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": 4.090013269830545,
+        "y": 11.191603907235804
+      },
+      {
+        "x": -0.6283398720308028,
+        "y": 5.17094667761567
+      },
+      {
+        "x": 1.2383419882023237,
+        "y": 4.499364774307686
+      },
+      {
+        "x": -1.7529494160486307,
+        "y": -37.14775273748982
+      },
+      {
+        "x": -3.2023089534740454,
+        "y": 10.769385914816517
+      }
+    ],
+    "encodedSymbols": [
+      "LL:S",
+      "RR:G",
+      "RR:M"
+    ],
+    "toleranceAlternates": {},
+    "traversalVariant": "reverse"
+  },
+  {
+    "id": "Cru_fwd",
+    "constellationId": "Cru",
+    "name": "Crux (Southern Cross) (Normal)",
+    "description": "The four pointer stars of the Southern Cross: Acrux, Mimosa, Gacrux, and Imai",
+    "orderedStarIds": [
+      60530,
+      62239,
+      60893,
+      59565
+    ],
+    "orderedHrIds": [
+      4730,
+      4853,
+      4763,
+      4656
+    ],
+    "starNames": [
+      "Acrux",
+      "Mimosa",
+      "Gacrux",
+      "Imai"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 186.64966,
+        "dec": -63.09909
+      },
+      {
+        "ra": 191.93039,
+        "dec": -59.68876
+      },
+      {
+        "ra": 187.79144,
+        "dec": -57.11321
+      },
+      {
+        "ra": 183.78641,
+        "dec": -58.74893
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -0.4038614532471892,
+        "y": -3.410862663396199
+      },
+      {
+        "x": 2.2149469124287013,
+        "y": -0.06700146665541845
+      },
+      {
+        "x": 0.13628053779888155,
+        "y": 2.5833319886516217
+      },
+      {
+        "x": -1.947655974026864,
+        "y": 0.8916214846126117
+      }
+    ],
+    "encodedSymbols": [
+      "LL:M",
+      "LL:M"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "LL:S"
+      ],
+      "1": [
+        "LL:S"
+      ]
+    },
+    "traversalVariant": "forward"
+  },
+  {
+    "id": "Cru_rev",
+    "constellationId": "Cru",
+    "name": "Crux (Southern Cross) (Reversed)",
+    "description": "The four pointer stars of the Southern Cross: Acrux, Mimosa, Gacrux, and Imai",
+    "orderedStarIds": [
+      59565,
+      60893,
+      62239,
+      60530
+    ],
+    "orderedHrIds": [
+      4656,
+      4763,
+      4853,
+      4730
+    ],
+    "starNames": [
+      "Imai",
+      "Gacrux",
+      "Mimosa",
+      "Acrux"
+    ],
+    "referenceCoordsRaDec": [
+      {
+        "ra": 183.78641,
+        "dec": -58.74893
+      },
+      {
+        "ra": 187.79144,
+        "dec": -57.11321
+      },
+      {
+        "ra": 191.93039,
+        "dec": -59.68876
+      },
+      {
+        "ra": 186.64966,
+        "dec": -63.09909
+      }
+    ],
+    "referencePoints": [
+      {
+        "x": -1.947655974026864,
+        "y": 0.8916214846126117
+      },
+      {
+        "x": 0.13628053779888155,
+        "y": 2.5833319886516217
+      },
+      {
+        "x": 2.2149469124287013,
+        "y": -0.06700146665541845
+      },
+      {
+        "x": -0.4038614532471892,
+        "y": -3.410862663396199
+      }
+    ],
+    "encodedSymbols": [
+      "RR:M",
+      "RR:M"
+    ],
+    "toleranceAlternates": {
+      "0": [
+        "RR:G"
+      ],
+      "1": [
+        "RR:G"
+      ]
+    },
+    "traversalVariant": "reverse"
+  }
+]
