@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAstroStore, type AutomataTab } from '../../stores/useAstroStore';
+import { AutomataInstrumentPanel } from './AutomataInstrumentPanel';
 import { NfaView } from './NfaView';
 import { EpsilonClosureView } from './EpsilonClosureView';
 import { SubsetConstructionView } from './SubsetConstructionView';
@@ -11,8 +12,18 @@ import { TransitionTableView } from './TransitionTableView';
 import { ExportModal } from './ExportModal';
 
 export const AutomataLab: React.FC = () => {
-  const { automataTab, setAutomataTab, setActiveView } = useAstroStore();
-  const [isExportOpen, setIsExportOpen] = useState(false);
+  const { automataTab, setAutomataTab } = useAstroStore();
+  const [isInstrumentPanel, setIsInstrumentPanel] = useState<boolean>(true);
+  const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
+
+  // Synchronize when automataTab is changed externally (e.g., from Trace mode handoff)
+  const initialTabRef = useRef(automataTab);
+  useEffect(() => {
+    if (automataTab !== initialTabRef.current) {
+      initialTabRef.current = automataTab;
+      setIsInstrumentPanel(false);
+    }
+  }, [automataTab]);
 
   const tabs: Array<{ id: AutomataTab; index: string; label: string }> = [
     { id: 'nfa', index: '01', label: 'ε-NFA' },
@@ -25,34 +36,45 @@ export const AutomataLab: React.FC = () => {
     { id: 'table', index: '08', label: 'TRANS TABLE' },
   ];
 
+  const handleSelectTab = (tabId: AutomataTab) => {
+    setAutomataTab(tabId);
+    setIsInstrumentPanel(false);
+  };
+
+  const handleSelectInstrumentPanel = () => {
+    setIsInstrumentPanel(true);
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-[var(--bg-shell,#ECEEF2)] text-[var(--ink-primary,#181A20)] font-mono overflow-hidden select-none">
-      {/* Sub-header navigation strip — Hardware Machined Console */}
-      <div className="h-12 border-b border-[var(--bg-tray,#E2E5EC)] bg-[var(--bg-card,#F5F6F8)] px-3 flex items-center justify-between shrink-0 overflow-x-auto gap-3">
-        <div className="flex items-center gap-2 shrink-0">
+      {/* Sub-header navigation strip — Hardware Machined Console with Discrete Tabs */}
+      <div className="h-11 border-b border-[var(--bg-tray,#E2E5EC)] bg-[var(--bg-card,#F5F6F8)] px-3.5 flex items-center justify-between shrink-0 overflow-x-auto gap-3">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Hardware Instrument Panel Primary View Selector (Matches Frame 10 Visual Truth) */}
           <button
-            onClick={() => setActiveView('sky')}
-            className="hud-reticle px-2 py-1 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.08)] text-[var(--ink-primary,#181A20)] text-[10px] uppercase font-mono font-semibold tracking-wider transition-colors cursor-pointer flex items-center gap-1"
-            title="Return to Sky Viewport"
+            onClick={handleSelectInstrumentPanel}
+            className={`hud-reticle ${isInstrumentPanel ? 'active' : ''} px-3 py-1 rounded-[6px] text-[10px] font-mono font-bold uppercase tracking-wider whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+              isInstrumentPanel
+                ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white border border-[var(--signal-mid,#6892F6)] shadow-none'
+                : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)] hover:bg-[#DCE0E8] border border-transparent'
+            }`}
+            title="Frame 10 Tactile Hardware Instrument Panel"
           >
-            <span>⟵</span>
-            <span>SKY</span>
+            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)] inline-block mr-0.5" />
+            <span>INSTRUMENT PANEL</span>
+            <span className="text-[9px] text-white/70 font-semibold">[FRAME 10]</span>
           </button>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-[var(--bg-tray,#E2E5EC)] text-[var(--ink-primary,#181A20)] text-[11px] font-mono font-bold tracking-widest uppercase">
-            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)] inline-block" />
-            <span>LAB CONSOLE</span>
-          </div>
         </div>
 
-        {/* Tactile hardware rocker switch tab pills with HUD reticles */}
+        {/* Retained 8 Educational Detailed Teaching Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           {tabs.map(tab => {
-            const isActive = automataTab === tab.id;
+            const isActive = !isInstrumentPanel && automataTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setAutomataTab(tab.id)}
-                className={`hud-reticle ${isActive ? 'active' : ''} px-2.5 py-1 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                onClick={() => handleSelectTab(tab.id)}
+                className={`hud-reticle ${isActive ? 'active' : ''} px-2 py-1 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1 ${
                   isActive
                     ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white border border-[var(--signal-mid,#6892F6)] shadow-none'
                     : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)] hover:bg-[#DCE0E8] border border-transparent'
@@ -77,16 +99,25 @@ export const AutomataLab: React.FC = () => {
         </button>
       </div>
 
-      {/* Main Tab Content — Framed in recessed bento tray with 6px gaps */}
-      <div className="flex-1 p-[6px] bg-[var(--bg-tray,#E2E5EC)] overflow-hidden relative flex flex-col gap-[6px]">
-        {automataTab === 'nfa' && <NfaView />}
-        {automataTab === 'closure' && <EpsilonClosureView />}
-        {automataTab === 'subset' && <SubsetConstructionView />}
-        {automataTab === 'dfa' && <DfaView />}
-        {automataTab === 'minimized' && <MinimizedDfaView />}
-        {automataTab === 'simulator' && <SimulatorView />}
-        {automataTab === 'formal' && <FormalDefinitionView />}
-        {automataTab === 'table' && <TransitionTableView />}
+      {/* Main Content Surface */}
+      <div className="flex-1 bg-[var(--bg-shell,#ECEEF2)] overflow-hidden relative flex flex-col">
+        {isInstrumentPanel ? (
+          <AutomataInstrumentPanel
+            onOpenTab={handleSelectTab}
+            onOpenExport={() => setIsExportOpen(true)}
+          />
+        ) : (
+          <div className="flex-1 p-[6px] bg-[var(--bg-tray,#E2E5EC)] overflow-hidden relative flex flex-col gap-[6px]">
+            {automataTab === 'nfa' && <NfaView />}
+            {automataTab === 'closure' && <EpsilonClosureView />}
+            {automataTab === 'subset' && <SubsetConstructionView />}
+            {automataTab === 'dfa' && <DfaView />}
+            {automataTab === 'minimized' && <MinimizedDfaView />}
+            {automataTab === 'simulator' && <SimulatorView />}
+            {automataTab === 'formal' && <FormalDefinitionView />}
+            {automataTab === 'table' && <TransitionTableView />}
+          </div>
+        )}
       </div>
 
       {/* Export Modal */}

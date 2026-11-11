@@ -99,9 +99,9 @@ export const SubsetConstructionView: React.FC = () => {
                   key={idx}
                   onClick={() => { setCurrentStepIdx(idx); setIsPlaying(false); }}
                   title={`Step ${idx + 1}`}
-                  className={`h-4 min-w-[5px] flex-1 rounded-[1px] transition-all cursor-pointer ${
+                  className={`h-4 min-w-[5px] flex-1 rounded-[1px] transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-[var(--signal-cobalt,#1D55F5)] scale-y-110'
+                      ? 'bg-[var(--signal-cobalt,#1D55F5)]'
                       : isPassed
                         ? 'bg-[var(--signal-mid,#6892F6)] opacity-70 hover:opacity-100'
                         : 'bg-[var(--dot-inactive,#C8CCD4)] hover:bg-[#B0B5C0]'

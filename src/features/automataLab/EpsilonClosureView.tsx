@@ -80,7 +80,7 @@ export const EpsilonClosureView: React.FC = () => {
                 <button
                   key={s.id}
                   onClick={() => toggleState(s.id)}
-                  className={`hud-reticle ${isSelected ? 'active' : ''} px-2 py-0.5 rounded-[4px] text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer font-semibold ${
+                  className={`hud-reticle ${isSelected ? 'active' : ''} px-2 py-0.5 rounded-[4px] text-[10px] font-mono uppercase tracking-wider transition-colors cursor-pointer font-semibold ${
                     isSelected
                       ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white border border-[var(--signal-mid,#6892F6)] shadow-none'
                       : 'bg-[var(--bg-card,#F5F6F8)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)] hover:bg-[#EAECEF] border border-[rgba(0,0,0,0.08)]'

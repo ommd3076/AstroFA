@@ -13,6 +13,7 @@ import { recognizePattern } from '../recognition/matcher';
 import { projectRaDecToTangentPlane } from '../geometry/projection';
 
 export type ActiveView =
+  | 'overview'
   | 'sky'
   | 'tonight'
   | 'constellations'
@@ -21,6 +22,57 @@ export type ActiveView =
   | 'imageLab'
   | 'academic'
   | 'credits';
+
+const getInitialParams = () => {
+  if (typeof window === 'undefined') {
+    return {
+      view: 'sky' as ActiveView,
+      trace: false,
+      results: false,
+      analysis: false,
+      sampleReport: null as RecognitionReport | null,
+    };
+  }
+  const params = new URLSearchParams(window.location.search);
+  const view = params.get('view') as ActiveView | null;
+  const trace = params.get('trace') === '1' || params.get('trace') === 'true';
+  const results = params.get('results') === '1' || params.get('results') === 'true';
+  const analysis = params.get('analysis') === '1' || params.get('analysis') === 'true';
+  const validViews: ActiveView[] = [
+    'overview',
+    'sky',
+    'tonight',
+    'constellations',
+    'automataLab',
+    'hunt',
+    'imageLab',
+    'academic',
+    'credits',
+  ];
+
+  let sampleReport: RecognitionReport | null = null;
+  if (results || analysis) {
+    try {
+      sampleReport = recognizePattern(
+        REFERENCE_PATTERNS[0].referencePoints,
+        MINIMIZED_DFA_MACHINE,
+        REFERENCE_PATTERNS
+      );
+    } catch {
+      sampleReport = null;
+    }
+  }
+
+  return {
+    view: view && validViews.includes(view) ? view : 'sky',
+    trace: trace || results || analysis,
+    results,
+    analysis,
+    sampleReport,
+  };
+};
+
+const _initialParams = getInitialParams();
 
 export type AutomataTab =
   | 'nfa'
@@ -106,7 +158,7 @@ export interface AstroState {
 
 export const useAstroStore = create<AstroState>((set, get) => ({
   // Defaults
-  activeView: 'sky',
+  activeView: _initialParams.view,
   setActiveView: view => set({ activeView: view }),
 
   observer: PRESET_OBSERVERS[0], // Greenwich prime meridian
@@ -164,7 +216,7 @@ export const useAstroStore = create<AstroState>((set, get) => ({
   },
 
   // Trace Mode
-  isTraceMode: false,
+  isTraceMode: _initialParams.trace,
   setIsTraceMode: v => {
     if (!v) {
       set({
@@ -182,14 +234,14 @@ export const useAstroStore = create<AstroState>((set, get) => ({
 
   showTraceHints: false,
   setShowTraceHints: v => set({ showTraceHints: v }),
-  showPatternAnalysisModal: false,
+  showPatternAnalysisModal: _initialParams.analysis,
   setShowPatternAnalysisModal: v => set({ showPatternAnalysisModal: v }),
-  showRecognitionResultsModal: false,
+  showRecognitionResultsModal: _initialParams.results,
   setShowRecognitionResultsModal: v => set({ showRecognitionResultsModal: v }),
 
   tracedStarIds: [],
   tracedPoints: [],
-  recognitionReport: null,
+  recognitionReport: _initialParams.sampleReport,
 
   addTracedStar: star => {
     const { tracedStarIds } = get();

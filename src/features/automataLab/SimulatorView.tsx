@@ -261,7 +261,7 @@ export const SimulatorView: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className={`px-2.5 py-1.5 rounded-[4px] text-[10px] font-mono font-bold border transition-all shrink-0 ${
+                  className={`px-2.5 py-1.5 rounded-[4px] text-[10px] font-mono font-bold border transition-colors shrink-0 ${
                     isCurrent
                       ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none hud-reticle active'
                       : isConsumed

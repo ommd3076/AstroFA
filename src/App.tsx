@@ -13,21 +13,25 @@ import { HuntMode } from './features/huntMode/HuntMode';
 import { ImageLab } from './features/imageLab/ImageLab';
 import { AcademicWalkthrough } from './features/academic/AcademicWalkthrough';
 import { CreditsModal } from './components/CreditsModal';
+import { Overview } from './features/overview/Overview';
 
 export const App: React.FC = () => {
   const { activeView } = useAstroStore();
 
   return (
     <div className="bento-shell select-none">
-      {/* Universal Header Navigation */}
+      {/* Persistent Left Rail Navigation (w-[232px]) */}
       <HeaderNav />
 
       {/* Main View Area framed in recessed Bento Tray */}
       <main className="bento-tray">
+        {/* View 0: Overview Analytics Dashboard */}
+        {activeView === 'overview' && <Overview />}
+
         {/* View 1: Live Interactive Sky Canvas */}
         {activeView === 'sky' && (
-          <div className="relative w-full h-full flex flex-col rounded-[12px] overflow-hidden bento-card p-0 border border-white/60 bg-[var(--bg-viewport)]">
-            <div className="flex-1 relative overflow-hidden">
+          <div className="relative w-full h-full flex flex-col rounded-[12px] overflow-hidden bento-card p-0 border border-white/60 bg-[var(--bg-viewport)] min-h-0">
+            <div className="flex-1 relative overflow-hidden min-h-0">
               <SkyCanvas />
               <TraceHud />
               <StarInspector />

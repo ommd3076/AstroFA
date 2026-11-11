@@ -88,6 +88,10 @@ export const SkyCanvas: React.FC = () => {
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const hasDragged = useRef(false);
   const syncSvgOverlayRef = useRef<() => void>(() => {});
+  const requestRenderRef = useRef<() => void>(() => {});
+  const lastSvgContentRef = useRef<string>('');
+  const isRenderScheduled = useRef(false);
+  const animFrameId = useRef<number | null>(null);
 
   // 1. Initialize Scene & Three.js Canvas
   useEffect(() => {
@@ -268,39 +272,12 @@ export const SkyCanvas: React.FC = () => {
       gridGroup.add(new THREE.Line(g, m));
     }
 
-    // Handle Window Resize
-    const handleResize = () => {
-      if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
-      cameraRef.current.aspect = w / h;
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(w, h);
-    };
-    window.addEventListener('resize', handleResize);
+    // Demand-driven Render Frame (MOTION-01: 0 idle RAFs, 0 idle renders)
+    const renderFrame = () => {
+      isRenderScheduled.current = false;
+      animFrameId.current = null;
 
-    // Animation Loop with smooth camera interpolation and fast SVG overlay sync
-    let animId: number;
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-
-      // Smooth camera interpolation towards target angles
-      if (targetLookAngles.current) {
-        let diffAz = targetLookAngles.current.az - lookAngles.current.az;
-        while (diffAz > Math.PI) diffAz -= 2 * Math.PI;
-        while (diffAz < -Math.PI) diffAz += 2 * Math.PI;
-
-        const diffEl = targetLookAngles.current.el - lookAngles.current.el;
-
-        if (Math.abs(diffAz) > 0.002 || Math.abs(diffEl) > 0.002) {
-          lookAngles.current.az += diffAz * 0.08;
-          lookAngles.current.el += diffEl * 0.08;
-        } else {
-          lookAngles.current.az = targetLookAngles.current.az;
-          lookAngles.current.el = targetLookAngles.current.el;
-          targetLookAngles.current = null;
-        }
-      }
+      if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
 
       // Camera orientation from lookAngles
       const cam = cameraRef.current;
@@ -313,18 +290,44 @@ export const SkyCanvas: React.FC = () => {
         cam.lookAt(targetX, targetY, targetZ);
       }
 
-      if (rendererRef.current && sceneRef.current && cameraRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
+      rendererRef.current.render(sceneRef.current, cam);
 
       // Synchronize SVG overlay for numbered trace points and labels
       syncSvgOverlayRef.current();
     };
-    animate();
+
+    const requestRender = () => {
+      if (!isRenderScheduled.current) {
+        isRenderScheduled.current = true;
+        animFrameId.current = requestAnimationFrame(renderFrame);
+      }
+    };
+    requestRenderRef.current = requestRender;
+
+    // Attach ResizeObserver to canvas container for reliable responsive sizing (MOTION-01)
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0 && cameraRef.current && rendererRef.current) {
+          cameraRef.current.aspect = width / height;
+          cameraRef.current.updateProjectionMatrix();
+          rendererRef.current.setSize(width, height);
+          requestRender();
+        }
+      }
+    });
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Initial render
+    requestRender();
 
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
+      if (animFrameId.current !== null) {
+        cancelAnimationFrame(animFrameId.current);
+      }
+      resizeObserver.disconnect();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -448,7 +451,11 @@ export const SkyCanvas: React.FC = () => {
       }
     }
 
-    overlay.innerHTML = svgContent;
+    // Diff SVG overlay innerHTML to eliminate DOM thrash (MOTION-01)
+    if (overlay.innerHTML !== svgContent) {
+      overlay.innerHTML = svgContent;
+      lastSvgContentRef.current = svgContent;
+    }
   };
 
   useEffect(() => {
@@ -469,6 +476,7 @@ export const SkyCanvas: React.FC = () => {
       m[12], m[13], m[14], m[15]
     );
     celestialGroupRef.current.setRotationFromMatrix(matrix);
+    requestRenderRef.current();
   }, [observer, observationDate]);
 
   // 3. Time progression simulation loop
@@ -485,6 +493,7 @@ export const SkyCanvas: React.FC = () => {
     if (normalLinesMeshRef.current) normalLinesMeshRef.current.visible = showConstellationLines;
     if (horizonGroupRef.current) horizonGroupRef.current.visible = showHorizon;
     if (gridGroupRef.current) gridGroupRef.current.visible = showEquatorialGrid;
+    requestRenderRef.current();
   }, [showConstellationLines, showHorizon, showEquatorialGrid]);
 
   // 5. Update Focused Constellation Lines
@@ -493,6 +502,7 @@ export const SkyCanvas: React.FC = () => {
     if (!focusedConstellationId) {
       focusedLinesMeshRef.current.geometry.dispose();
       focusedLinesMeshRef.current.geometry = new THREE.BufferGeometry();
+      requestRenderRef.current();
       return;
     }
 
@@ -500,6 +510,7 @@ export const SkyCanvas: React.FC = () => {
     if (!con || con.lineSegments.length === 0) {
       focusedLinesMeshRef.current.geometry.dispose();
       focusedLinesMeshRef.current.geometry = new THREE.BufferGeometry();
+      requestRenderRef.current();
       return;
     }
 
@@ -518,6 +529,7 @@ export const SkyCanvas: React.FC = () => {
     geom.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     focusedLinesMeshRef.current.geometry.dispose();
     focusedLinesMeshRef.current.geometry = geom;
+    requestRenderRef.current();
   }, [focusedConstellationId]);
 
   // 6. Update Ghost Hint Lines in Trace / Hunt Mode
@@ -527,6 +539,7 @@ export const SkyCanvas: React.FC = () => {
     if (!shouldShowHints || (!focusedConstellationId && !huntTarget)) {
       hintLinesMeshRef.current.geometry.dispose();
       hintLinesMeshRef.current.geometry = new THREE.BufferGeometry();
+      requestRenderRef.current();
       return;
     }
 
@@ -549,6 +562,7 @@ export const SkyCanvas: React.FC = () => {
     geom.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     hintLinesMeshRef.current.geometry.dispose();
     hintLinesMeshRef.current.geometry = geom;
+    requestRenderRef.current();
   }, [isTraceMode, showTraceHints, huntHintLevel, focusedConstellationId, huntTarget]);
 
   // 7. Update Traced Star Lines
@@ -557,6 +571,7 @@ export const SkyCanvas: React.FC = () => {
     if (!isTraceMode || tracedStarIds.length < 2) {
       traceLineMeshRef.current.geometry.dispose();
       traceLineMeshRef.current.geometry = new THREE.BufferGeometry();
+      requestRenderRef.current();
       return;
     }
 
@@ -572,6 +587,7 @@ export const SkyCanvas: React.FC = () => {
     const geom = new THREE.BufferGeometry().setFromPoints(pts);
     traceLineMeshRef.current.geometry.dispose();
     traceLineMeshRef.current.geometry = geom;
+    requestRenderRef.current();
   }, [isTraceMode, tracedStarIds]);
 
   // 8. Focus camera smoothly when targetFocusCoords or focusedConstellationId changes
@@ -594,9 +610,17 @@ export const SkyCanvas: React.FC = () => {
       const hor = getHorizontalCoordinates(targetRa, targetDec, observer, observationDate);
       const targetAz = (hor.azimuth * Math.PI) / 180;
       const targetEl = (Math.max(-75, Math.min(85, hor.altitude)) * Math.PI) / 180;
-      targetLookAngles.current = { az: targetAz, el: targetEl };
+      // Immediate assignment without 8% easing or snap threshold (MOTION-01)
+      lookAngles.current = { az: targetAz, el: targetEl };
+      targetLookAngles.current = null;
+      requestRenderRef.current();
     }
   }, [targetFocusCoords, focusedConstellationId, observer, observationDate]);
+
+  // Synchronize overlay on toggle, selection or hunt change
+  useEffect(() => {
+    requestRenderRef.current();
+  }, [showConstellationLabels, selectedStarId, focusedConstellationId]);
 
   // 9. Pointer Drag, Zoom, and Raycasting Handlers
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -605,6 +629,7 @@ export const SkyCanvas: React.FC = () => {
     prevPointer.current = { x: e.clientX, y: e.clientY };
     pointerDownPos.current = { x: e.clientX, y: e.clientY };
     targetLookAngles.current = null; // stop any ongoing smooth animation when user takes manual control
+    requestRenderRef.current();
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -623,6 +648,7 @@ export const SkyCanvas: React.FC = () => {
 
       // Clamp elevation so camera doesn't flip over zenith or nadir
       lookAngles.current.el = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, lookAngles.current.el));
+      requestRenderRef.current();
       return;
     }
 
@@ -647,6 +673,7 @@ export const SkyCanvas: React.FC = () => {
 
   const handlePointerUp = () => {
     isDragging.current = false;
+    requestRenderRef.current();
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -654,6 +681,7 @@ export const SkyCanvas: React.FC = () => {
     const nextFov = cameraRef.current.fov + e.deltaY * 0.05;
     cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
     cameraRef.current.updateProjectionMatrix();
+    requestRenderRef.current();
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -680,13 +708,14 @@ export const SkyCanvas: React.FC = () => {
           setFocusedConstellationId(star.con);
         }
       }
+      requestRenderRef.current();
     }
   };
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full select-none overflow-hidden cursor-grab active:cursor-grabbing bg-[#060A14] touch-none"
+      className="relative w-full h-full select-none overflow-hidden cursor-grab active:cursor-grabbing bg-[#060A14] touch-none min-h-0"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -734,7 +763,7 @@ export const SkyCanvas: React.FC = () => {
           </div>
           {isTraceMode && (
             <div className="pt-1 text-[9px] text-[#6892F6] flex items-center gap-1.5 border-t border-[#1E293B]/60 uppercase tracking-[0.08em]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)]" />
               CLICK STAR TO APPEND TRACE
             </div>
           )}

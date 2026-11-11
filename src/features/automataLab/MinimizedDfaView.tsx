@@ -158,7 +158,7 @@ export const MinimizedDfaView: React.FC = () => {
         <div className="flex items-center gap-1.5 border-t border-[var(--bg-tray,#E2E5EC)] pt-2.5 text-xs">
           <button
             onClick={() => setActiveTab('partitions')}
-            className={`hud-reticle ${activeTab === 'partitions' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-all ${
+            className={`hud-reticle ${activeTab === 'partitions' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
               activeTab === 'partitions'
                 ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white'
                 : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
@@ -168,7 +168,7 @@ export const MinimizedDfaView: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('sideBySide')}
-            className={`hud-reticle ${activeTab === 'sideBySide' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-all ${
+            className={`hud-reticle ${activeTab === 'sideBySide' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
               activeTab === 'sideBySide'
                 ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white'
                 : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
@@ -178,7 +178,7 @@ export const MinimizedDfaView: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('proof')}
-            className={`hud-reticle ${activeTab === 'proof' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-all ${
+            className={`hud-reticle ${activeTab === 'proof' ? 'active' : ''} px-3 py-1 rounded-[6px] font-mono text-[10px] font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
               activeTab === 'proof'
                 ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white'
                 : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
@@ -214,7 +214,7 @@ export const MinimizedDfaView: React.FC = () => {
                   <div
                     key={idx}
                     onClick={() => handleSelectMinState(minId)}
-                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2.5 rounded-[8px] border cursor-pointer transition-all ${
+                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2.5 rounded-[8px] border cursor-pointer transition-colors ${
                       isSelected
                         ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none'
                         : hasMerger
@@ -359,7 +359,7 @@ export const MinimizedDfaView: React.FC = () => {
                   <div
                     key={state.id}
                     onClick={() => handleSelectOrigState(state.id)}
-                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2 rounded-[6px] border cursor-pointer transition-all font-mono text-xs ${
+                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2 rounded-[6px] border cursor-pointer transition-colors font-mono text-xs ${
                       isSelected
                         ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none'
                         : isTargetMinSelected
@@ -425,7 +425,7 @@ export const MinimizedDfaView: React.FC = () => {
                   <div
                     key={idx}
                     onClick={() => handleSelectMinState(minId)}
-                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2 rounded-[6px] border cursor-pointer transition-all font-mono text-xs ${
+                    className={`hud-reticle ${isSelected ? 'active' : ''} p-2 rounded-[6px] border cursor-pointer transition-colors font-mono text-xs ${
                       isSelected
                         ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none'
                         : hasMerger

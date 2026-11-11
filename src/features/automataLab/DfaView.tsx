@@ -128,7 +128,7 @@ export const DfaView: React.FC = () => {
                           <button
                             key={s.id}
                             onClick={() => setSelectedStateId(s.id)}
-                            className={`hud-reticle ${isSelected ? 'active' : ''} px-2.5 py-1.5 rounded-[6px] border text-[11px] font-mono transition-all text-left cursor-pointer ${
+                            className={`hud-reticle ${isSelected ? 'active' : ''} px-2.5 py-1.5 rounded-[6px] border text-[11px] font-mono transition-colors text-left cursor-pointer ${
                               isSelected
                                 ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none'
                                 : s.isAccepting

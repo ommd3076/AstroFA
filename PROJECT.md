@@ -42,7 +42,7 @@ Costellar combines formal Theory of Computation (automata theory, $\varepsilon$-
 | M2 | Sky Viewport & Trace Telemetry | SkyCanvas.tsx, StarInspector.tsx, TraceHud.tsx, PatternAnalysisModal.tsx, RecognitionResultsModal.tsx | M1 contract | DONE |
 | M3 | Automata Lab Hardware Console | AutomataLab.tsx, NfaView.tsx, EpsilonClosureView.tsx, SubsetConstructionView.tsx, DfaView.tsx, MinimizedDfaView.tsx, SimulatorView.tsx, FormalDefinitionView.tsx, TransitionTableView.tsx, ExportModal.tsx | M1 contract | DONE |
 | M4 | Observational Tools & Image Lab | ConstellationExplorer.tsx, SkyTonight.tsx, HuntMode.tsx, ImageLab.tsx, AcademicWalkthrough.tsx, CreditsModal.tsx | M1 contract | DONE |
-| M_FINAL | E2E Verification & Adversarial Hardening | Pass 100% E2E test suite, adversarial coverage audit, forensic integrity review | M1, M2, M3, M4, M_TEST | IN_PROGRESS |
+| M_FINAL | E2E Verification & Adversarial Hardening | Pass 100% E2E test suite, adversarial coverage audit, forensic integrity review | M1, M2, M3, M4, M_TEST | DONE |
 
 ## Interface Contracts
 
