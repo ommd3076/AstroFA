@@ -15,13 +15,23 @@ export const SimulatorView: React.FC = () => {
 
   const [inputStringRaw, setInputStringRaw] = useState<string>(simulatorSymbols.join(' '));
   const [playbackSpeedMs, setPlaybackSpeedMs] = useState<number>(750);
+  const [inputError, setInputError] = useState<string | null>(null);
 
   // Parse raw text into symbol array
   const handleApplyInput = () => {
+    setSimulatorIsPlaying(false);
     const parsed = inputStringRaw
       .split(/[\s,]+/)
       .map(s => s.trim())
       .filter(s => s.length > 0);
+    const invalidSymbols = [...new Set(parsed.filter(symbol => !MINIMIZED_DFA_MACHINE.alphabet.includes(symbol)))];
+    if (invalidSymbols.length > 0) {
+      setInputError(`Unknown symbol${invalidSymbols.length === 1 ? '' : 's'}: ${invalidSymbols.join(', ')}. Use symbols from Σ.`);
+      return;
+    }
+    setInputError(null);
+    setSimulatorStep(0);
+    setSimulatorIsPlaying(false);
     setSimulatorSymbols(parsed);
   };
 
@@ -56,7 +66,7 @@ export const SimulatorView: React.FC = () => {
   const isFinalStep = simulatorStep === totalSteps;
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono select-none overflow-y-auto pr-0.5">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-y-auto pr-0.5">
       {/* Overview Banner — Module Card */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] space-y-1.5 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -89,6 +99,9 @@ export const SimulatorView: React.FC = () => {
                 value={inputStringRaw}
                 onChange={e => setInputStringRaw(e.target.value)}
                 placeholder="E.G. LL:M RR:M L:M OR S:S R:G"
+                aria-label="Input string over the minimized DFA alphabet"
+                aria-invalid={Boolean(inputError)}
+                aria-describedby={inputError ? 'simulator-input-error' : undefined}
                 className="w-full bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-[var(--ink-primary,#181A20)] placeholder:text-[var(--ink-muted,#8C93A0)]"
               />
             </div>
@@ -107,8 +120,12 @@ export const SimulatorView: React.FC = () => {
                 const pat = REFERENCE_PATTERNS.find(p => p.id === e.target.value);
                 if (pat) {
                   setInputStringRaw(pat.encodedSymbols.join(' '));
+                  setInputError(null);
+                  setSimulatorStep(0);
+                  setSimulatorIsPlaying(false);
                   setSimulatorSymbols(pat.encodedSymbols);
                 }
+                e.currentTarget.value = '';
               }}
               defaultValue=""
               className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2.5 py-1.5 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase tracking-wider cursor-pointer"
@@ -123,6 +140,8 @@ export const SimulatorView: React.FC = () => {
           </div>
         </div>
 
+        {inputError && <p id="simulator-input-error" role="alert" className="text-[10px] text-red-700">{inputError}</p>}
+
         {/* Quick-insert alphabet symbol buttons */}
         <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--bg-tray,#E2E5EC)]">
           <span className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase font-semibold mr-1">
@@ -134,7 +153,7 @@ export const SimulatorView: React.FC = () => {
               onClick={() => {
                 const nextStr = inputStringRaw ? `${inputStringRaw} ${sym}` : sym;
                 setInputStringRaw(nextStr);
-                setSimulatorSymbols(nextStr.split(/\s+/));
+                setSimulatorSymbols(nextStr.split(/[\s,]+/).filter(Boolean));
               }}
               className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--ink-primary,#181A20)] rounded-[4px] text-[10px] font-mono border border-[rgba(0,0,0,0.06)] transition-colors cursor-pointer"
             >
@@ -163,6 +182,7 @@ export const SimulatorView: React.FC = () => {
           </button>
           <button
             onClick={() => setSimulatorIsPlaying(!simulatorIsPlaying)}
+            disabled={!simulatorIsPlaying && (totalSteps === 0 || simulatorStep >= totalSteps)}
             className={`hud-reticle active px-3 py-1 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1 ${
               simulatorIsPlaying
                 ? 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--signal-cobalt,#1D55F5)] border border-[var(--signal-mid,#6892F6)]'

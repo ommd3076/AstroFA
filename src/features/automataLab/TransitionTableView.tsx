@@ -36,7 +36,7 @@ export const TransitionTableView: React.FC = () => {
   }, [dfa.alphabet, filterSymbol]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono select-none overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-hidden">
       {/* Control Banner — Elevated Bento Module Card */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3 rounded-[12px] flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
@@ -44,6 +44,7 @@ export const TransitionTableView: React.FC = () => {
           <div className="flex bg-[var(--bg-tray,#E2E5EC)] rounded-[6px] p-0.5 border border-[rgba(0,0,0,0.06)]">
             <button
               onClick={() => setMachineChoice('minimized')}
+              aria-pressed={machineChoice === 'minimized'}
               className={`hud-reticle ${machineChoice === 'minimized' ? 'active' : ''} px-3 py-1 rounded-[4px] text-[10px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
                 machineChoice === 'minimized'
                   ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
@@ -54,6 +55,7 @@ export const TransitionTableView: React.FC = () => {
             </button>
             <button
               onClick={() => setMachineChoice('original')}
+              aria-pressed={machineChoice === 'original'}
               className={`hud-reticle ${machineChoice === 'original' ? 'active' : ''} px-3 py-1 rounded-[4px] text-[10px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
                 machineChoice === 'original'
                   ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
@@ -74,6 +76,7 @@ export const TransitionTableView: React.FC = () => {
           <div className="hud-reticle">
             <input
               type="text"
+              aria-label="Filter states by name or accepting pattern"
               placeholder="FILTER STATE / PATTERN..."
               value={searchState}
               onChange={e => setSearchState(e.target.value)}
@@ -82,6 +85,7 @@ export const TransitionTableView: React.FC = () => {
           </div>
           <div className="hud-reticle">
             <select
+              aria-label="Filter transition table by input symbol"
               value={filterSymbol}
               onChange={e => setFilterSymbol(e.target.value)}
               className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2 py-1 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase cursor-pointer"
@@ -119,7 +123,8 @@ export const TransitionTableView: React.FC = () => {
               return (
                 <tr key={state.id} className="hover:bg-[var(--bg-pill-neutral,#E6E9EF)] transition-colors">
                   {/* Row Header (Sticky left) */}
-                  <td className="p-2.5 sticky left-0 bg-[var(--bg-card,#F5F6F8)] border-r border-[rgba(0,0,0,0.1)] font-bold text-[var(--ink-primary,#181A20)] flex items-center justify-between gap-1 z-10">
+                  <td className="p-2.5 sticky left-0 bg-[var(--bg-card,#F5F6F8)] border-r border-[rgba(0,0,0,0.1)] font-bold text-[var(--ink-primary,#181A20)] z-10">
+                    <div className="flex items-center justify-between gap-1">
                     <div className="flex items-center gap-1.5 truncate">
                       {isInitial && (
                         <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">
@@ -142,6 +147,7 @@ export const TransitionTableView: React.FC = () => {
                         {state.acceptingLabels[0]}
                       </span>
                     )}
+                    </div>
                   </td>
 
                   {/* Transition cells */}

@@ -55,7 +55,7 @@ export const DfaView: React.FC = () => {
   }, [selectedStateId]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono select-none overflow-y-auto pr-0.5">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-y-auto pr-0.5">
       {/* Overview Banner — Elevated Bento Module Card */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] space-y-1.5 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -93,6 +93,7 @@ export const DfaView: React.FC = () => {
                 placeholder="SEARCH STATE / PATTERN..."
                 value={searchFilter}
                 onChange={e => setSearchFilter(e.target.value)}
+                aria-label="Search DFA states and accepting patterns"
                 className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2.5 py-1 text-[11px] text-[var(--ink-primary,#181A20)] font-mono uppercase tracking-wider placeholder:text-[var(--ink-muted,#8C93A0)]"
               />
             </div>
@@ -128,6 +129,7 @@ export const DfaView: React.FC = () => {
                           <button
                             key={s.id}
                             onClick={() => setSelectedStateId(s.id)}
+                            aria-pressed={isSelected}
                             className={`hud-reticle ${isSelected ? 'active' : ''} px-2.5 py-1.5 rounded-[6px] border text-[11px] font-mono transition-colors text-left cursor-pointer ${
                               isSelected
                                 ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none'
@@ -202,10 +204,11 @@ export const DfaView: React.FC = () => {
               <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
                 {outgoingTransitions.length > 0 ? (
                   outgoingTransitions.map((t, idx) => (
-                    <div
+                    <button
                       key={idx}
                       onClick={() => setSelectedStateId(t.to)}
-                      className="p-1.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] rounded-[6px] border border-[rgba(0,0,0,0.06)] cursor-pointer flex items-center justify-between text-[11px] font-mono transition-colors"
+                      className="w-full p-1.5 bg-[var(--bg-tray,#dedfdf)] hover:bg-[#e5e6e5] rounded-[6px] border border-[rgba(0,0,0,0.06)] cursor-pointer flex items-center justify-between text-[11px] font-mono transition-colors text-left"
+                      aria-label={`Go to state ${t.to} on symbol ${t.symbol}`}
                     >
                       <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold px-1.5 py-0.2 bg-[var(--bg-card,#F5F6F8)] border border-[var(--signal-surface,#C7D5EC)] rounded-[4px] text-[10px]">
                         {t.symbol}
@@ -214,7 +217,7 @@ export const DfaView: React.FC = () => {
                       <span className="text-[var(--ink-primary,#181A20)] font-bold font-['Doto',monospace]">
                         {t.to}
                       </span>
-                    </div>
+                    </button>
                   ))
                 ) : (
                   <div className="text-[10px] text-[var(--ink-muted,#8C93A0)] uppercase p-2">
@@ -231,15 +234,16 @@ export const DfaView: React.FC = () => {
               </div>
               <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
                 {incomingTransitions.map((t, idx) => (
-                  <div
+                  <button
                     key={idx}
                     onClick={() => setSelectedStateId(t.from)}
-                    className="p-1.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] rounded-[6px] border border-[rgba(0,0,0,0.06)] cursor-pointer flex items-center justify-between text-[11px] font-mono transition-colors"
+                    className="w-full p-1.5 bg-[var(--bg-tray,#dedfdf)] hover:bg-[#e5e6e5] rounded-[6px] border border-[rgba(0,0,0,0.06)] cursor-pointer flex items-center justify-between text-[11px] font-mono transition-colors text-left"
+                    aria-label={`Go to source state ${t.from} on symbol ${t.symbol}`}
                   >
                     <span className="text-[var(--ink-primary,#181A20)] font-bold font-['Doto',monospace]">{t.from}</span>
                     <span className="text-[10px] text-[var(--ink-muted,#8C93A0)]">on '{t.symbol}' ➔</span>
                     <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold font-['Doto',monospace]">{t.to}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

@@ -57,7 +57,7 @@ export const MinimizedDfaView: React.FC = () => {
   });
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono select-none overflow-y-auto pr-0.5">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-y-auto pr-0.5">
       {/* Top Telemetry Header & 4 KPI Module Cards */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] space-y-3 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

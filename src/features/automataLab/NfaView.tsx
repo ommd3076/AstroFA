@@ -81,7 +81,7 @@ export const NfaView: React.FC = () => {
   }, [activePatterns]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono select-none overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-hidden">
       {/* Control Banner — Elevated Bento Module Card */}
       <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="space-y-1">
@@ -120,12 +120,12 @@ export const NfaView: React.FC = () => {
       </div>
 
       {/* Uniform Matte Technical Canvas */}
-      <div className="flex-1 rounded-[12px] border border-[var(--bg-tray,#E2E5EC)] overflow-auto relative bg-[#060A14]">
+      <div className="flex-1 min-h-0 rounded-[10px] border border-[var(--bg-tray,#dedfdf)] overflow-auto relative bg-[var(--bg-card,#f6f6f5)]">
         <svg
           width={layout.width}
           height={layout.height}
           className="min-w-full"
-          style={{ background: '#060A14' }}
+          style={{ background: '#f6f6f5' }}
         >
           <defs>
             <marker
@@ -190,8 +190,8 @@ export const NfaView: React.FC = () => {
                   width={isEps ? 20 : 40}
                   height={18}
                   rx={3}
-                  fill="#0B1120"
-                  stroke={isHighlighted ? '#1D55F5' : isEps ? '#8FA4C4' : '#2A3447'}
+                  fill="#f6f6f5"
+                  stroke={isHighlighted ? '#064bdc' : isEps ? '#8a8f96' : '#dedfdf'}
                   strokeWidth={1}
                 />
                 <text
@@ -199,7 +199,7 @@ export const NfaView: React.FC = () => {
                   y={midY + 3}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill={isHighlighted ? '#FFFFFF' : isEps ? '#C7D5EC' : '#E0E8F9'}
+                  fill={isHighlighted ? '#064bdc' : '#565b64'}
                   fontSize={isEps ? '11px' : '9px'}
                   fontWeight="600"
                   fontFamily="'IBM Plex Mono', monospace"
@@ -221,7 +221,19 @@ export const NfaView: React.FC = () => {
                 transform={`translate(${node.x}, ${node.y})`}
                 onMouseEnter={() => setHoveredState(id)}
                 onMouseLeave={() => setHoveredState(null)}
-                className="cursor-pointer"
+                onClick={() => setHoveredState(id)}
+                onFocus={() => setHoveredState(id)}
+                onBlur={() => setHoveredState(null)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setHoveredState(id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${node.label}${node.isAccepting ? `, accepting ${node.labels.join(', ')}` : ''}`}
+                className="cursor-pointer outline-none"
               >
                 {/* Start arrow for q0 */}
                 {isInitial && (
@@ -257,8 +269,8 @@ export const NfaView: React.FC = () => {
                 {/* Main state circle */}
                 <circle
                   r={20}
-                  fill={isInitial || node.isAccepting ? '#0D2359' : '#0B1120'}
-                  stroke={isInitial || node.isAccepting ? '#1D55F5' : isHovered ? '#1D55F5' : '#3E485E'}
+                  fill={isInitial || node.isAccepting ? '#e5edff' : '#f6f6f5'}
+                  stroke={isInitial || node.isAccepting || isHovered ? '#064bdc' : '#8a8f96'}
                   strokeWidth={isHovered ? 2.5 : 1.8}
                 />
 
@@ -266,7 +278,7 @@ export const NfaView: React.FC = () => {
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill="#FFFFFF"
+                  fill="#18191b"
                   fontSize={isInitial ? '11px' : '9px'}
                   fontFamily="'IBM Plex Mono', monospace"
                   fontWeight="600"
@@ -283,14 +295,14 @@ export const NfaView: React.FC = () => {
                       width={56}
                       height={16}
                       rx={3}
-                      fill="#0D2359"
-                      stroke="#1D55F5"
+                      fill="#e5edff"
+                      stroke="#064bdc"
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill="#E0E8F9"
+                      fill="#064bdc"
                       fontSize="9px"
                       fontFamily="'IBM Plex Mono', monospace"
                       fontWeight="600"

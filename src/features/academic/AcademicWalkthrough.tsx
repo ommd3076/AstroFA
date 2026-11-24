@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   REFERENCE_PATTERNS,
   NFA_MACHINE,
@@ -15,6 +15,16 @@ import { normalizeGeometry } from '../../geometry/normalize';
 export const AcademicWalkthrough: React.FC = () => {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('Cas_fwd');
   const [activeStep, setActiveStep] = useState<number>(1);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement || event.target instanceof HTMLTextAreaElement) return;
+      if (event.key === 'ArrowRight') setActiveStep(step => Math.min(11, step + 1));
+      if (event.key === 'ArrowLeft') setActiveStep(step => Math.max(1, step - 1));
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const pattern = REFERENCE_PATTERNS.find(p => p.id === selectedPatternId) || REFERENCE_PATTERNS[0];
 
@@ -51,13 +61,13 @@ export const AcademicWalkthrough: React.FC = () => {
   ];
 
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-1.5 sm:p-2 gap-1.5 overflow-y-auto">
+    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-2 sm:p-3 gap-2 overflow-y-auto" aria-label="Academic viva walkthrough">
       {/* Top Header Bento Card */}
       <div className="bento-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-            <span className="telemetry-label text-xs">[ 🎓 ACADEMIC VIVA DEMONSTRATION // 11-STEP FORMAL EVALUATION ]</span>
+          <span className="telemetry-label text-xs">ACADEMIC VIVA · FORMAL WALKTHROUGH</span>
           </div>
           <p className="text-[11px] text-[var(--ink-secondary)] mt-1">
             End-to-end mathematical theory of computation proof for college viva &amp; formal examination.
@@ -83,33 +93,28 @@ export const AcademicWalkthrough: React.FC = () => {
         </div>
       </div>
 
-      {/* 11-Step Tactile Hardware Step Navigation Strip */}
-      <div className="bento-card p-2 flex items-center gap-1.5 overflow-x-auto">
-        {stepsList.map(s => {
-          const isActive = activeStep === s.num;
-          return (
-            <button
-              key={s.num}
-              onClick={() => setActiveStep(s.num)}
-              className={`tactile-pill hud-reticle px-3 py-2 text-left border transition-all cursor-pointer whitespace-nowrap shrink-0 rounded-[8px] ${
-                isActive
-                  ? 'bg-[var(--signal-cobalt)] text-white border-[var(--signal-mid)] shadow-none'
-                  : 'bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] border-[var(--bg-tray)]'
-              }`}
-            >
-              <div className="flex items-center gap-1.5 font-bold text-xs">
-                <span className={`font-dot ${isActive ? 'text-white' : 'text-[var(--signal-cobalt)]'}`}>
-                  {s.num.toString().padStart(2, '0')}.
-                </span>
-                <span className="uppercase tracking-wider">{s.title}</span>
-              </div>
-              <div className={`text-[10px] uppercase tracking-wide truncate max-w-[130px] ${isActive ? 'text-white/80' : 'text-[var(--ink-muted)]'}`}>
-                {s.subtitle}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      {/* Compact step selector keeps all eleven named stages available on short screens. */}
+      <nav className="bento-card p-3 flex flex-row items-center justify-between gap-3" aria-label="Walkthrough steps" style={{ flexDirection: 'row' }}>
+        <label className="flex min-w-0 flex-col gap-1 text-[10px] text-[var(--ink-muted)] uppercase tracking-wide">
+          <span>Step {String(activeStep).padStart(2, '0')} of 11</span>
+          <select
+            value={activeStep}
+            onChange={event => setActiveStep(Number(event.target.value))}
+            className="max-w-full rounded-[6px] border border-[var(--bg-tray)] bg-[var(--bg-card-subtle)] px-3 py-2 text-xs font-semibold text-[var(--ink-primary)] focus:outline-none focus:border-[var(--signal-cobalt)]"
+            aria-label="Choose walkthrough step"
+          >
+            {stepsList.map(step => (
+              <option key={step.num} value={step.num}>
+                {String(step.num).padStart(2, '0')}. {step.title} — {step.subtitle}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="min-w-0 text-right">
+          <p className="truncate text-sm font-semibold text-[var(--signal-cobalt)]">{stepsList[activeStep - 1].title}</p>
+          <p className="truncate text-[10px] text-[var(--ink-muted)]">{stepsList[activeStep - 1].subtitle}</p>
+        </div>
+      </nav>
 
       {/* Active Step Content Card */}
       <div className="bento-card p-5 space-y-4">
@@ -503,6 +508,6 @@ export const AcademicWalkthrough: React.FC = () => {
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

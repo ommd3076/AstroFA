@@ -3,7 +3,6 @@ import { useAstroStore, type AutomataTab } from '../../stores/useAstroStore';
 import {
   DFA_MACHINE,
   MINIMIZED_DFA_MACHINE,
-  NFA_MACHINE,
   REFERENCE_PATTERNS,
 } from '../../data/astroData';
 import type { DFA, StateId } from '../../automata/types';
@@ -20,7 +19,7 @@ interface AutomataInstrumentPanelProps {
   onOpenExport?: () => void;
 }
 
-type MachineRockerChoice = 'nfa' | 'dfa' | 'minimized';
+type MachineRockerChoice = 'dfa' | 'minimized';
 type FixtureSource = 'live' | 'frame10';
 
 export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = ({
@@ -49,16 +48,13 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
       ? simulatorSymbols.join(' ')
       : (REFERENCE_PATTERNS.find(p => p.id === 'Cas_fwd') || REFERENCE_PATTERNS[0]).encodedSymbols.join(' ');
   });
-  const [localStep, setLocalStep] = useState<number>(() => {
-    return simulatorStep > 0
-      ? simulatorStep
-      : (REFERENCE_PATTERNS.find(p => p.id === 'Cas_fwd') || REFERENCE_PATTERNS[0]).encodedSymbols.length;
-  });
+  const [localStep, setLocalStep] = useState<number>(simulatorStep);
   const [localIsPlaying, setLocalIsPlaying] = useState<boolean>(false);
 
   // Graph Pan & Zoom
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState<number>(1);
+  const [showAllGraphStates, setShowAllGraphStates] = useState(false);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -70,41 +66,20 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
     if (rockerChoice === 'minimized') {
       return MINIMIZED_DFA_MACHINE;
     }
-    if (rockerChoice === 'dfa') {
-      return DFA_MACHINE;
-    }
-    // For 'nfa', wrap NFA transitions into a DFA-compatible view for rendering
-    return {
-      states: NFA_MACHINE.states.map(s => ({
-        id: s.id,
-        name: s.name,
-        isInitial: s.isInitial,
-        isAccepting: s.isAccepting,
-        acceptingLabels: s.acceptingLabels,
-        nfaSubset: [s.id],
-      })),
-      alphabet: NFA_MACHINE.alphabet,
-      initialState: NFA_MACHINE.initialState,
-      transitions: NFA_MACHINE.transitions.map(t => ({
-        from: t.from,
-        to: t.to,
-        symbol: t.symbol,
-      })),
-      acceptingStates: NFA_MACHINE.acceptingStates,
-      isComplete: false,
-    };
+    return DFA_MACHINE;
   }, [fixtureSource, rockerChoice]);
 
   // Handle switching fixture source
   const handleSelectFixture = (source: FixtureSource) => {
+    setLocalIsPlaying(false);
     setFixtureSource(source);
     if (source === 'frame10') {
       setLocalInputRaw(FRAME_10_DEFAULT_INPUT);
-      setLocalStep(6);
+      setLocalStep(0);
     } else {
       const defaultPattern = REFERENCE_PATTERNS.find(p => p.id === 'Cas_fwd') || REFERENCE_PATTERNS[0];
       setLocalInputRaw(simulatorSymbols.length > 0 ? simulatorSymbols.join(' ') : defaultPattern.encodedSymbols.join(' '));
-      setLocalStep(simulatorSymbols.length > 0 ? simulatorStep : defaultPattern.encodedSymbols.length);
+      setLocalStep(0);
     }
   };
 
@@ -121,6 +96,12 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
     }
     return raw.split(/[\s,]+/).filter(Boolean);
   }, [localInputRaw, fixtureSource]);
+
+  const invalidSymbols = useMemo(
+    () => [...new Set(parsedInputSymbols.filter(symbol => !activeMachine.alphabet.includes(symbol)))],
+    [parsedInputSymbols, activeMachine],
+  );
+  const hasValidInput = invalidSymbols.length === 0;
 
   // Run simulation over activeMachine
   const simResult = useMemo(() => {
@@ -155,6 +136,32 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
   // Current simulation step & state
   const currentSimStep = localStep > 0 && localStep <= simResult.steps.length ? simResult.steps[localStep - 1] : null;
   const currentSimStateId = currentSimStep ? currentSimStep.nextState : activeMachine.initialState;
+
+  // Keep large live machines readable by showing a labelled window around the
+  // current input trace. The full graph is one click away and remains the same
+  // active machine; no fixture data is substituted.
+  const graphVisibleStateIds = useMemo(() => {
+    const allStateIds = new Set(activeMachine.states.map(state => state.id));
+    if (fixtureSource === 'frame10' || showAllGraphStates || activeMachine.states.length <= 18) {
+      return allStateIds;
+    }
+
+    const windowSize = 10;
+    const windowStart = Math.max(0, Math.min(localStep - 5, simResult.steps.length - windowSize));
+    const visibleIds = new Set<StateId>();
+    if (windowStart === 0 || simResult.steps.length === 0) visibleIds.add(activeMachine.initialState);
+    simResult.steps.slice(windowStart, windowStart + windowSize).forEach(step => {
+      visibleIds.add(step.currentState);
+      visibleIds.add(step.nextState);
+    });
+    if (selectedStateId && allStateIds.has(selectedStateId)) visibleIds.add(selectedStateId);
+    return visibleIds;
+  }, [activeMachine, fixtureSource, localStep, selectedStateId, showAllGraphStates, simResult.steps]);
+
+  const graphStates = useMemo(
+    () => activeMachine.states.filter(state => graphVisibleStateIds.has(state.id)),
+    [activeMachine, graphVisibleStateIds],
+  );
 
   // Active state for highlighting
   const highlightedStateId = selectedStateId || currentSimStateId;
@@ -197,11 +204,15 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
 
     // BFS depth assignment for live machines
     const depths = new Map<StateId, number>();
-    depths.set(activeMachine.initialState, 0);
-    const queue: StateId[] = [activeMachine.initialState];
+    const layoutStartState = graphVisibleStateIds.has(activeMachine.initialState)
+      ? activeMachine.initialState
+      : graphStates[0]?.id;
+    if (layoutStartState) depths.set(layoutStartState, 0);
+    const queue: StateId[] = layoutStartState ? [layoutStartState] : [];
     const adj = new Map<StateId, StateId[]>();
 
     for (const t of activeMachine.transitions) {
+      if (!graphVisibleStateIds.has(t.from) || !graphVisibleStateIds.has(t.to)) continue;
       if (!adj.has(t.from)) adj.set(t.from, []);
       adj.get(t.from)!.push(t.to);
     }
@@ -217,10 +228,12 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
       }
     }
 
-    // Group by layer
+    // Group the visible graph window by layer so a focused trace does not keep
+    // the spacing of dozens of hidden states.
     const layers: Record<number, StateId[]> = {};
-    for (const s of activeMachine.states) {
-      const d = depths.get(s.id) ?? 99;
+    const deepestReachableDepth = Math.max(0, ...depths.values());
+    for (const s of graphStates) {
+      const d = depths.get(s.id) ?? deepestReachableDepth;
       if (!layers[d]) layers[d] = [];
       layers[d].push(s.id);
     }
@@ -243,7 +256,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
     });
 
     return pos;
-  }, [fixtureSource, activeMachine]);
+  }, [fixtureSource, activeMachine, graphStates, graphVisibleStateIds]);
 
   // Constellation path states
   const constellationPathStateIds = useMemo(() => {
@@ -270,7 +283,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
     if (fixtureSource === 'frame10') {
       return ['0', '1'];
     }
-    return activeMachine.alphabet.slice(0, 10); // Show first 10 symbols with scroll
+    return activeMachine.alphabet.slice(0, 6);
   }, [fixtureSource, activeMachine]);
 
   // Visible States for transition table
@@ -278,9 +291,14 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
     if (fixtureSource === 'frame10') {
       return activeMachine.states;
     }
-    // In live mode, prioritize initial state, active simulation state, and accepting states
-    return activeMachine.states.slice(0, 15);
-  }, [fixtureSource, activeMachine]);
+    const prioritized = [
+      activeMachine.states.find(state => state.id === activeMachine.initialState),
+      activeMachine.states.find(state => state.id === currentSimStateId),
+      ...activeMachine.states.filter(state => state.isAccepting),
+      ...activeMachine.states,
+    ].filter((state): state is (typeof activeMachine.states)[number] => Boolean(state));
+    return [...new Map(prioritized.map(state => [state.id, state])).values()].slice(0, 8);
+  }, [fixtureSource, activeMachine, currentSimStateId]);
 
   // Handle Graph Reset
   const handleResetGraph = () => {
@@ -292,6 +310,12 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
 
   // Handle Run / Pause
   const handleToggleRun = () => {
+    if (!hasValidInput) return;
+    if (stepMode) {
+      setLocalIsPlaying(false);
+      setLocalStep(prev => Math.min(simResult.steps.length, prev + 1));
+      return;
+    }
     if (localIsPlaying) {
       setLocalIsPlaying(false);
     } else {
@@ -313,7 +337,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
   };
 
   return (
-    <div className="flex-1 flex flex-col p-3.5 gap-3 bg-[var(--bg-shell,#ECEEF2)] text-[var(--ink-primary,#181A20)] font-mono select-none overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 flex flex-col p-3.5 gap-3 bg-[var(--bg-shell,#ECEEF2)] text-[var(--ink-primary,#181A20)] font-mono  overflow-y-auto overflow-x-hidden">
       {/* =========================================================================
           ROW 1: FOUR HARDWARE METRIC TILES (FRAME 10 TOP STRIP)
           ========================================================================= */}
@@ -385,22 +409,27 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             <div className="flex items-center gap-2">
               {/* Rocker Switch: NFA | DFA | MINIMIZED (Matches Frame 10 Rocker) */}
               <div className="flex items-center bg-[var(--bg-tray,#E2E5EC)] rounded-[6px] p-0.5 border border-[rgba(0,0,0,0.06)]">
-                {(['nfa', 'dfa', 'minimized'] as MachineRockerChoice[]).map(choice => {
-                  const isActive = rockerChoice === choice && fixtureSource === 'live';
+                {(['nfa', 'dfa', 'minimized'] as const).map(choice => {
+                  const isActive = choice !== 'nfa' && rockerChoice === choice && fixtureSource === 'live';
                   return (
                     <button
                       key={choice}
                       onClick={() => {
+                        if (choice === 'nfa') {
+                          onOpenTab('nfa');
+                          return;
+                        }
                         handleSelectFixture('live');
                         setRockerChoice(choice);
                       }}
+                      title={choice === 'nfa' ? 'Open the epsilon-NFA lesson' : `Show the ${choice === 'minimized' ? 'minimized DFA' : 'original DFA'}`}
                       className={`px-2.5 py-1 rounded-[4px] text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-colors ${
                         isActive
                           ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
                           : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
                       }`}
                     >
-                      {choice.toUpperCase()}
+                      {choice === 'nfa' ? 'ε-NFA' : choice.toUpperCase()}
                     </button>
                   );
                 })}
@@ -460,30 +489,44 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             </div>
           )}
 
+          {fixtureSource === 'live' && activeMachine.states.length > 18 && (
+            <div className="flex items-center justify-between px-1 text-[9px] font-mono uppercase tracking-wider text-[var(--ink-muted,#8C93A0)]">
+              <span>{showAllGraphStates ? 'FULL MACHINE' : `TRACE WINDOW / ${graphStates.length} OF ${activeMachine.states.length} STATES`}</span>
+              <button
+                type="button"
+                onClick={() => setShowAllGraphStates(value => !value)}
+                aria-pressed={showAllGraphStates}
+                className="font-bold text-[var(--signal-cobalt,#1D55F5)] hover:underline cursor-pointer"
+              >
+                {showAllGraphStates ? 'FOCUS TRACE' : `SHOW ALL ${activeMachine.states.length}`}
+              </button>
+            </div>
+          )}
           {/* Interactive Automaton SVG Graph */}
           <div className="flex-1 min-h-[260px] bg-[var(--bg-tray,#E2E5EC)]/40 rounded-[8px] border border-[rgba(0,0,0,0.06)] relative overflow-hidden flex items-center justify-center">
             <svg
               viewBox="0 0 740 310"
-              className="w-full h-full cursor-grab active:cursor-grabbing"
+              className="w-full h-full touch-none cursor-grab active:cursor-grabbing"
               style={{
                 transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
                 transformOrigin: 'center center',
               }}
-              onMouseDown={e => {
+              onPointerDown={e => {
                 isDraggingRef.current = true;
                 dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+                e.currentTarget.setPointerCapture(e.pointerId);
               }}
-              onMouseMove={e => {
+              onPointerMove={e => {
                 if (!isDraggingRef.current) return;
                 setPan({
                   x: e.clientX - dragStartRef.current.x,
                   y: e.clientY - dragStartRef.current.y,
                 });
               }}
-              onMouseUp={() => {
+              onPointerUp={() => {
                 isDraggingRef.current = false;
               }}
-              onMouseLeave={() => {
+              onPointerCancel={() => {
                 isDraggingRef.current = false;
               }}
               onWheel={e => {
@@ -543,14 +586,16 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               )}
 
               {/* Transitions (Edges) */}
-              {activeMachine.transitions.map((t, idx) => {
+              {activeMachine.transitions.filter(t => graphVisibleStateIds.has(t.from) && graphVisibleStateIds.has(t.to)).map((t, idx) => {
                 const src = nodePositions[t.from];
                 const dst = nodePositions[t.to];
                 if (!src || !dst) return null;
 
-                const isPathActive = constellationPathStateIds
+                const isConstellationPathActive = constellationPathStateIds
                   ? constellationPathStateIds.has(t.from) && constellationPathStateIds.has(t.to)
                   : true;
+                const isCurrentTransition = currentSimStep?.currentState === t.from && currentSimStep?.inputSymbol === t.symbol && currentSimStep?.nextState === t.to;
+                const isPathActive = isConstellationPathActive && (!currentSimStep || isCurrentTransition);
 
                 // Self loop transition
                 if (t.from === t.to) {
@@ -657,7 +702,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               })}
 
               {/* State Nodes */}
-              {activeMachine.states.map(s => {
+              {graphStates.map(s => {
                 const pos = nodePositions[s.id];
                 if (!pos) return null;
 
@@ -668,8 +713,18 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 return (
                   <g
                     key={s.id}
-                    className="cursor-pointer"
+                    className="cursor-pointer outline-none"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${s.name}, state ${s.id}${isAccepting ? ', accepting' : ''}${s.isInitial ? ', initial' : ''}`}
+                    aria-pressed={selectedStateId === s.id}
                     onClick={() => setSelectedStateId(s.id)}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setSelectedStateId(s.id);
+                      }
+                    }}
                   >
                     {/* Selected / Current Simulation Ring */}
                     {(isSelected || isCurrentSim) && (
@@ -754,9 +809,9 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">Q</span>
                 <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
                 <div className="flex-1 text-right text-[var(--ink-primary,#181A20)] truncate">
-                  {fixtureSource === 'frame10'
-                    ? '{Q0, Q1, Q2, Q3, Q5}'
-                    : `{${activeMachine.states.slice(0, 6).map(s => s.id).join(', ')}${activeMachine.states.length > 6 ? ', ...' : ''}} (|Q|=${activeMachine.states.length})`}
+                  <span title={`{${activeMachine.states.map(state => state.id).join(', ')}}`}>
+                    {`{${activeMachine.states.slice(0, 6).map(s => s.id).join(', ')}${activeMachine.states.length > 6 ? ', …' : ''}} (|Q|=${activeMachine.states.length})`}
+                  </span>
                 </div>
               </div>
 
@@ -765,9 +820,9 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">Σ</span>
                 <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
                 <div className="flex-1 text-right text-[var(--ink-primary,#181A20)] truncate">
-                  {fixtureSource === 'frame10'
-                    ? '{0, 1}'
-                    : `{${activeMachine.alphabet.slice(0, 5).join(', ')}${activeMachine.alphabet.length > 5 ? ', ...' : ''}} (|Σ|=${activeMachine.alphabet.length})`}
+                  <span title={`{${activeMachine.alphabet.join(', ')}}`}>
+                    {`{${activeMachine.alphabet.slice(0, 5).join(', ')}${activeMachine.alphabet.length > 5 ? ', …' : ''}} (|Σ|=${activeMachine.alphabet.length})`}
+                  </span>
                 </div>
               </div>
 
@@ -776,7 +831,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">δ</span>
                 <span className="text-[var(--ink-secondary,#525866)] shrink-0">:</span>
                 <div className="flex-1 text-right text-[var(--ink-primary,#181A20)]">
-                  {rockerChoice === 'nfa' ? 'Q × (Σ ∪ {ε}) → P(Q)' : 'Q × Σ → Q'}
+                  Q × Σ → Q
                 </div>
               </div>
 
@@ -794,9 +849,9 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">F</span>
                 <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
                 <div className="flex-1 text-right text-[var(--signal-cobalt,#1D55F5)] font-bold truncate">
-                  {fixtureSource === 'frame10'
-                    ? '{Q5}'
-                    : `{${activeMachine.acceptingStates.slice(0, 4).join(', ')}${activeMachine.acceptingStates.length > 4 ? ', ...' : ''}} (|F|=${activeMachine.acceptingStates.length})`}
+                  <span title={`{${activeMachine.acceptingStates.join(', ')}}`}>
+                    {`{${activeMachine.acceptingStates.slice(0, 4).join(', ')}${activeMachine.acceptingStates.length > 4 ? ', …' : ''}} (|F|=${activeMachine.acceptingStates.length})`}
+                  </span>
                 </div>
               </div>
             </div>
@@ -828,15 +883,19 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
         <div className="lg:col-span-5 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] flex flex-col gap-2 min-h-[310px] shadow-none">
           <div className="flex items-center justify-between border-b border-[var(--bg-tray,#E2E5EC)] pb-2">
             <h3 className="text-[12px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary,#181A20)]">
-              TRANSITION TABLE (δ)
+              TRANSITION PREVIEW · δ
             </h3>
             <button
               onClick={() => onOpenTab('table')}
               className="text-[10px] font-mono text-[var(--signal-cobalt,#1D55F5)] hover:underline uppercase tracking-wider font-semibold cursor-pointer"
             >
-              FULL MATRIX ↗
+              OPEN FULL TABLE ↗
             </button>
           </div>
+
+          <p className="text-[10px] text-[var(--ink-muted,#777d85)]">
+            Showing {tableStates.length} of {activeMachine.states.length} states and {tableAlphabet.length} of {activeMachine.alphabet.length} symbols. The full table includes every transition.
+          </p>
 
           {/* Table Container with Sticky Light Header */}
           <div className="flex-1 border border-[rgba(0,0,0,0.06)] rounded-[8px] bg-[var(--bg-card,#F5F6F8)] overflow-auto max-h-[240px]">
@@ -907,7 +966,12 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                 STEP MODE
               </span>
               <button
-                onClick={() => setStepMode(!stepMode)}
+                onClick={() => {
+                  setStepMode(!stepMode);
+                  if (!stepMode) setLocalIsPlaying(false);
+                }}
+                aria-label="Toggle step mode"
+                aria-pressed={stepMode}
                 className={`w-9 h-5 rounded-full p-0.5 cursor-pointer transition-colors flex items-center ${
                   stepMode ? 'bg-[var(--signal-cobalt,#1D55F5)] justify-end' : 'bg-[var(--bg-tray,#E2E5EC)] justify-start'
                 }`}
@@ -934,6 +998,8 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                   setLocalIsPlaying(false);
                 }}
                 placeholder={fixtureSource === 'frame10' ? '010110' : 'LL:M RR:M L:M'}
+                aria-label="Input string for the active automaton"
+                aria-invalid={!hasValidInput}
                 className="w-full bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] pl-3 pr-8 py-1.5 text-[12px] font-mono font-semibold tracking-wider text-[var(--ink-primary,#181A20)] uppercase"
               />
               {localInputRaw && (
@@ -954,9 +1020,11 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             {/* Run / Pause Button */}
             <button
               onClick={handleToggleRun}
-              className="hud-reticle active px-4 py-1.5 bg-[var(--signal-cobalt,#1D55F5)] hover:bg-[#1546D8] text-white rounded-[6px] text-[11px] font-mono uppercase tracking-wider font-bold cursor-pointer flex items-center gap-1.5 shrink-0 transition-colors"
+              disabled={!hasValidInput || simResult.steps.length === 0 || (stepMode && localStep >= simResult.steps.length)}
+              aria-label={stepMode ? 'Advance one transition' : localIsPlaying ? 'Pause simulation' : 'Run simulation'}
+              className="hud-reticle active px-4 py-1.5 bg-[var(--signal-cobalt,#1D55F5)] hover:bg-[#1546D8] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-[6px] text-[11px] font-mono uppercase tracking-wider font-bold cursor-pointer flex items-center gap-1.5 shrink-0 transition-colors"
             >
-              <span>{localIsPlaying ? '⏸ PAUSE' : '▶ RUN'}</span>
+              <span>{stepMode ? '› NEXT STEP' : localIsPlaying ? '⏸ PAUSE' : '▶ RUN'}</span>
             </button>
 
             {/* Stepper Buttons */}
@@ -990,6 +1058,12 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             </div>
           </div>
 
+          {!hasValidInput && (
+            <p role="alert" aria-live="polite" className="text-[10px] text-red-600 font-mono">
+              Unknown symbol{invalidSymbols.length === 1 ? '' : 's'}: {invalidSymbols.join(', ')}. Allowed: {activeMachine.alphabet.join(', ')}.
+            </p>
+          )}
+
           {/* Trace Pipeline Row (Matches Frame 10 Trace Flow) */}
           <div className="space-y-1.5">
             <span className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-secondary,#525866)] uppercase">
@@ -1011,7 +1085,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               </div>
 
               {/* Transition steps */}
-              {simResult.steps.map((st, idx) => {
+              {hasValidInput && simResult.steps.map((st, idx) => {
                 const isReached = idx < localStep;
                 const isCurrent = idx === localStep - 1;
                 const isLast = idx === simResult.steps.length - 1;
@@ -1065,14 +1139,14 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                     : 'bg-red-50 text-red-600 border border-red-200'
                 }`}
               >
-                {simResult.accepted ? 'ACCEPT' : 'REJECT'}
+                {!hasValidInput ? 'INVALID INPUT' : simResult.accepted ? 'ACCEPT' : 'REJECT'}
               </span>
             </div>
 
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-[var(--ink-secondary,#525866)] uppercase">FINAL STATE</span>
               <span className="font-bold text-[var(--ink-primary,#181A20)]">
-                {simResult.steps.length > 0 && localStep > 0
+                {!hasValidInput ? '—' : simResult.steps.length > 0 && localStep > 0
                   ? simResult.steps[Math.min(localStep - 1, simResult.steps.length - 1)].nextState
                   : simResult.finalState}
               </span>
@@ -1081,7 +1155,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-[var(--ink-secondary,#525866)] uppercase">STEPS</span>
               <span className="font-bold text-[var(--ink-primary,#181A20)]">
-                {localStep} / {simResult.steps.length}
+                {hasValidInput ? `${localStep} / ${simResult.steps.length}` : '—'}
               </span>
             </div>
           </div>

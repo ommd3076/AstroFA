@@ -13,7 +13,9 @@ import { ExportModal } from './ExportModal';
 
 export const AutomataLab: React.FC = () => {
   const { automataTab, setAutomataTab } = useAstroStore();
-  const [isInstrumentPanel, setIsInstrumentPanel] = useState<boolean>(true);
+  // `nfa` is the store's default. A non-default tab means another feature
+  // intentionally handed a string or state inspection into the lab.
+  const [isInstrumentPanel, setIsInstrumentPanel] = useState<boolean>(automataTab === 'nfa');
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
 
   // Synchronize when automataTab is changed externally (e.g., from Trace mode handoff)
@@ -29,7 +31,7 @@ export const AutomataLab: React.FC = () => {
     { id: 'nfa', index: '01', label: 'ε-NFA' },
     { id: 'closure', index: '02', label: 'ε-CLOSURE' },
     { id: 'subset', index: '03', label: 'SUBSET CONSTR' },
-    { id: 'dfa', index: '04', label: 'DFA MATRIX' },
+    { id: 'dfa', index: '04', label: 'DFA STATES' },
     { id: 'minimized', index: '05', label: 'MIN-DFA' },
     { id: 'simulator', index: '06', label: 'SIMULATOR' },
     { id: 'formal', index: '07', label: 'FORMAL 5-TUPLE' },
@@ -46,9 +48,23 @@ export const AutomataLab: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[var(--bg-shell,#ECEEF2)] text-[var(--ink-primary,#181A20)] font-mono overflow-hidden select-none">
+    <div
+      className="flex-1 min-h-0 flex flex-col bg-[var(--bg-shell,#eeeeed)] text-[var(--ink-primary,#18191b)] font-mono overflow-hidden"
+      style={{
+        '--bg-shell': '#eeeeed',
+        '--bg-tray': '#dedfdf',
+        '--bg-card': '#f6f6f5',
+        '--ink-primary': '#18191b',
+        '--ink-secondary': '#565b64',
+        '--ink-muted': '#777d85',
+        '--bg-pill-neutral': '#e5e6e5',
+        '--bg-pill-active': '#e5edff',
+        '--signal-cobalt': '#064bdc',
+        '--signal-mid': '#8aa9ef',
+      } as React.CSSProperties}
+    >
       {/* Sub-header navigation strip — Hardware Machined Console with Discrete Tabs */}
-      <div className="h-11 border-b border-[var(--bg-tray,#E2E5EC)] bg-[var(--bg-card,#F5F6F8)] px-3.5 flex items-center justify-between shrink-0 overflow-x-auto gap-3">
+      <div className="min-h-11 border-b border-[var(--bg-tray)] bg-[var(--bg-card)] px-2 sm:px-3.5 py-1.5 flex flex-wrap items-center justify-between shrink-0 gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
           {/* Hardware Instrument Panel Primary View Selector (Matches Frame 10 Visual Truth) */}
           <button
@@ -62,32 +78,32 @@ export const AutomataLab: React.FC = () => {
           >
             <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)] inline-block mr-0.5" />
             <span>INSTRUMENT PANEL</span>
-            <span className="text-[9px] text-white/70 font-semibold">[FRAME 10]</span>
+            <span className="hidden sm:inline text-[9px] text-white/70 font-semibold">LIVE + DEMO</span>
           </button>
         </div>
 
         {/* Retained 8 Educational Detailed Teaching Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+        <nav aria-label="Automata lessons" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto no-scrollbar py-0.5 sm:justify-center">
           {tabs.map(tab => {
             const isActive = !isInstrumentPanel && automataTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => handleSelectTab(tab.id)}
+                aria-current={isActive ? 'page' : undefined}
+                title={tab.label}
                 className={`hud-reticle ${isActive ? 'active' : ''} px-2 py-1 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1 ${
                   isActive
                     ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white border border-[var(--signal-mid,#6892F6)] shadow-none'
                     : 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)] hover:bg-[#DCE0E8] border border-transparent'
                 }`}
               >
-                <span className={`text-[9px] ${isActive ? 'text-white/80' : 'text-[var(--ink-muted,#8C93A0)]'}`}>
-                  {tab.index}
-                </span>
-                <span>{tab.label}</span>
+                <span className="sr-only">{tab.index} </span>
+                <span>{tab.id === 'subset' ? 'SUBSET' : tab.id === 'formal' ? '5-TUPLE' : tab.id === 'table' ? 'TABLE' : tab.id === 'minimized' ? 'MIN-DFA' : tab.id === 'closure' ? 'CLOSURE' : tab.id === 'simulator' ? 'SIMULATOR' : tab.id === 'dfa' ? 'DFA STATES' : 'ε-NFA'}</span>
               </button>
             );
           })}
-        </div>
+        </nav>
 
         {/* Export Suite Button */}
         <button
@@ -100,14 +116,14 @@ export const AutomataLab: React.FC = () => {
       </div>
 
       {/* Main Content Surface */}
-      <div className="flex-1 bg-[var(--bg-shell,#ECEEF2)] overflow-hidden relative flex flex-col">
+      <div className="flex-1 min-h-0 bg-[var(--bg-shell)] overflow-hidden relative flex flex-col">
         {isInstrumentPanel ? (
           <AutomataInstrumentPanel
             onOpenTab={handleSelectTab}
             onOpenExport={() => setIsExportOpen(true)}
           />
         ) : (
-          <div className="flex-1 p-[6px] bg-[var(--bg-tray,#E2E5EC)] overflow-hidden relative flex flex-col gap-[6px]">
+          <div className="flex-1 min-h-0 p-1.5 sm:p-2 bg-[var(--bg-tray)] overflow-hidden relative flex flex-col gap-1.5 sm:gap-2">
             {automataTab === 'nfa' && <NfaView />}
             {automataTab === 'closure' && <EpsilonClosureView />}
             {automataTab === 'subset' && <SubsetConstructionView />}
