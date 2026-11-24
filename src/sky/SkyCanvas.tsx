@@ -80,7 +80,6 @@ export const SkyCanvas: React.FC = () => {
 
   // Camera look rotation angles (azimuth and elevation in radians)
   const lookAngles = useRef({ az: 0, el: Math.PI / 6 });
-  const targetLookAngles = useRef<{ az: number; el: number } | null>(null);
 
   // Drag detection to distinguish camera panning from star clicking
   const isDragging = useRef(false);
@@ -327,6 +326,8 @@ export const SkyCanvas: React.FC = () => {
       if (animFrameId.current !== null) {
         cancelAnimationFrame(animFrameId.current);
       }
+      isRenderScheduled.current = false;
+      animFrameId.current = null;
       resizeObserver.disconnect();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
@@ -612,7 +613,6 @@ export const SkyCanvas: React.FC = () => {
       const targetEl = (Math.max(-75, Math.min(85, hor.altitude)) * Math.PI) / 180;
       // Immediate assignment without 8% easing or snap threshold (MOTION-01)
       lookAngles.current = { az: targetAz, el: targetEl };
-      targetLookAngles.current = null;
       requestRenderRef.current();
     }
   }, [targetFocusCoords, focusedConstellationId, observer, observationDate]);
@@ -622,13 +622,29 @@ export const SkyCanvas: React.FC = () => {
     requestRenderRef.current();
   }, [showConstellationLabels, selectedStarId, focusedConstellationId]);
 
+  // Zoom event listener for external toolbar controls
+  useEffect(() => {
+    const handleCustomZoom = (e: Event) => {
+      const customEvent = e as CustomEvent<{ delta: number }>;
+      if (cameraRef.current && customEvent.detail) {
+        const nextFov = cameraRef.current.fov + customEvent.detail.delta;
+        cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
+        cameraRef.current.updateProjectionMatrix();
+        requestRenderRef.current();
+      }
+    };
+    window.addEventListener('sky-zoom', handleCustomZoom);
+    return () => window.removeEventListener('sky-zoom', handleCustomZoom);
+  }, []);
+
   // 9. Pointer Drag, Zoom, and Raycasting Handlers
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
     hasDragged.current = false;
     prevPointer.current = { x: e.clientX, y: e.clientY };
     pointerDownPos.current = { x: e.clientX, y: e.clientY };
-    targetLookAngles.current = null; // stop any ongoing smooth animation when user takes manual control
     requestRenderRef.current();
   };
 
@@ -671,8 +687,11 @@ export const SkyCanvas: React.FC = () => {
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     isDragging.current = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
     requestRenderRef.current();
   };
 
@@ -719,6 +738,7 @@ export const SkyCanvas: React.FC = () => {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onWheel={handleWheel}
       onClick={handleClick}
     >
@@ -730,7 +750,7 @@ export const SkyCanvas: React.FC = () => {
 
       {/* Hovered Star Tooltip Telemetry Readout (Costellar HUD Reticle) */}
       {hoveredStar && (
-        <div className="hud-reticle absolute pointer-events-none z-20 bottom-6 left-6 p-3 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] text-xs space-y-2 font-mono">
+        <div className="hud-reticle absolute pointer-events-none z-20 bottom-6 left-6 p-3 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] text-xs space-y-2 font-mono" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
           <div className="flex items-center justify-between gap-3 border-b border-[#1E293B] pb-1.5">
             <span className="font-bold text-[#E0E8F9] text-xs uppercase tracking-[0.08em]">
               {hoveredStar.proper || hoveredStar.name}
@@ -770,36 +790,32 @@ export const SkyCanvas: React.FC = () => {
         </div>
       )}
 
-      {/* Hunt Mode Target Hardware Overlay */}
-      {huntTarget && (
-        <div className="hud-reticle absolute top-4 left-4 z-20 bg-[#080E1C]/95 border border-[#232D42] rounded-[8px] p-3.5 text-xs font-mono max-w-sm space-y-2">
-          <div className="flex items-center justify-between gap-3 border-b border-[#1E293B] pb-2">
-            <span className="font-bold text-[#E0E8F9] text-xs uppercase tracking-[0.08em] flex items-center gap-1.5">
-              <span>TARGET:</span>
-              <span className="text-[var(--signal-cobalt)]">{huntTarget.name}</span>
-            </span>
-            <span className="text-[9px] text-[#8FA4C4] uppercase px-1.5 py-0.5 bg-[#101827] border border-[#232D42] rounded-[3px]">
-              {huntTarget.orderedStarIds.length} STARS
-            </span>
+      {/* Bottom Horizon Silhouette & Azimuth Scale (Matching Frame 2) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none overflow-hidden select-none">
+        {/* Azimuth Compass Scale */}
+        <div className="w-full pb-1 flex items-center justify-center relative h-7">
+          <svg className="w-full h-7 overflow-visible" preserveAspectRatio="none">
+            <line x1="0" y1="18" x2="100%" y2="18" stroke="#334155" strokeWidth="1" strokeDasharray="3 4" opacity="0.6" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-between px-8 text-[9px] font-mono font-semibold text-[#94A3B8] tracking-widest uppercase">
+            <span>120°</span>
+            <span className="text-[#64748B]">SE</span>
+            <span>150°</span>
+            <span className="text-[var(--signal-cobalt)] font-bold text-[10px]">180° S</span>
+            <span>210°</span>
+            <span className="text-[#64748B]">SW</span>
+            <span>240°</span>
           </div>
-          <p className="text-[#A0AEC0] text-[10px] leading-relaxed tracking-wide">
-            {huntTarget.description}
-          </p>
-          {huntHintLevel >= 1 && (
-            <div className="text-[10px] text-[#C7D5EC] bg-[#101827] border border-[#232D42] p-2 rounded-[4px] uppercase tracking-wider">
-              HINT 1: REGION RA {((CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.raCenter || 0) / 15).toFixed(1)}H, DEC {(CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.decCenter || 0).toFixed(0)}°.
-            </div>
-          )}
-          {huntHintLevel >= 2 && (
-            <div className="text-[10px] text-[var(--signal-cobalt)] bg-[#101827] border border-[var(--signal-cobalt)]/40 p-2 rounded-[4px] uppercase tracking-wider font-semibold">
-              HINT 2: INITIAL STAR &rarr; {huntTarget.starNames[0]}
-            </div>
-          )}
         </div>
-      )}
+
+        {/* Low Mountain Ridge Silhouette */}
+        <svg viewBox="0 0 1200 48" className="w-full h-5 block text-[#020617] fill-current" preserveAspectRatio="none">
+          <path d="M0,48 L0,26 L40,20 L90,24 L150,14 L210,22 L270,12 L330,20 L400,10 L470,23 L540,13 L620,26 L690,14 L760,22 L840,9 L910,20 L980,13 L1060,24 L1130,16 L1200,22 L1200,48 Z" />
+        </svg>
+      </div>
 
       {/* Precision 360° Azimuth Telemetry Strip with HUD Corner Ticks */}
-      <div className="hud-reticle absolute bottom-6 right-6 z-20 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] px-3.5 py-2 text-[10px] font-mono text-[#8C93A0] pointer-events-none uppercase tracking-[0.08em] space-y-1">
+      <div className="hud-reticle absolute bottom-6 right-6 z-20 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] px-3.5 py-2 text-[10px] font-mono text-[#8C93A0] pointer-events-none uppercase tracking-[0.08em] space-y-1" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
         <div className="flex items-center justify-between gap-4 text-[9px] text-[#525866]">
           <span>AZIMUTH TELEMETRY</span>
           <span className="text-[var(--signal-cobalt)] font-semibold">360° HORIZON</span>

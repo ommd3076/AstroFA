@@ -162,8 +162,10 @@ export const StarInspector: React.FC = () => {
   // If user dismissed the inspector, provide a minimal tactile pill to re-open
   if (isDismissed) {
     return (
-      <button
+        <button
         onClick={() => setIsDismissed(false)}
+          type="button"
+          aria-label="Reopen object inspector"
         className="hud-reticle absolute top-4 right-4 z-20 px-3 py-1.5 bg-[var(--bg-card)] border border-[#D0D5DD] rounded-[8px] text-[11px] font-mono font-semibold text-[var(--signal-cobalt)] hover:bg-white cursor-pointer uppercase tracking-wider flex items-center gap-1.5 shadow-none"
         title="Open Inspector"
       >
@@ -176,7 +178,7 @@ export const StarInspector: React.FC = () => {
   // --- RENDERING VARIANT 1: STAR SELECTED ---
   if (selectedStar && starHorizontal) {
     return (
-      <div className="hud-reticle-4corner absolute top-4 right-4 z-20 w-[358px] max-w-[calc(100%-2rem)] bg-[var(--bg-card)] border border-[#D0D5DD] rounded-[12px] p-4 text-xs font-mono space-y-3 shadow-none">
+      <div className="hud-reticle-4corner w-full h-full bg-[var(--bg-card)] border border-[#D0D5DD] rounded-[12px] p-4 text-xs font-mono flex flex-col justify-between shadow-none overflow-y-auto">
         {/* Header Row */}
         <div className="flex items-start justify-between border-b border-[#E2E5EC] pb-2.5">
           <div>
@@ -201,6 +203,8 @@ export const StarInspector: React.FC = () => {
           </div>
           <button
             onClick={() => setSelectedStarId(null)}
+            type="button"
+            aria-label="Return to constellation details"
             className="w-7 h-7 flex items-center justify-center rounded-[6px] border border-transparent hover:border-[#D8DCE5] text-[var(--ink-muted)] hover:text-[var(--ink-primary)] cursor-pointer text-xs font-bold"
             title="Return to Constellation"
           >
@@ -317,7 +321,7 @@ export const StarInspector: React.FC = () => {
 
   // --- RENDERING VARIANT 2: CONSTELLATION INSPECTOR (FRAME 2 & 4 DESIGN TRUTH) ---
   return (
-    <div className="hud-reticle-4corner absolute top-4 right-4 z-20 w-[358px] max-w-[calc(100%-2rem)] bg-[var(--bg-card)] border border-[#D0D5DD] rounded-[12px] p-4 text-xs font-mono space-y-3 shadow-none">
+    <div className="hud-reticle-4corner w-full h-full bg-[var(--bg-card)] border border-[#D0D5DD] rounded-[12px] p-4 text-xs font-mono flex flex-col justify-between shadow-none overflow-y-auto">
       {/* Header Row with Title & Prev/Next Chevrons */}
       <div className="flex items-center justify-between border-b border-[#E2E5EC] pb-2.5">
         <div>
@@ -400,13 +404,15 @@ export const StarInspector: React.FC = () => {
               ? `${BAYER_GREEK[star.bayer]} ${currentConstellation?.id}`
               : (star.bayer ? `${star.bayer} ${currentConstellation?.id}` : null);
             return (
-              <div
+              <button
+                type="button"
                 key={star.id}
                 onClick={() => setSelectedStarId(star.id)}
-                className="flex items-center justify-between py-1.5 px-2 rounded-[6px] bg-[var(--bg-tray)]/50 hover:bg-[var(--bg-tray)] cursor-pointer text-xs font-mono"
+                aria-label={`Inspect ${star.proper || star.name}, magnitude ${star.mag.toFixed(2)}`}
+                className="flex w-full items-center justify-between py-2 px-2 rounded-[6px] bg-[var(--bg-tray)]/50 hover:bg-[var(--bg-tray)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--signal-cobalt)] cursor-pointer text-left text-xs font-mono"
                 title={`Select ${star.proper || star.name}`}
               >
-                <div className="flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt)] shrink-0" />
                   <span className="font-bold text-[var(--ink-primary)] uppercase text-[11px]">
                     {star.proper || star.name}
@@ -416,12 +422,12 @@ export const StarInspector: React.FC = () => {
                       {bayerGreek}
                     </span>
                   )}
-                </div>
-                <div className="text-[10px] font-mono text-[var(--ink-secondary)]">
+                </span>
+                <span className="text-[10px] font-mono text-[var(--ink-secondary)]">
                   <span className="text-[var(--ink-muted)] mr-1">MAG</span>
                   <strong className="text-[var(--ink-primary)]">{star.mag.toFixed(2)}</strong>
-                </div>
-              </div>
+                </span>
+              </button>
             );
           })}
         </div>
@@ -444,22 +450,26 @@ export const StarInspector: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Actions (Dual Button Strip) */}
-      <div className="flex items-center gap-2 pt-2 border-t border-[#E2E5EC]">
-        <button
-          onClick={handleStartTrace}
-          className="flex-1 py-2.5 px-3 bg-[var(--signal-cobalt)] hover:bg-[#1644C5] text-white rounded-[8px] font-mono font-semibold text-xs uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 border border-[#1644C5] cursor-pointer"
-        >
-          <span>✍️</span>
-          <span>START TRACE</span>
-        </button>
-        <button
-          onClick={handleOpenDetails}
-          className="flex-1 py-2.5 px-3 bg-[var(--bg-card)] hover:bg-white text-[var(--signal-cobalt)] rounded-[8px] font-mono font-semibold text-xs uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 border border-[var(--signal-surface)] cursor-pointer"
-        >
-          <span>OPEN DETAILS</span>
-          <span>&rarr;</span>
-        </button>
+      {/* Quick Actions (Dual Button Strip - Frame 2 Design Truth) */}
+      <div className="pt-2.5 border-t border-[#E2E5EC] space-y-1.5">
+        <div className="text-[10px] text-[var(--ink-muted)] uppercase tracking-[0.08em] font-semibold">
+          QUICK ACTIONS
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleStartTrace}
+            className="flex-1 py-2 px-3 bg-[#E0E8F9] hover:bg-[#D0DEFA] text-[#1D55F5] rounded-[8px] font-mono font-semibold text-xs uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 border border-transparent cursor-pointer transition-colors"
+          >
+            <span>START TRACE</span>
+          </button>
+          <button
+            onClick={handleOpenDetails}
+            className="flex-1 py-2 px-3 bg-[#E0E8F9] hover:bg-[#D0DEFA] text-[#1D55F5] rounded-[8px] font-mono font-semibold text-xs uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 border border-transparent cursor-pointer transition-colors"
+          >
+            <span>OPEN DETAILS</span>
+            <span>&rarr;</span>
+          </button>
+        </div>
       </div>
     </div>
   );
