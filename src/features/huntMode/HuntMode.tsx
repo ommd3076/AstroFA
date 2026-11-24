@@ -1,9 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
+import { CONSTELLATION_BY_ID } from '../../data/astroData';
 import { SkyCanvas } from '../../sky/SkyCanvas';
 import { TraceHud } from '../traceMode/TraceHud';
 
 export const HuntMode: React.FC = () => {
+  const huntEntryState = useRef<{
+    isTraceMode: boolean;
+    showConstellationLines: boolean;
+    showTraceHints: boolean;
+    tracedStarIds: number[];
+    tracedPoints: { x: number; y: number }[];
+    recognitionReport: ReturnType<typeof useAstroStore.getState>['recognitionReport'];
+    focusedConstellationId: string | null;
+    targetFocusCoords: ReturnType<typeof useAstroStore.getState>['targetFocusCoords'];
+  } | null>(null);
   const {
     huntTarget,
     startNewHunt,
@@ -16,28 +27,61 @@ export const HuntMode: React.FC = () => {
   } = useAstroStore();
 
   useEffect(() => {
+    const state = useAstroStore.getState();
+    if (!huntEntryState.current) {
+      huntEntryState.current = {
+        isTraceMode: state.isTraceMode,
+        showConstellationLines: state.showConstellationLines,
+        showTraceHints: state.showTraceHints,
+        tracedStarIds: state.tracedStarIds,
+        tracedPoints: state.tracedPoints,
+        recognitionReport: state.recognitionReport,
+        focusedConstellationId: state.focusedConstellationId,
+        targetFocusCoords: state.targetFocusCoords,
+      };
+    }
+    const unsubscribe = useAstroStore.subscribe((next, previous) => {
+      if (previous.activeView === 'hunt' && next.activeView !== 'hunt' && next.huntTarget) {
+        const entry = huntEntryState.current;
+        if (entry) {
+          const keepTraceForResult = next.activeView === 'results' || next.activeView === 'patterns';
+          const returningToTraceSky = next.activeView === 'sky' && next.isTraceMode;
+          useAstroStore.setState({
+            huntTarget: null,
+            huntHintLevel: 0,
+            ...((keepTraceForResult || returningToTraceSky) ? {} : {
+              isTraceMode: entry.isTraceMode,
+              showConstellationLines: entry.showConstellationLines,
+              showTraceHints: entry.showTraceHints,
+              tracedStarIds: entry.tracedStarIds,
+              tracedPoints: entry.tracedPoints,
+              recognitionReport: entry.recognitionReport,
+              focusedConstellationId: entry.focusedConstellationId,
+              targetFocusCoords: entry.targetFocusCoords,
+            }),
+          });
+        }
+      }
+    });
     if (!huntTarget) {
       startNewHunt();
     }
+    return unsubscribe;
   }, [huntTarget, startNewHunt]);
 
   const isSuccess = recognitionReport?.status === 'FULL_MATCH' &&
-    recognitionReport.acceptedPatterns.includes(huntTarget?.constellationId || '');
+    recognitionReport.bestMatch?.isVerified === true &&
+    recognitionReport.bestMatch.constellationId === huntTarget?.constellationId;
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[var(--bg-viewport)] overflow-hidden font-mono">
-      {/* Real 3D Sky Canvas Viewport & Trace HUD */}
-      <div className="flex-1 relative">
-        <SkyCanvas />
-        <TraceHud />
-
-        {/* Hunt Challenge Header Banner with HUD Reticle & Monospace Micro-labels */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 max-w-xl w-[calc(100%-24px)] mx-auto font-mono pointer-events-auto">
-          <div className="bento-card hud-reticle-4corner p-3.5 shadow-none border border-[var(--signal-surface)] flex flex-col sm:flex-row items-center justify-between gap-3 text-[var(--ink-primary)]">
+    <div className="relative w-full h-full flex flex-col bg-[var(--bg-shell)] overflow-hidden font-mono">
+      {/* Challenge controls occupy their own strip so the tracing HUD stays unobscured. */}
+      <div className="shrink-0 px-2 pt-2 font-mono">
+          <div className="bento-card p-3 shadow-none border border-[var(--card-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-3 text-[var(--ink-primary)]">
             <div className="space-y-1 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-                <span className="telemetry-label text-[11px]">[ 🎯 HUNT TELEMETRY // TARGET IDENTIFICATION ]</span>
+                <span className="telemetry-label text-[11px]">CONSTELLATION HUNT</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2 pt-0.5">
                 <span className="text-[11px] text-[var(--ink-muted)] uppercase">TARGET:</span>
@@ -51,6 +95,19 @@ export const HuntMode: React.FC = () => {
               <p className="text-[10px] text-[var(--ink-secondary)]">
                 LOCATE &amp; TRACE THE <strong className="font-dot text-[var(--signal-cobalt)] font-bold">{huntTarget?.orderedStarIds.length}</strong> REFERENCE STARS IN THE LIVE SKY CANVAS.
               </p>
+              {huntTarget?.description && (
+                <p className="max-w-2xl text-[10px] leading-relaxed text-[var(--ink-muted)]">{huntTarget.description}</p>
+              )}
+              {huntHintLevel >= 1 && huntTarget && (
+                <p className="text-[10px] font-semibold text-[var(--signal-cobalt)]" aria-live="polite">
+                  HINT 1 · REGION RA {((CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.raCenter || 0) / 15).toFixed(1)}H, DEC {(CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.decCenter || 0).toFixed(0)}°
+                </p>
+              )}
+              {huntHintLevel >= 2 && huntTarget && (
+                <p className="text-[10px] font-semibold text-[var(--signal-cobalt)]" aria-live="polite">
+                  HINT 2 · INITIAL STAR: {huntTarget.starNames[0]}
+                </p>
+              )}
             </div>
 
             {/* Hint Stepper & Target Stepper Buttons */}
@@ -58,20 +115,27 @@ export const HuntMode: React.FC = () => {
               {huntHintLevel < 2 && (
                 <button
                   onClick={() => setHuntHintLevel(huntHintLevel + 1)}
-                  className="tactile-pill hud-reticle bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-surface)] text-[10px] py-1.5 px-2.5 font-bold uppercase tracking-wider cursor-pointer"
+                  aria-label={`Show hint ${huntHintLevel + 1} of 2`}
+                  className="tactile-pill bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-surface)] text-[10px] py-2 px-3 font-bold uppercase tracking-wider cursor-pointer"
                 >
-                  💡 HINT ({huntHintLevel + 1}/2)
+                  HINT ({huntHintLevel + 1}/2)
                 </button>
               )}
               <button
                 onClick={() => startNewHunt()}
+                aria-label="Start next hunt target"
                 className="tactile-pill bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] border border-[var(--bg-tray)] text-[10px] py-1.5 px-2.5 font-bold uppercase tracking-wider cursor-pointer"
               >
                 NEXT TARGET ↗
               </button>
             </div>
           </div>
-        </div>
+      </div>
+
+      {/* Real 3D Sky Canvas Viewport & Trace HUD */}
+      <div className="relative flex-1 min-h-0">
+        <SkyCanvas />
+        <TraceHud />
 
         {/* Tactical Telemetry Verdict Dialog (Costellar Hardware Verdict) */}
         {isSuccess && (
@@ -80,21 +144,20 @@ export const HuntMode: React.FC = () => {
               {/* Verdict Header with Tier 1 Doto READOUT */}
               <div className="space-y-1 border-b border-[var(--card-border-subtle)] pb-3">
                 <div className="flex items-center justify-between">
-                  <span className="telemetry-label text-[10px]">[ VERDICT TELEMETRY // COSTELLAR ENGINE ]</span>
+                  <span className="telemetry-label text-[10px]">HUNT RESULT</span>
                   <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
                 </div>
                 <div className="font-dot text-3xl font-bold tracking-wider text-[var(--signal-cobalt)] pt-1">
-                  [ VERIFIED ]
+                  MATCHED
                 </div>
                 <div className="text-[11px] uppercase font-bold tracking-wider text-[var(--ink-secondary)]">
-                  CELESTIAL PATTERN ACCEPTED &amp; CONFIRMED
+                  TARGET RECOGNIZED
                 </div>
               </div>
 
               {/* Explanation Text */}
               <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-                You successfully located and traced <strong className="text-[var(--ink-primary)] font-bold">{huntTarget?.name.toUpperCase()}</strong>.
-                The formal finite state automaton recognized the symbolic turn and distance sequence, and 2D Procrustes alignment confirmed the celestial asterism geometry.
+                You traced <strong className="text-[var(--ink-primary)] font-bold">{huntTarget?.name.toUpperCase()}</strong>. The pattern and its geometry match.
               </p>
 
               {/* Telemetry Breakdown Box */}
@@ -134,15 +197,13 @@ export const HuntMode: React.FC = () => {
                   }}
                   className="tactile-button bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-surface)] py-2.5 px-3 rounded-[6px] text-xs font-semibold uppercase tracking-wider flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>⚡</span>
                   <span>INSPECT IN AUTOMATA LAB ↗</span>
                 </button>
                 <button
                   onClick={() => startNewHunt()}
                   className="tactile-button bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white border border-[var(--signal-mid)] py-2.5 px-3 rounded-[6px] text-xs font-semibold uppercase tracking-wider flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>🎯</span>
-                  <span>PLAY ANOTHER HUNT ↗</span>
+                  <span>PLAY ANOTHER HUNT</span>
                 </button>
               </div>
             </div>
