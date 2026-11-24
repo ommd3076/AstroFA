@@ -2,25 +2,25 @@
 @import "./App.css";
 
 @theme {
-  --color-bg-shell: #ECEEF2;
-  --color-bg-tray: #E2E5EC;
-  --color-bg-card: #F5F6F8;
-  --color-bg-card-subtle: #EDF0F5;
-  --color-bg-pill-neutral: #E6E9EF;
-  --color-bg-pill-active: #E0E8F9;
+  --color-bg-shell: #EEEEED;
+  --color-bg-tray: #E3E3E1;
+  --color-bg-card: #F7F7F6;
+  --color-bg-card-subtle: #F0F0EF;
+  --color-bg-pill-neutral: #ECECEB;
+  --color-bg-pill-active: #E7EDFA;
   --color-bg-viewport: #060A14;
 
   --color-ink-primary: #181A20;
-  --color-ink-secondary: #525866;
-  --color-ink-muted: #8C93A0;
+  --color-ink-secondary: #565B64;
+  --color-ink-muted: #858991;
   --color-ink-on-signal: #FFFFFF;
 
-  --color-signal-cobalt: #1D55F5;
-  --color-signal-mid: #6892F6;
-  --color-signal-surface: #C7D5EC;
+  --color-signal-cobalt: #064BDC;
+  --color-signal-mid: #6F98E8;
+  --color-signal-surface: #D2DDF1;
 
   --color-dot-inactive: #C8CCD4;
-  --color-dot-active: #1D55F5;
+  --color-dot-active: #064BDC;
   --color-reticle-tick: #8FA4C4;
 
   --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
@@ -34,29 +34,29 @@
 @layer base {
   :root {
     color-scheme: light;
-    --bg-shell: #ECEEF2;
-    --bg-tray: #E2E5EC;
-    --bg-card: #F5F6F8;
-    --bg-card-subtle: #EDF0F5;
-    --bg-pill-neutral: #E6E9EF;
-    --bg-pill-active: #E0E8F9;
+    --bg-shell: #EEEEED;
+    --bg-tray: #E3E3E1;
+    --bg-card: #F7F7F6;
+    --bg-card-subtle: #F0F0EF;
+    --bg-pill-neutral: #ECECEB;
+    --bg-pill-active: #E7EDFA;
     --bg-viewport: #060A14;
     --ink-primary: #181A20;
-    --ink-secondary: #525866;
-    --ink-muted: #8C93A0;
+    --ink-secondary: #565B64;
+    --ink-muted: #858991;
     --ink-on-signal: #FFFFFF;
-    --signal-cobalt: #1D55F5;
-    --signal-mid: #6892F6;
-    --signal-surface: #C7D5EC;
+    --signal-cobalt: #064BDC;
+    --signal-mid: #6F98E8;
+    --signal-surface: #D2DDF1;
     --dot-inactive: #C8CCD4;
-    --dot-active: #1D55F5;
+    --dot-active: #064BDC;
     --reticle-tick: #8FA4C4;
-    --reticle-tick-active: #1D55F5;
-    --card-border: 1px solid rgba(255, 255, 255, 0.7);
-    --card-border-subtle: 1px solid rgba(0, 0, 0, 0.06);
-    --card-border-active: 1px solid #1D55F5;
-    --card-radius: 12px;
-    --bento-gap: 6px;
+    --reticle-tick-active: #064BDC;
+    --card-border: 1px solid rgba(24, 25, 27, 0.07);
+    --card-border-subtle: 1px solid rgba(24, 25, 27, 0.06);
+    --card-border-active: 1px solid #064BDC;
+    --card-radius: 14px;
+    --bento-gap: 8px;
     --pill-radius: 8px;
     --tag-radius: 6px;
     --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
@@ -74,7 +74,12 @@
     font-family: var(--font-mono);
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
-    user-select: none;
+    user-select: auto;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal-cobalt);
+    outline-offset: 2px;
   }
 }
 

@@ -5,13 +5,13 @@ export const CreditsModal: React.FC = () => {
   const { setActiveView } = useAstroStore();
 
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-1.5 sm:p-2 gap-1.5 overflow-y-auto">
+    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-2 sm:p-3 gap-2 overflow-y-auto" aria-label="Credits and data sources">
       {/* Top Header Bento Card */}
       <div className="bento-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-            <span className="telemetry-label text-xs">[ ℹ️ DATA PROVENANCE // SCIENTIFIC CITATIONS &amp; LICENSES ]</span>
+            <span className="telemetry-label text-xs">CREDITS · DATA SOURCES &amp; LICENSES</span>
           </div>
           <p className="text-[11px] text-[var(--ink-secondary)] mt-1">
             Costellar is built strictly on open scientific datasets and verifiable astronomical computations.
@@ -43,7 +43,7 @@ export const CreditsModal: React.FC = () => {
             </p>
           </div>
           <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <span className="text-[var(--signal-cobalt)] font-semibold">codeberg.org/astronexus/hyg</span></div>
+            <div>SOURCE: <a href="https://codeberg.org/astronexus/hyg" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Astronexus HYG catalog ↗</a></div>
             <div>INGESTION: <strong className="text-[var(--ink-primary)] font-dot">8,921 STARS</strong> (mag &le; 6.5)</div>
             <div>COORDINATES: J2000 RIGHT ASCENSION &amp; DECLINATION</div>
           </div>
@@ -65,7 +65,7 @@ export const CreditsModal: React.FC = () => {
             </p>
           </div>
           <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <span className="text-[var(--signal-cobalt)] font-semibold">github.com/MarcvdSluys/ConstellationLines</span></div>
+            <div>SOURCE: <a href="https://github.com/MarcvdSluys/ConstellationLines" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Constellation Lines ↗</a></div>
             <div>RELATION: <strong className="text-[var(--ink-primary)]">YALE BRIGHT STAR (HR) IDS</strong></div>
             <div>RESOLVED: <span className="font-dot text-[var(--signal-cobalt)] font-bold">88 IAU CONSTELLATIONS</span></div>
           </div>
@@ -87,7 +87,7 @@ export const CreditsModal: React.FC = () => {
             </p>
           </div>
           <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <span className="text-[var(--signal-cobalt)] font-semibold">github.com/cosinekitty/astronomy</span></div>
+            <div>SOURCE: <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Astronomy Engine ↗</a></div>
             <div>TRANSFORMS: <strong className="text-[var(--ink-primary)]">EQJ TO HORIZONTAL (ALT/AZ)</strong></div>
             <div>COPYRIGHT: MIT LICENSE (c) 2019-2024 DON CROSS</div>
           </div>
@@ -124,6 +124,6 @@ export const CreditsModal: React.FC = () => {
           Zero accounts, zero trackers, zero secret keys.
         </p>
       </div>
-    </div>
+    </section>
   );
 };

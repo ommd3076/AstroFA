@@ -21,7 +21,9 @@ export type ActiveView =
   | 'hunt'
   | 'imageLab'
   | 'academic'
-  | 'credits';
+  | 'credits'
+  | 'results'
+  | 'patterns';
 
 const getInitialParams = () => {
   if (typeof window === 'undefined') {
@@ -31,6 +33,7 @@ const getInitialParams = () => {
       results: false,
       analysis: false,
       sampleReport: null as RecognitionReport | null,
+      seededPattern: null as ReferencePattern | null,
     };
   }
   const params = new URLSearchParams(window.location.search);
@@ -48,13 +51,17 @@ const getInitialParams = () => {
     'imageLab',
     'academic',
     'credits',
+    'results',
+    'patterns',
   ];
 
   let sampleReport: RecognitionReport | null = null;
+  let seededPattern: ReferencePattern | null = null;
   if (results || analysis) {
     try {
+      seededPattern = REFERENCE_PATTERNS[0];
       sampleReport = recognizePattern(
-        REFERENCE_PATTERNS[0].referencePoints,
+        seededPattern.referencePoints,
         MINIMIZED_DFA_MACHINE,
         REFERENCE_PATTERNS
       );
@@ -64,11 +71,12 @@ const getInitialParams = () => {
   }
 
   return {
-    view: view && validViews.includes(view) ? view : 'sky',
+    view: results ? 'results' : analysis ? 'patterns' : view && validViews.includes(view) ? view : 'sky',
     trace: trace || results || analysis,
     results,
     analysis,
     sampleReport,
+    seededPattern,
   };
 };
 
@@ -189,9 +197,14 @@ export const useAstroStore = create<AstroState>((set, get) => ({
 
   selectedStarId: null,
   setSelectedStarId: id => set({ selectedStarId: id }),
-  focusedConstellationId: null,
+  focusedConstellationId: _initialParams.analysis ? _initialParams.seededPattern?.constellationId ?? null : null,
   setFocusedConstellationId: id => set({ focusedConstellationId: id }),
-  targetFocusCoords: null,
+  targetFocusCoords: _initialParams.analysis && _initialParams.seededPattern
+    ? (() => {
+        const constellation = CONSTELLATION_BY_ID.get(_initialParams.seededPattern!.constellationId);
+        return constellation ? { ra: constellation.raCenter, dec: constellation.decCenter } : null;
+      })()
+    : null,
   setTargetFocusCoords: coords => set({ targetFocusCoords: coords }),
 
   focusOnStar: starId => {
@@ -234,13 +247,13 @@ export const useAstroStore = create<AstroState>((set, get) => ({
 
   showTraceHints: false,
   setShowTraceHints: v => set({ showTraceHints: v }),
-  showPatternAnalysisModal: _initialParams.analysis,
+  showPatternAnalysisModal: false,
   setShowPatternAnalysisModal: v => set({ showPatternAnalysisModal: v }),
-  showRecognitionResultsModal: _initialParams.results,
+  showRecognitionResultsModal: false,
   setShowRecognitionResultsModal: v => set({ showRecognitionResultsModal: v }),
 
-  tracedStarIds: [],
-  tracedPoints: [],
+  tracedStarIds: _initialParams.analysis ? _initialParams.seededPattern?.orderedStarIds ?? [] : [],
+  tracedPoints: _initialParams.analysis ? _initialParams.seededPattern?.referencePoints ?? [] : [],
   recognitionReport: _initialParams.sampleReport,
 
   addTracedStar: star => {

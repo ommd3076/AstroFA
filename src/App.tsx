@@ -2,10 +2,7 @@ import React from 'react';
 import './App.css';
 import { useAstroStore } from './stores/useAstroStore';
 import { HeaderNav } from './components/HeaderNav';
-import { SkyCanvas } from './sky/SkyCanvas';
-import { TimelineBar } from './components/TimelineBar';
-import { StarInspector } from './components/StarInspector';
-import { TraceHud } from './features/traceMode/TraceHud';
+import { SkyExplorer } from './features/skyExplorer/SkyExplorer';
 import { SkyTonight } from './features/skyTonight/SkyTonight';
 import { ConstellationExplorer } from './features/constellationExplorer/ConstellationExplorer';
 import { AutomataLab } from './features/automataLab/AutomataLab';
@@ -14,12 +11,14 @@ import { ImageLab } from './features/imageLab/ImageLab';
 import { AcademicWalkthrough } from './features/academic/AcademicWalkthrough';
 import { CreditsModal } from './components/CreditsModal';
 import { Overview } from './features/overview/Overview';
+import { RecognitionResultsModal } from './features/traceMode/RecognitionResultsModal';
+import { PatternAnalysisModal } from './features/traceMode/PatternAnalysisModal';
 
 export const App: React.FC = () => {
-  const { activeView } = useAstroStore();
+  const { activeView, setActiveView } = useAstroStore();
 
   return (
-    <div className="bento-shell select-none">
+    <div className="bento-shell">
       {/* Persistent Left Rail Navigation (w-[232px]) */}
       <HeaderNav />
 
@@ -28,17 +27,8 @@ export const App: React.FC = () => {
         {/* View 0: Overview Analytics Dashboard */}
         {activeView === 'overview' && <Overview />}
 
-        {/* View 1: Live Interactive Sky Canvas */}
-        {activeView === 'sky' && (
-          <div className="relative w-full h-full flex flex-col rounded-[12px] overflow-hidden bento-card p-0 border border-white/60 bg-[var(--bg-viewport)] min-h-0">
-            <div className="flex-1 relative overflow-hidden min-h-0">
-              <SkyCanvas />
-              <TraceHud />
-              <StarInspector />
-            </div>
-            <TimelineBar />
-          </div>
-        )}
+        {/* View 1: Live Interactive Sky Explorer */}
+        {activeView === 'sky' && <SkyExplorer />}
 
         {/* View 2: Sky Tonight (Above-horizon constellations) */}
         {activeView === 'tonight' && <SkyTonight />}
@@ -60,6 +50,16 @@ export const App: React.FC = () => {
 
         {/* View 8: Data Sources & Licensing Credits */}
         {activeView === 'credits' && <CreditsModal />}
+
+        {/* View 9: Dedicated Recognition Results Page (Frame 8) */}
+        {activeView === 'results' && (
+          <RecognitionResultsModal onClose={() => setActiveView('sky')} />
+        )}
+
+        {/* View 10: Dedicated Pattern Analysis Page (Frame 9) */}
+        {activeView === 'patterns' && (
+          <PatternAnalysisModal onClose={() => setActiveView('sky')} />
+        )}
       </main>
     </div>
   );
