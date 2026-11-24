@@ -1,18 +1,23 @@
 $screens = @(
-    @{ name = "01-overview"; url = "http://localhost:5173/?view=overview" },
-    @{ name = "02-sky"; url = "http://localhost:5173/?view=sky" },
-    @{ name = "05-tonight"; url = "http://localhost:5173/?view=tonight" },
-    @{ name = "06-constellations-catalog"; url = "http://localhost:5173/?view=constellations" },
-    @{ name = "07-trace-workspace"; url = "http://localhost:5173/?view=sky&trace=1" },
-    @{ name = "08-recognition-results"; url = "http://localhost:5173/?view=sky&results=1" },
-    @{ name = "09-pattern-analysis"; url = "http://localhost:5173/?view=sky&analysis=1" },
-    @{ name = "10-automata-lab"; url = "http://localhost:5173/?view=automataLab" },
-    @{ name = "11-imagelab"; url = "http://localhost:5173/?view=imageLab" },
-    @{ name = "12-constellation-detail-orion"; url = "http://localhost:5173/?view=constellations&constellation=Ori" }
+    @{ name = "01-overview"; query = "?view=overview" },
+    @{ name = "02-sky"; query = "?view=sky" },
+    @{ name = "03-tonight"; query = "?view=tonight" },
+    @{ name = "04-constellations-catalog"; query = "?view=constellations" },
+    @{ name = "05-trace-workspace"; query = "?view=sky&trace=1" },
+    @{ name = "06-recognition-results"; query = "?view=results&results=1" },
+    @{ name = "07-pattern-analysis"; query = "?view=patterns&analysis=1" },
+    @{ name = "08-automata-lab"; query = "?view=automataLab" },
+    @{ name = "09-image-lab"; query = "?view=imageLab" },
+    @{ name = "10-hunt-mode"; query = "?view=hunt" },
+    @{ name = "11-viva-mode"; query = "?view=academic" },
+    @{ name = "12-credits"; query = "?view=credits" }
 )
 
 $edgePath = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-$outDir = "C:\ommd3076\Proejcts\automata-theory\work\evidence"
+$baseUrl = if ($env:COSTELLAR_BASE_URL) { $env:COSTELLAR_BASE_URL.TrimEnd('/') } else { "http://localhost:5319" }
+$outputRoot = if ($env:COSTELLAR_EVIDENCE_DIR) { $env:COSTELLAR_EVIDENCE_DIR } else { Join-Path $env:TEMP "costellar-evidence" }
+$runId = Get-Date -Format "yyyyMMdd-HHmmss-fff"
+$outDir = Join-Path $outputRoot "screens-$runId"
 
 if (!(Test-Path $outDir)) {
     New-Item -ItemType Directory -Force -Path $outDir
@@ -20,14 +25,17 @@ if (!(Test-Path $outDir)) {
 
 foreach ($s in $screens) {
     $outFile = Join-Path $outDir "$($s.name).png"
-    Write-Host "Capturing $($s.name) from $($s.url) -> $outFile"
+    $url = "$baseUrl/$($s.query)"
+    Write-Host "Capturing $($s.name) from $url -> $outFile"
     $args = @(
         "--headless=new",
         "--disable-gpu",
         "--hide-scrollbars",
         "--window-size=1586,992",
+        "--user-data-dir=$(Join-Path $env:TEMP "costellar-shot-$runId-$($s.name)")",
+        "--force-device-scale-factor=1",
         "--screenshot=$outFile",
-        $s.url
+        $url
     )
     Start-Process -FilePath $edgePath -ArgumentList $args -Wait
     if (Test-Path $outFile) {

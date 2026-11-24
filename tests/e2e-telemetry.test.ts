@@ -46,32 +46,33 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
   describe('Tier 1: Visual System, Design Tokens & Micro-Architecture Invariants', () => {
     describe('F1: Design Token Matrix Invariants', () => {
       it('declares all 7 physical surface & container chassis tokens in :root and @theme', () => {
-        expect(indexCss).toMatch(/--bg-shell:\s*#ECEEF2/i);
-        expect(indexCss).toMatch(/--bg-tray:\s*#E2E5EC/i);
-        expect(indexCss).toMatch(/--bg-card:\s*#F5F6F8/i);
-        expect(indexCss).toMatch(/--bg-card-subtle:\s*#EDF0F5/i);
-        expect(indexCss).toMatch(/--bg-pill-neutral:\s*#E6E9EF/i);
-        expect(indexCss).toMatch(/--bg-pill-active:\s*#E0E8F9/i);
+        expect(indexCss).toMatch(/--bg-shell:\s*#EEEEED/i);
+        expect(indexCss).toMatch(/--bg-tray:\s*#E3E3E1/i);
+        expect(indexCss).toMatch(/--bg-card:\s*#F7F7F6/i);
+        expect(indexCss).toMatch(/--bg-card-subtle:\s*#F0F0EF/i);
+        expect(indexCss).toMatch(/--bg-pill-neutral:\s*#ECECEB/i);
+        expect(indexCss).toMatch(/--bg-pill-active:\s*#E7EDFA/i);
         expect(indexCss).toMatch(/--bg-viewport:\s*#060A14/i);
       });
 
       it('declares all 4 ink typography color tokens in :root with calibrated greys', () => {
         expect(indexCss).toMatch(/--ink-primary:\s*#181A20/i);
-        expect(indexCss).toMatch(/--ink-secondary:\s*#525866/i);
-        expect(indexCss).toMatch(/--ink-muted:\s*#8C93A0/i);
+        expect(indexCss).toMatch(/--ink-secondary:\s*#565B64/i);
+        expect(indexCss).toMatch(/--ink-muted:\s*#858991/i);
         expect(indexCss).toMatch(/--ink-on-signal:\s*#FFFFFF/i);
       });
 
       it('declares the single-signal electric cobalt color architecture tokens', () => {
-        expect(indexCss).toMatch(/--signal-cobalt:\s*#1D55F5/i);
-        expect(indexCss).toMatch(/--signal-mid:\s*#6892F6/i);
-        expect(indexCss).toMatch(/--signal-surface:\s*#C7D5EC/i);
+        expect(indexCss).toMatch(/--signal-cobalt:\s*#064BDC/i);
+        expect(indexCss).toMatch(/--signal-mid:\s*#6F98E8/i);
+        expect(indexCss).toMatch(/--signal-surface:\s*#D2DDF1/i);
       });
 
       it('declares tactile dot matrix and corner reticle tick tokens', () => {
         expect(indexCss).toMatch(/--dot-inactive:\s*#C8CCD4/i);
-        expect(indexCss).toMatch(/--dot-active:\s*#1D55F5/i);
+        expect(indexCss).toMatch(/--dot-active:\s*#064BDC/i);
         expect(indexCss).toMatch(/--reticle-tick:\s*#8FA4C4/i);
+        expect(indexCss).toMatch(/--reticle-tick-active:\s*#064BDC/i);
       });
 
       it('declares strict monospace and dot-matrix font family tokens', () => {
@@ -128,10 +129,10 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
         expect(appCss).toMatch(/\.bento-tray\s*\{[^}]*gap:\s*6px/s);
       });
 
-      it('defines .bento-card class with 12px radius, card surface, and zero drop shadows', () => {
+      it('defines .bento-card class with 14px radius, card surface, and zero drop shadows', () => {
         expect(appCss).toContain('.bento-card');
         expect(appCss).toMatch(/\.bento-card\s*\{[^}]*background-color:\s*var\(--bg-card\)/s);
-        expect(appCss).toMatch(/\.bento-card\s*\{[^}]*border-radius:\s*12px/s);
+        expect(appCss).toMatch(/\.bento-card\s*\{[^}]*border-radius:\s*14px/s);
         expect(appCss).toMatch(/\.bento-card\s*\{[^}]*box-shadow:\s*none/s);
       });
     });

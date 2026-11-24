@@ -34,15 +34,19 @@ export const ImageLab: React.FC = () => {
   const imageObjRef = useRef<HTMLImageElement | null>(null);
 
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [detectionComplete, setDetectionComplete] = useState(false);
+  const [imageRevision, setImageRevision] = useState(0);
   const [fileMeta, setFileMeta] = useState<FileMetadata | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Preview Mode
   const [previewMode, setPreviewMode] = useState<PreviewMode>('DETECTED');
 
   // Luminance Threshold (50-240, mapping to [0, 1] normalized display)
   const [threshold, setThreshold] = useState<number>(180);
+  const [thresholdText, setThresholdText] = useState('180');
 
   // Detected & Traced Points
   const [autoStars, setAutoStars] = useState<Point2D[]>([]);
@@ -56,20 +60,11 @@ export const ImageLab: React.FC = () => {
 
   // Preprocessing controls (Tactile hardware settings)
   const [filterActive, setFilterActive] = useState<boolean>(true);
-  const [debayer, setDebayer] = useState<'OFF' | 'ON'>('ON');
-  const [backgroundSub, setBackgroundSub] = useState<'NONE' | 'SUBTRACT' | 'FLATTEN'>('SUBTRACT');
-  const [denoise, setDenoise] = useState<number>(0.4);
   const [contrast, setContrast] = useState<number>(1.2);
-  const [sharpen, setSharpen] = useState<number>(0.3);
-  const [normalize, setNormalize] = useState<'OFF' | 'ON'>('ON');
 
   // 24 discrete histogram bins for luminance range [50, 240]
   const [histogramBins, setHistogramBins] = useState<number[]>(new Array(24).fill(0));
 
-  // Normalized threshold in [0, 1] range derived from 50..240
-  const normalizedThreshold = useMemo(() => {
-    return Number(((threshold - 50) / 190).toFixed(2));
-  }, [threshold]);
 
   // Combined visible detected stars (auto minus excluded + manual)
   const visibleStars = useMemo(() => {
@@ -84,6 +79,7 @@ export const ImageLab: React.FC = () => {
 
   // Generate deterministic synthetic starry sky canvas with Cassiopeia asterism
   const loadSampleSkyImage = useCallback(() => {
+    setUploadError(null);
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -132,18 +128,23 @@ export const ImageLab: React.FC = () => {
     }
 
     const dataUrl = canvas.toDataURL('image/png');
+    const base64Payload = dataUrl.slice(dataUrl.indexOf(',') + 1);
+    const sampleByteSize = Math.floor(base64Payload.length * 3 / 4) - (base64Payload.endsWith('==') ? 2 : base64Payload.endsWith('=') ? 1 : 0);
     const img = new Image();
     img.src = dataUrl;
     img.onload = () => {
       imageObjRef.current = img;
+      setImageRevision(revision => revision + 1);
+      setDetectionComplete(false);
       setImageLoaded(true);
       setFileMeta({
-        name: 'SAMPLE_CASSIOPEIA.PNG',
-        size: 145408,
+        name: 'SYNTHETIC_CASSIOPEIA.PNG',
+        size: sampleByteSize,
         width: 800,
         height: 600,
       });
       setThumbnailUrl(dataUrl);
+      setAutoStars([]);
       setManualStars([]);
       setExcludedStarKeys(new Set());
       setTracedPoints([]);
@@ -153,19 +154,27 @@ export const ImageLab: React.FC = () => {
 
   // Handle uploaded file (PNG or JPEG)
   const processFile = useCallback((file: File) => {
-    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
-      alert('Only PNG and JPEG formats are supported. FITS parser is currently unavailable.');
+    const mimeType = file.type.toLowerCase();
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    const isSupported = mimeType === 'image/png' || mimeType === 'image/jpeg' ||
+      (!mimeType && (extension === 'png' || extension === 'jpg' || extension === 'jpeg'));
+    if (!isSupported) {
+      setUploadError('Unsupported file. Choose a PNG or JPEG image. FITS files are not supported.');
       return;
     }
 
+    setUploadError(null);
     const reader = new FileReader();
+    reader.onerror = () => setUploadError('The selected file could not be read. Please try another PNG or JPEG.');
     reader.onload = ev => {
       const dataUrl = ev.target?.result as string;
       const img = new Image();
-      img.src = dataUrl;
+      img.onerror = () => setUploadError('This file could not be decoded as an image. Your current image is unchanged.');
       img.onload = () => {
         imageObjRef.current = img;
-        setImageLoaded(true);
+        setImageRevision(revision => revision + 1);
+        setDetectionComplete(false);
+      setImageLoaded(true);
         setFileMeta({
           name: file.name.toUpperCase(),
           size: file.size,
@@ -173,11 +182,13 @@ export const ImageLab: React.FC = () => {
           height: img.height,
         });
         setThumbnailUrl(dataUrl);
+        setAutoStars([]);
         setManualStars([]);
         setExcludedStarKeys(new Set());
         setTracedPoints([]);
         setReport(null);
       };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
   }, []);
@@ -207,6 +218,7 @@ export const ImageLab: React.FC = () => {
   const handleUnloadImage = () => {
     imageObjRef.current = null;
     setImageLoaded(false);
+    setDetectionComplete(false);
     setFileMeta(null);
     setThumbnailUrl(null);
     setAutoStars([]);
@@ -214,11 +226,23 @@ export const ImageLab: React.FC = () => {
     setExcludedStarKeys(new Set());
     setTracedPoints([]);
     setReport(null);
+    setUploadError(null);
+  };
+
+  const handleSetThreshold = (value: number) => {
+    if (!Number.isFinite(value)) return;
+    const nextThreshold = Math.min(240, Math.max(50, Math.round(value)));
+    setThreshold(nextThreshold);
+    setThresholdText(String(nextThreshold));
+    // Detection changes with the threshold. Clear a trace tied to the previous point set.
+    setTracedPoints([]);
+    setReport(null);
   };
 
   // Run Star Detection & Update Real Luminance Histogram
   useEffect(() => {
     if (!imageLoaded || !imageObjRef.current || !canvasRef.current) return;
+    setDetectionComplete(false);
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d')!;
     const img = imageObjRef.current;
@@ -288,7 +312,8 @@ export const ImageLab: React.FC = () => {
     }
 
     setAutoStars(candidates);
-  }, [imageLoaded, threshold, contrast, filterActive]);
+    setDetectionComplete(true);
+  }, [imageLoaded, imageRevision, threshold, contrast, filterActive]);
 
   // Canvas Redraw for Preview Modes & Interactive Overlays
   useEffect(() => {
@@ -375,7 +400,7 @@ export const ImageLab: React.FC = () => {
       ctx.font = 'bold 10px "IBM Plex Mono", monospace';
       ctx.fillText(`${idx + 1}`, p.x + 12, p.y - 6);
     });
-  }, [imageLoaded, previewMode, visibleStars, tracedPoints]);
+  }, [imageLoaded, imageRevision, previewMode, visibleStars, tracedPoints]);
 
   // Handle Canvas Click based on Active Tool
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -418,12 +443,6 @@ export const ImageLab: React.FC = () => {
     if (activeTool === 'add') {
       const newStar: Point2D = { x: Math.round(clickX), y: Math.round(clickY) };
       setManualStars(prev => [...prev, newStar]);
-      const nextPoints = [...tracedPoints, newStar];
-      setTracedPoints(nextPoints);
-      if (nextPoints.length >= 2) {
-        const rep = recognizePattern(nextPoints, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS);
-        setReport(rep);
-      }
       return;
     }
 
@@ -461,92 +480,33 @@ export const ImageLab: React.FC = () => {
     setReport(null);
   };
 
-  // Stepper threshold handler
-  const handleStepThreshold = (delta: number) => {
-    setThreshold(prev => Math.min(240, Math.max(50, prev + delta)));
-  };
-
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-2 sm:p-3 gap-2 overflow-y-auto min-h-0 select-none">
-      {/* =========================================================================
-          TOP KPI TELEMETRY STRIP (Frame 11 Target Alignment)
-          ========================================================================= */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 shrink-0">
-        {/* Metric 1: Image Dimensions */}
-        <div className="bento-card p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[var(--ink-secondary)]">
-            <span className="telemetry-label text-[10px] tracking-wider uppercase font-semibold">IMAGE SIZE</span>
-            <span className="text-[var(--ink-muted)] font-mono text-[10px]">↗</span>
-          </div>
-          <div className="telemetry-kpi text-xl sm:text-2xl mt-1 font-bold">
-            {imageLoaded && fileMeta?.width && fileMeta?.height
-              ? `${fileMeta.width} × ${fileMeta.height}`
-              : '-- × --'}
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] mt-1 truncate">
-            {imageLoaded && fileMeta ? `${fileMeta.name} (${(fileMeta.size / 1024).toFixed(1)} KB)` : 'NO ASSET LOADED'}
-          </div>
-        </div>
-
-        {/* Metric 2: Detected Star Count */}
-        <div className="bento-card p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[var(--ink-secondary)]">
-            <span className="telemetry-label text-[10px] tracking-wider uppercase font-semibold">DETECTED STARS</span>
-            <span className="text-[var(--ink-muted)] font-mono text-[10px]">↗</span>
-          </div>
-          <div className="telemetry-kpi text-xl sm:text-2xl mt-1 font-bold font-dot text-[var(--signal-cobalt)]">
-            {imageLoaded ? visibleStars.length.toLocaleString() : '--'}
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] mt-1">
-            LOCAL MAXIMA (RADIUS 8PX)
-          </div>
-        </div>
-
-        {/* Metric 3: Ground-Truth Matcher Status (Replaces fabricated detection rate) */}
-        <div className="bento-card p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[var(--ink-secondary)]">
-            <span className="telemetry-label text-[10px] tracking-wider uppercase font-semibold">MATCHER STATUS</span>
-            <span className="text-[var(--ink-muted)] font-mono text-[10px]">↗</span>
-          </div>
-          <div className="telemetry-kpi text-lg sm:text-xl mt-1 font-bold text-[var(--ink-primary)]">
-            {report ? report.status.replace('_', ' ') : 'STANDBY'}
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] mt-1">
-            {tracedPoints.length >= 2 ? `${tracedPoints.length} NODES TRACED` : 'AWAITING >= 2 TRACE NODES'}
-          </div>
-        </div>
-
-        {/* Metric 4: Recognition Result & Procrustes Residual */}
-        <div className="bento-card p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-[var(--ink-secondary)]">
-            <span className="telemetry-label text-[10px] tracking-wider uppercase font-semibold">RECOGNITION (PREVIEW)</span>
-            <span className="text-[var(--ink-muted)] font-mono text-[10px]">↗</span>
-          </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <div className="font-dot text-base sm:text-lg font-bold text-[var(--signal-cobalt)] truncate max-w-[140px]">
-              {report?.bestMatch?.patternName
-                ? report.bestMatch.patternName.split(' ')[0]
-                : report?.prefixMatch
-                ? 'PREFIX'
-                : '--'}
-            </div>
-            <div className="text-right pl-2">
-              <span className="micro-label text-[8px] block text-[var(--ink-muted)]">RESIDUAL</span>
-              <span className="font-mono text-xs font-bold text-[var(--ink-primary)]">
-                {report?.bestMatch ? report.bestMatch.residual.toFixed(3) : '--'}
-              </span>
-            </div>
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] mt-1">
-            {report?.bestMatch ? 'PROCRUSTES TOL: ≤ 0.32' : 'ROTATION & SCALE INVARIANT'}
-          </div>
-        </div>
-      </div>
-
+    <div className="image-lab w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-3 sm:p-4 gap-3 overflow-y-auto min-h-0">
+      <style>{`
+        .image-lab .bento-card { background: #f6f6f5; border-color: #dedfdf; box-shadow: 0 1px 2px #18191b08; }
+        .image-lab .tactile-pill { border-radius: 6px; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+        .image-lab .tactile-pill:focus-visible, .image-lab [role="button"]:focus-visible { outline: 2px solid #064bdc; outline-offset: 2px; }
+        .image-lab input[type="range"] { accent-color: #064bdc; }
+        .image-lab canvas { max-width: 100%; max-height: min(62vh, 620px); width: auto; height: auto; }
+        @media (max-width: 1023px) {
+          .image-lab .image-workspace { display: flex; flex: none; flex-direction: column; align-items: stretch; min-height: auto; }
+          .image-lab .image-workspace > div { flex: none; min-height: auto; }
+          .image-lab .image-preview-card { min-height: 420px; }
+          .image-lab .image-viewport { flex: 1 0 320px; min-height: 320px; }
+        }
+        @media (max-width: 640px) {
+          .image-lab .image-preview-card { min-height: 360px; }
+          .image-lab .image-viewport { flex: 1 0 240px; min-height: 240px; }
+        }
+      `}</style>
+      <header className="flex flex-wrap items-end justify-between gap-2 px-1">
+        <h1 className="text-lg font-semibold tracking-tight">Image Lab</h1>
+        <p className="text-[10px] text-[var(--ink-secondary)]">PNG / JPEG · 8-bit luminance analysis</p>
+      </header>
       {/* =========================================================================
           MAIN 3-COLUMN WORKSPACE (Upload/Preprocess - Preview - Detection/Settings)
           ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-1 min-h-0">
+      <div className="image-workspace grid grid-cols-1 lg:grid-cols-12 gap-2 flex-1 min-h-0">
         {/* =======================================================================
             COLUMN 1: UPLOAD & PREPROCESSING (Left Column, lg:col-span-3)
             ======================================================================= */}
@@ -557,15 +517,25 @@ export const ImageLab: React.FC = () => {
               <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
                 UPLOAD IMAGE
               </span>
-              <span className="micro-label text-[9px] text-[var(--ink-muted)]">PNG / JPEG</span>
+              <span className="micro-label text-[9px] text-[var(--ink-muted)]">STEP 01 · SOURCE</span>
             </div>
 
             {/* Drag & Drop Target Area */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Choose a PNG or JPEG image, or drop a file here"
+              data-testid="image-lab-upload"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               className={`border border-dashed rounded-[8px] p-3 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 ${
                 isDragOver
                   ? 'border-[var(--signal-cobalt)] bg-[var(--bg-pill-active)]'
@@ -575,7 +545,7 @@ export const ImageLab: React.FC = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png, image/jpeg"
+                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -589,14 +559,21 @@ export const ImageLab: React.FC = () => {
                 JPG &nbsp; PNG
               </div>
             </div>
+                {uploadError && (
+              <p role="alert" className="text-[10px] text-red-600 font-mono leading-relaxed">
+                {uploadError}
+              </p>
+            )}
 
             {/* Quick Sample Sky Button */}
             <button
               onClick={loadSampleSkyImage}
+              aria-label="Load synthetic Cassiopeia sample"
+              data-testid="image-lab-sample"
               className="tactile-pill w-full bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--ink-primary)] hover:text-[var(--signal-cobalt)] border border-[var(--card-border-subtle)] text-[10px] py-1.5 px-2 font-bold uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>🌌</span>
-              <span>LOAD SAMPLE SKY PHOTO</span>
+              <span>LOAD SYNTHETIC CASSIOPEIA</span>
             </button>
 
             {/* File Metadata Tile when Loaded */}
@@ -632,11 +609,11 @@ export const ImageLab: React.FC = () => {
             )}
           </div>
 
-          {/* Card 2: Preprocessing Hardware Controls */}
+          {/* Contrast is the supported preprocessing control; other imaging algorithms are not implemented. */}
           <div className="bento-card p-3 space-y-2 flex-1">
             <div className="flex items-center justify-between">
               <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                PREPROCESSING
+                DETECTION CONTRAST
               </span>
               <button
                 onClick={() => setFilterActive(!filterActive)}
@@ -649,55 +626,6 @@ export const ImageLab: React.FC = () => {
             </div>
 
             <div className="space-y-2 text-xs">
-              {/* Debayer Rocker */}
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="text-[var(--ink-secondary)] uppercase">DEBAYER</span>
-                <div className="tactile-rocker">
-                  {(['OFF', 'ON'] as const).map(d => (
-                    <button
-                      key={d}
-                      onClick={() => setDebayer(d)}
-                      className={`tactile-pill text-[9px] py-0.5 px-2 uppercase ${debayer === d ? 'active' : ''}`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Background Subtraction Rocker */}
-              <div className="flex items-center justify-between text-[10px]">
-                <span className="text-[var(--ink-secondary)] uppercase">BACKGROUND</span>
-                <div className="tactile-rocker">
-                  {(['NONE', 'SUBTRACT', 'FLATTEN'] as const).map(b => (
-                    <button
-                      key={b}
-                      onClick={() => setBackgroundSub(b)}
-                      className={`tactile-pill text-[9px] py-0.5 px-1.5 uppercase ${backgroundSub === b ? 'active' : ''}`}
-                    >
-                      {b}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Denoise Slider */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-[var(--ink-secondary)] uppercase">DENOISE</span>
-                  <span className="font-mono text-[var(--ink-primary)] font-bold">{denoise.toFixed(2)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.00"
-                  max="1.00"
-                  step="0.05"
-                  value={denoise}
-                  onChange={e => setDenoise(parseFloat(e.target.value))}
-                  className="w-full accent-[var(--signal-cobalt)] h-1 cursor-pointer bg-[var(--bg-tray)] rounded"
-                />
-              </div>
-
               {/* Contrast Slider (Directly impacts luminance calculation) */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-[10px]">
@@ -715,38 +643,7 @@ export const ImageLab: React.FC = () => {
                 />
               </div>
 
-              {/* Sharpen Slider */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-[var(--ink-secondary)] uppercase">SHARPEN</span>
-                  <span className="font-mono text-[var(--ink-primary)] font-bold">{sharpen.toFixed(2)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.00"
-                  max="1.00"
-                  step="0.05"
-                  value={sharpen}
-                  onChange={e => setSharpen(parseFloat(e.target.value))}
-                  className="w-full accent-[var(--signal-cobalt)] h-1 cursor-pointer bg-[var(--bg-tray)] rounded"
-                />
-              </div>
-
-              {/* Normalize Rocker */}
-              <div className="flex items-center justify-between text-[10px] pt-1">
-                <span className="text-[var(--ink-secondary)] uppercase">NORMALIZE</span>
-                <div className="tactile-rocker">
-                  {(['OFF', 'ON'] as const).map(n => (
-                    <button
-                      key={n}
-                      onClick={() => setNormalize(n)}
-                      className={`tactile-pill text-[9px] py-0.5 px-2 uppercase ${normalize === n ? 'active' : ''}`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="text-[9px] leading-relaxed text-[var(--ink-muted)]">Contrast remaps luminance before thresholding. Denoise, debayer, background correction, sharpening, and normalization are not available for these PNG/JPEG inputs.</p>
             </div>
           </div>
         </div>
@@ -755,7 +652,7 @@ export const ImageLab: React.FC = () => {
             COLUMN 2: DOMINANT IMAGE PREVIEW (Center Column, lg:col-span-6)
             ======================================================================= */}
         <div className="lg:col-span-6 flex flex-col gap-2 min-h-0">
-          <div className="bento-card p-3 flex flex-col flex-1 min-h-[420px]">
+          <div className="bento-card image-preview-card p-3 flex flex-col flex-1 min-h-[420px]">
             {/* Header: Title and Original / Detected Preview Mode Toggle */}
             <div className="flex items-center justify-between mb-2 pb-2 border-b border-[var(--card-border-subtle)]">
               <div className="flex items-center gap-2">
@@ -775,6 +672,7 @@ export const ImageLab: React.FC = () => {
                     <button
                       key={mode}
                       onClick={() => setPreviewMode(mode)}
+                      aria-pressed={previewMode === mode}
                       className={`tactile-pill text-[10px] py-1 px-2.5 uppercase font-bold ${
                         previewMode === mode ? 'active' : ''
                       }`}
@@ -783,14 +681,13 @@ export const ImageLab: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                <span className="text-[var(--ink-muted)] text-xs cursor-pointer font-mono">↗</span>
               </div>
             </div>
 
             {/* Dominant Dark Viewport Container */}
-            <div className="relative flex-1 bg-[var(--bg-viewport)] rounded-[8px] overflow-hidden flex items-center justify-center p-2 border border-[var(--card-border-subtle)] min-h-[360px]">
+            <div className="image-viewport relative flex-1 bg-[#101318] rounded-[8px] overflow-hidden flex items-center justify-center p-2 border border-[var(--card-border-subtle)] min-h-[360px]">
               {imageLoaded ? (
-                <canvas
+                    <canvas
                   ref={canvasRef}
                   onClick={handleCanvasClick}
                   className="max-w-full max-h-[520px] object-contain cursor-crosshair rounded-[4px]"
@@ -802,16 +699,16 @@ export const ImageLab: React.FC = () => {
                     🌌
                   </div>
                   <div className="telemetry-label text-xs text-white uppercase font-bold tracking-wider">
-                    NO ASTRONOMICAL IMAGE LOADED
+                    {uploadError ? 'IMAGE COULD NOT BE LOADED' : 'NO IMAGE LOADED'}
                   </div>
                   <p className="text-[11px] text-[var(--ink-muted)] max-w-sm font-mono leading-relaxed">
-                    Upload a local JPG/PNG astrophotography frame or load the calibrated Cassiopeia sample to inspect star centroids.
+                    {uploadError || 'Choose a local JPG/PNG image, or load the labelled synthetic Cassiopeia sample. FITS is not supported.'}
                   </p>
                   <button
                     onClick={loadSampleSkyImage}
                     className="tactile-pill bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white text-[11px] py-1.5 px-3 font-bold uppercase tracking-wider cursor-pointer"
                   >
-                    LOAD CASSIOPEIA SAMPLE SKY ↗
+                    LOAD SYNTHETIC CASSIOPEIA
                   </button>
                 </div>
               )}
@@ -855,34 +752,14 @@ export const ImageLab: React.FC = () => {
             </span>
 
             {/* 2x2 Honest Metrics Grid */}
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 gap-2 text-xs">
               <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px]">
                 <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">DETECTED STARS</div>
                 <div className="font-dot text-base font-bold text-[var(--signal-cobalt)] mt-0.5">
-                  {imageLoaded ? visibleStars.length.toLocaleString() : '--'}
+                  {imageLoaded ? autoStars.length.toLocaleString() : '--'}
                 </div>
               </div>
 
-              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px]">
-                <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">ACTIVE THRESHOLD</div>
-                <div className="font-mono text-xs font-bold text-[var(--ink-primary)] mt-1">
-                  {threshold} / 255
-                </div>
-              </div>
-
-              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px]">
-                <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">TRACED NODES</div>
-                <div className="font-dot text-base font-bold text-[var(--ink-primary)] mt-0.5">
-                  {tracedPoints.length}
-                </div>
-              </div>
-
-              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px]">
-                <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">PROCRUSTES RESIDUAL</div>
-                <div className="font-mono text-xs font-bold text-[var(--signal-cobalt)] mt-1">
-                  {report?.bestMatch ? report.bestMatch.residual.toFixed(3) : '--'}
-                </div>
-              </div>
             </div>
           </div>
 
@@ -892,7 +769,7 @@ export const ImageLab: React.FC = () => {
               <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
                 THRESHOLD SETTINGS
               </span>
-              <span className="font-mono text-[10px] text-[var(--ink-muted)]">50–240 L</span>
+              <span className="font-mono text-[10px] text-[var(--ink-muted)]">8-bit luminance · 50–240</span>
             </div>
 
             {/* 24-Column Dot Matrix Luminance Histogram with Threshold Marker Line */}
@@ -901,12 +778,13 @@ export const ImageLab: React.FC = () => {
                 {histogramBins.map((binCount, binIdx) => {
                   const binVal = 50 + (binIdx / 23) * 190;
                   const isAboveThreshold = binVal >= threshold;
-                  const fillHeightDots = Math.max(1, Math.min(7, Math.round((binCount / maxBinVal) * 7)));
+                  const fillHeightDots = imageLoaded ? Math.max(1, Math.min(7, Math.round((binCount / maxBinVal) * 7))) : 0;
 
                   return (
                     <button
                       key={binIdx}
-                      onClick={() => setThreshold(Math.round(binVal))}
+                      onClick={() => handleSetThreshold(binVal)}
+                      aria-label={`Set luminance threshold to ${Math.round(binVal)}`}
                       title={`Luminance ${Math.round(binVal)}: ${binCount.toLocaleString()} pixels`}
                       className="flex-1 flex flex-col-reverse items-center gap-[2px] cursor-pointer hover:opacity-80 h-full justify-start"
                     >
@@ -952,7 +830,8 @@ export const ImageLab: React.FC = () => {
                 max="240"
                 step="1"
                 value={threshold}
-                onChange={e => setThreshold(parseInt(e.target.value, 10))}
+                onChange={e => handleSetThreshold(parseInt(e.target.value, 10))}
+                aria-label="Luminance detection threshold slider"
                 className="w-full accent-[var(--signal-cobalt)] h-1 cursor-pointer bg-[var(--bg-tray)] rounded"
               />
             </div>
@@ -960,54 +839,38 @@ export const ImageLab: React.FC = () => {
             {/* Numeric Readout: Detection Threshold mapped to [0, 1] normalized display */}
             <div className="flex items-center justify-between text-xs pt-0.5">
               <span className="micro-label text-[10px] text-[var(--ink-secondary)] uppercase">
-                DETECTION THRESHOLD:
+                LUMINANCE CUTOFF (8-BIT):
               </span>
               <div className="flex items-center gap-1.5">
-                <div className="px-2 py-0.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded font-mono font-bold text-xs text-[var(--signal-cobalt)]">
-                  {normalizedThreshold.toFixed(2)}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    onClick={() => handleStepThreshold(5)}
-                    className="text-[9px] leading-none px-1 py-0.5 bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] rounded"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    onClick={() => handleStepThreshold(-5)}
-                    className="text-[9px] leading-none px-1 py-0.5 bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] rounded"
-                  >
-                    ▼
-                  </button>
-                </div>
+                <label className="sr-only" htmlFor="image-lab-threshold">Luminance threshold, 50 to 240</label>
+                <input
+                  id="image-lab-threshold"
+                  type="number"
+                  min={50}
+                  max={240}
+                  step={1}
+                  value={thresholdText}
+                  onChange={e => {
+                    const raw = e.target.value;
+                    setThresholdText(raw);
+                    if (/^\d+$/.test(raw)) {
+                      const next = Number(raw);
+                      if (next >= 50 && next <= 240) handleSetThreshold(next);
+                    }
+                  }}
+                  onBlur={() => {
+                    const parsed = Number(thresholdText);
+                    if (Number.isFinite(parsed) && thresholdText !== '') {
+                      handleSetThreshold(parsed);
+                    } else {
+                      setThresholdText(String(threshold));
+                    }
+                  }}
+                  className="w-16 px-2 py-0.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded font-mono font-bold text-xs text-[var(--ink-primary)]"
+                />
               </div>
             </div>
 
-            {/* Stepper Buttons (-10, -1, +1, +10) & Presets */}
-            <div className="flex items-center justify-between gap-1 text-[10px]">
-              <div className="flex items-center gap-1">
-                {[-10, -1, 1, 10].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => handleStepThreshold(s)}
-                    className="tactile-pill text-[9px] py-0.5 px-1.5 font-bold"
-                  >
-                    {s > 0 ? `+${s}` : s}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-1">
-                {[80, 140, 180, 210].map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setThreshold(p)}
-                    className={`tactile-pill text-[8px] py-0.5 px-1.5 ${threshold === p ? 'active' : ''}`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Card 3: Manual Correction Tools (Frame 11 Target Alignment) */}
@@ -1021,6 +884,7 @@ export const ImageLab: React.FC = () => {
               {/* Tool 1: Pointer / Select */}
               <button
                 onClick={() => setActiveTool('select')}
+                aria-label="Select and trace centroids"
                 title="Select / Trace star centroids"
                 className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
                   activeTool === 'select' ? 'active' : ''
@@ -1034,6 +898,7 @@ export const ImageLab: React.FC = () => {
               {/* Tool 2: Add Point (+) */}
               <button
                 onClick={() => setActiveTool('add')}
+                aria-label="Add manual centroid"
                 title="Add manual star centroid"
                 className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
                   activeTool === 'add' ? 'active' : ''
@@ -1045,6 +910,7 @@ export const ImageLab: React.FC = () => {
               {/* Tool 3: Remove Point (-) */}
               <button
                 onClick={() => setActiveTool('remove')}
+                aria-label="Remove centroid"
                 title="Remove star centroid"
                 className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
                   activeTool === 'remove' ? 'active' : ''
@@ -1098,11 +964,11 @@ export const ImageLab: React.FC = () => {
 
           <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto text-[10px] py-1">
             {[
-              { num: '01', label: 'UPLOAD', active: imageLoaded, icon: '⬆' },
-              { num: '02', label: 'DETECT STARS', active: visibleStars.length > 0, icon: '✦' },
+              { num: '01', label: 'SOURCE', active: imageLoaded, icon: '01' },
+              { num: '02', label: 'DETECT STARS', active: imageLoaded && detectionComplete, icon: '✦' },
               { num: '03', label: 'EDIT POINTS', active: tracedPoints.length > 0 || manualStars.length > 0, icon: '✎' },
               { num: '04', label: 'TRACE PATTERN', active: tracedPoints.length >= 2, icon: '☍' },
-              { num: '05', label: 'RUN RECOGNITION', active: report !== null, icon: '◎' },
+              { num: '05', label: 'MATCH', active: report !== null, icon: '05' },
             ].map((step, idx, arr) => (
               <React.Fragment key={step.num}>
                 <div className="flex items-center gap-2 shrink-0">
@@ -1147,9 +1013,9 @@ export const ImageLab: React.FC = () => {
             <div className="font-dot text-lg font-bold text-[var(--signal-cobalt)] truncate max-w-[150px]">
               {report?.bestMatch?.patternName
                 ? report.bestMatch.patternName.split(' ')[0]
-                : report?.prefixMatch
-                ? 'PREFIX...'
-                : report?.status === 'SYMBOLIC_REJECT'
+                : report?.status === 'VALID_PREFIX'
+                ? 'PREFIX'
+                : report?.status === 'SYMBOLIC_REJECT' || report?.status === 'GEOMETRIC_REJECT'
                 ? 'NO MATCH'
                 : 'STANDBY'}
             </div>
