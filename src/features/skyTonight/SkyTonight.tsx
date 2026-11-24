@@ -9,6 +9,17 @@ import type { IAUConstellation, ObserverLocation } from '../../types/astronomy';
 const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4] as const;
 const QUANTA_MINUTES = [0, 15, 30, 45] as const;
 
+// Treat observations between midnight and 04:59 UTC as the tail of the
+// previous evening. From 05:00 onward, the displayed night starts today.
+const getNightSampleDate = (baseDate: Date, hour: number, minute: number) => {
+  const sample = new Date(baseDate);
+  const baseHour = baseDate.getUTCHours();
+  if (baseHour < 5) sample.setUTCDate(sample.getUTCDate() - 1);
+  if (hour < 12) sample.setUTCDate(sample.getUTCDate() + 1);
+  sample.setUTCHours(hour, minute, 0, 0);
+  return sample;
+};
+
 /**
  * Renders an accurate Moon Phase Disc SVG based on phase fraction and angle.
  */
@@ -292,18 +303,11 @@ export const SkyTonight: React.FC = () => {
   // Precompute 44 sample dates across the 11-hour night (18:00 to 04:00 UTC, 4 per hour)
   // Ensures proper UTC date rollover when crossing midnight
   const nightQuantumDates = useMemo(() => {
-    const baseHour = observationDate.getUTCHours();
     const dates: Array<{ hour: number; minute: number; date: Date }> = [];
 
     for (const h of NIGHT_HOURS) {
       for (const m of QUANTA_MINUTES) {
-        const d = new Date(observationDate);
-        if (h < 12 && baseHour >= 12) {
-          d.setUTCDate(d.getUTCDate() + 1);
-        } else if (h >= 12 && baseHour < 12) {
-          d.setUTCDate(d.getUTCDate() - 1);
-        }
-        d.setUTCHours(h, m, 0, 0);
+        const d = getNightSampleDate(observationDate, h, m);
         dates.push({ hour: h, minute: m, date: d });
       }
     }
@@ -394,7 +398,10 @@ export const SkyTonight: React.FC = () => {
   const circumpolarCount = constellationsData.filter(c => c.culmination.isCircumpolar).length;
   const visibleBrightStars = brightStarsData.filter(s => s.isAboveHorizon);
   const visibleBrightStarsCount = visibleBrightStars.length;
-  const totalVisibleCount = aboveHorizonCount + visibleBrightStarsCount;
+  const visibleTargetCount = targetType === 'constellations' ? aboveHorizonCount : visibleBrightStarsCount;
+  const visibleTargetDescription = targetType === 'constellations'
+    ? 'ABOVE HORIZON · CONSTELLATIONS'
+    : 'ABOVE HORIZON · BRIGHT STARS';
 
   // Derive honest top metrics
   const topMetrics = useMemo(() => {
@@ -538,14 +545,7 @@ export const SkyTonight: React.FC = () => {
 
   // Quantum setter: updates UTC time to exact hour and minute with overnight rollover awareness
   const handleSetQuantumTime = (hour: number, minute: number) => {
-    const baseHour = observationDate.getUTCHours();
-    const newDate = new Date(observationDate);
-    if (hour < 12 && baseHour >= 12) {
-      newDate.setUTCDate(newDate.getUTCDate() + 1);
-    } else if (hour >= 12 && baseHour < 12) {
-      newDate.setUTCDate(newDate.getUTCDate() - 1);
-    }
-    newDate.setUTCHours(hour, minute, 0, 0);
+    const newDate = getNightSampleDate(observationDate, hour, minute);
     setObservationDate(newDate);
   };
 
@@ -558,14 +558,14 @@ export const SkyTonight: React.FC = () => {
   const activeSelectedId = selectedConId || recommendedWindows[0]?.id || 'Ori';
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 overflow-y-auto pr-0.5 font-mono select-none text-[var(--ink-primary)]">
+    <section className="w-full h-full min-w-0 flex flex-col gap-2 overflow-y-auto pr-0.5 font-mono text-[var(--ink-primary)]" aria-label="Sky visibility tonight">
       {/* 1. Top Row of 5 Metric Cards matching Frame 5 */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 shrink-0">
         {/* Card 1: DATE */}
         <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
           <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
             <span>DATE</span>
-            <span className="text-[var(--ink-muted)] text-[11px]">↗</span>
+            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">UTC</span>
           </div>
           <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
             {topMetrics.dateStr}
@@ -576,9 +576,9 @@ export const SkyTonight: React.FC = () => {
         <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
           <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
             <span>OBSERVER LOCATION</span>
-            <span className="text-[var(--ink-muted)] text-[11px]">↗</span>
+            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">WGS84</span>
           </div>
-          <div className="flex items-center gap-3 text-xs sm:text-[13px]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-[13px]">
             <span className="text-[var(--ink-muted)]">
               LAT <strong className="text-[var(--ink-primary)] font-bold">{topMetrics.latVal}° {topMetrics.latDir}</strong>
             </span>
@@ -592,7 +592,7 @@ export const SkyTonight: React.FC = () => {
         <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
           <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
             <span>SUNSET</span>
-            <span className="text-[var(--ink-muted)] text-[11px]">↗</span>
+            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">UTC</span>
           </div>
           <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
             {topMetrics.sunsetTimeStr}
@@ -603,7 +603,7 @@ export const SkyTonight: React.FC = () => {
         <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
           <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
             <span>MOON ILLUMINATION</span>
-            <span className="text-[var(--ink-muted)] text-[11px]">↗</span>
+            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">PHASE</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
@@ -614,53 +614,34 @@ export const SkyTonight: React.FC = () => {
         </div>
 
         {/* Card 5: VISIBLE COUNT */}
-        <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
+        <div className="col-span-2 md:col-span-1 bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
+          <div className="flex flex-col gap-0.5 text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
             <span>VISIBLE COUNT</span>
-            <span className="text-[var(--ink-muted)] text-[11px]">↗</span>
+            <span className="text-[9px] font-normal text-[var(--ink-muted)]">{visibleTargetDescription}</span>
           </div>
           <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
-            {totalVisibleCount}
+            {visibleTargetCount}
           </div>
         </div>
       </div>
 
       {/* 2. Middle Bento Card: SKY TONIGHT Table matching Frame 5 */}
-      <div className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-4 flex flex-col gap-3 min-h-0 flex-1">
+      <section className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-3 sm:p-4 flex flex-col gap-3 min-h-[360px] flex-1" aria-labelledby="sky-tonight-title">
         {/* Table Title and Frame 5 Evening/Night/Full Mode Toggles */}
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex items-center gap-2.5">
-            <span className="font-bold text-sm tracking-wider uppercase text-[var(--ink-primary)]">SKY TONIGHT</span>
+            <h1 id="sky-tonight-title" className="font-bold text-sm tracking-wider uppercase text-[var(--ink-primary)]">Sky tonight</h1>
             <span className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wide">
-              [{filteredConstellations.length} CONSTELLATIONS // {currentUtcTimeStr} UTC]
+              [{targetType === 'constellations' ? filteredConstellations.length : filteredBrightStars.length} {targetType === 'constellations' ? 'CONSTELLATIONS' : 'BRIGHT STARS'} // {currentUtcTimeStr} UTC]
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Target Category Toggle: Constellations vs Bright Stars */}
-            <div className="tactile-rocker">
-              <button
-                onClick={() => setTargetType('constellations')}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  targetType === 'constellations' ? 'active' : ''
-                }`}
-              >
-                CONSTELLATIONS ({aboveHorizonCount})
-              </button>
-              <button
-                onClick={() => setTargetType('stars')}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  targetType === 'stars' ? 'active' : ''
-                }`}
-              >
-                BRIGHT STARS ({visibleBrightStarsCount})
-              </button>
-            </div>
-
             {/* Frame 5 Segmented Mode Rockers: EVENING / NIGHT / FULL */}
             <div className="tactile-rocker">
               <button
                 onClick={() => setTimeMode('evening')}
+                aria-pressed={timeMode === 'evening'}
                 className={`tactile-pill text-[10px] uppercase font-semibold ${
                   timeMode === 'evening' ? 'active' : ''
                 }`}
@@ -669,6 +650,7 @@ export const SkyTonight: React.FC = () => {
               </button>
               <button
                 onClick={() => setTimeMode('night')}
+                aria-pressed={timeMode === 'night'}
                 className={`tactile-pill text-[10px] uppercase font-semibold ${
                   timeMode === 'night' ? 'active' : ''
                 }`}
@@ -677,6 +659,7 @@ export const SkyTonight: React.FC = () => {
               </button>
               <button
                 onClick={() => setTimeMode('full')}
+                aria-pressed={timeMode === 'full'}
                 className={`tactile-pill text-[10px] uppercase font-semibold ${
                   timeMode === 'full' ? 'active' : ''
                 }`}
@@ -687,13 +670,45 @@ export const SkyTonight: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters, Steppers, and Search Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-0.5 border-t border-[#E2E5EC]/60">
-          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[320px]">
+        {/* Keep secondary browse and time controls available without crowding the reference layout. */}
+        <details className="group shrink-0">
+          <summary className="cursor-pointer list-none border-y border-[#E2E5EC]/60 py-2 text-[10px] font-bold uppercase tracking-wider text-[var(--ink-secondary)] marker:hidden">
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span className="text-[var(--signal-cobalt)]">+</span>
+              Browse &amp; time controls
+              <span className="font-normal normal-case tracking-normal text-[var(--ink-muted)]">Search, filters, target type, and time steps</span>
+            </span>
+          </summary>
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+            {/* Target Category Toggle: Constellations vs Bright Stars */}
+            <div className="tactile-rocker">
+              <button
+                onClick={() => setTargetType('constellations')}
+                aria-pressed={targetType === 'constellations'}
+                className={`tactile-pill text-[10px] uppercase font-semibold ${
+                  targetType === 'constellations' ? 'active' : ''
+                }`}
+              >
+                CONSTELLATIONS ({aboveHorizonCount})
+              </button>
+              <button
+                onClick={() => setTargetType('stars')}
+                aria-pressed={targetType === 'stars'}
+                className={`tactile-pill text-[10px] uppercase font-semibold ${
+                  targetType === 'stars' ? 'active' : ''
+                }`}
+              >
+                BRIGHT STARS ({visibleBrightStarsCount})
+              </button>
+            </div>
+
+
             {/* Search Input */}
             <input
               type="text"
               placeholder="SEARCH CONSTELLATION OR STAR..."
+              aria-label="Search constellations or bright stars"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] rounded-[8px] px-3 py-1 text-xs text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)] focus:outline-none focus:border-[var(--signal-cobalt)] uppercase tracking-wider w-52 sm:w-60"
@@ -703,6 +718,7 @@ export const SkyTonight: React.FC = () => {
             <div className="tactile-rocker">
               <button
                 onClick={() => setHorizonFilter('above')}
+                aria-pressed={horizonFilter === 'above'}
                 className={`tactile-pill text-[10px] uppercase ${
                   horizonFilter === 'above' ? 'active' : ''
                 }`}
@@ -711,6 +727,7 @@ export const SkyTonight: React.FC = () => {
               </button>
               <button
                 onClick={() => setHorizonFilter('all')}
+                aria-pressed={horizonFilter === 'all'}
                 className={`tactile-pill text-[10px] uppercase ${
                   horizonFilter === 'all' ? 'active' : ''
                 }`}
@@ -719,6 +736,7 @@ export const SkyTonight: React.FC = () => {
               </button>
               <button
                 onClick={() => setHorizonFilter('circumpolar')}
+                aria-pressed={horizonFilter === 'circumpolar'}
                 className={`tactile-pill text-[10px] uppercase ${
                   horizonFilter === 'circumpolar' ? 'active' : ''
                 }`}
@@ -733,6 +751,7 @@ export const SkyTonight: React.FC = () => {
                 <button
                   key={hemi}
                   onClick={() => setHemisphereFilter(hemi)}
+                    aria-pressed={hemisphereFilter === hemi}
                   className={`tactile-pill text-[10px] uppercase ${
                     hemisphereFilter === hemi ? 'active' : ''
                   }`}
@@ -745,6 +764,7 @@ export const SkyTonight: React.FC = () => {
             {/* Sort Dropdown */}
             <select
               value={sortBy}
+              aria-label="Sort visible targets"
               onChange={e => setSortBy(e.target.value as any)}
               className="bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] rounded-[6px] px-2 py-1 text-[10px] text-[var(--ink-secondary)] uppercase tracking-wider cursor-pointer focus:outline-none focus:border-[var(--signal-cobalt)]"
             >
@@ -756,54 +776,55 @@ export const SkyTonight: React.FC = () => {
           </div>
 
           {/* Quick Hardware Time Stepper Buttons */}
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             <button
               onClick={() => stepTime(-1)}
               className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              title="Step -1 hour"
+              aria-label="Step observation time back one hour"
             >
               -1H
             </button>
             <button
               onClick={() => setObservationDate(new Date())}
               className="tactile-pill bg-[var(--signal-cobalt)] text-white text-[10px] py-1 px-2.5 font-bold"
-              title="Reset observation date to now"
+              aria-label="Set observation date and time to now"
             >
               NOW
             </button>
             <button
               onClick={() => stepTime(1)}
               className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              title="Step +1 hour"
+              aria-label="Step observation time forward one hour"
             >
               +1H
             </button>
             <button
               onClick={() => stepTime(24)}
               className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              title="Step +24 hours"
+              aria-label="Step observation time forward 24 hours"
             >
               +24H
             </button>
             <button
               onClick={() => handleStepMinutes(-15)}
               className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              title="Step -15 minutes"
+              aria-label="Step observation time back 15 minutes"
             >
               -15M
             </button>
             <button
               onClick={() => handleStepMinutes(15)}
               className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              title="Step +15 minutes"
+              aria-label="Step observation time forward 15 minutes"
             >
               +15M
             </button>
           </div>
-        </div>
+          </div>
+        </details>
 
         {/* 11-Hour Dot Matrix Table */}
-        <div className="overflow-x-auto overflow-y-auto max-h-[290px] border border-[#E2E5EC] rounded-[10px]">
+        <div className="min-h-0 flex-1 overflow-auto border border-[#E2E5EC] rounded-[10px]">
           <div className="min-w-[960px]">
             {/* Header Row */}
             <div className="sticky top-0 bg-[#F5F6F8] border-b border-[#E2E5EC] px-3 py-2 flex items-center text-[10px] font-bold text-[var(--ink-secondary)] tracking-wider uppercase z-10">
@@ -837,20 +858,25 @@ export const SkyTonight: React.FC = () => {
                   filteredConstellations.map(con => (
                     <div
                       key={con.id}
-                      className="px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs transition-colors group cursor-pointer"
-                      onClick={() => setSelectedConId(con.id)}
+                      className={`px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs group ${selectedConId === con.id ? 'bg-[#F4F7FC]' : ''}`}
                     >
                       {/* Constellation Vector Glyph & Name */}
                       <div className="w-56 shrink-0 flex items-center gap-2.5">
                         <MiniAsterismGlyph con={con} width={34} height={24} />
-                        <div>
-                          <div className="font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedConId(con.id)}
+                          aria-pressed={selectedConId === con.id}
+                          aria-label={`Select ${con.name}`}
+                          className="min-w-0 text-left"
+                        >
+                          <span className="block font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
                             {con.name}
-                          </div>
-                          <div className="text-[10px] text-[var(--ink-muted)] uppercase">
+                          </span>
+                          <span className="block text-[10px] text-[var(--ink-muted)] uppercase">
                             {con.englishName} ({con.id})
-                          </div>
-                        </div>
+                          </span>
+                        </button>
                       </div>
 
                       {/* Visibility Window */}
@@ -877,13 +903,16 @@ export const SkyTonight: React.FC = () => {
                                   e.stopPropagation();
                                   handleSetQuantumTime(hour, minute);
                                 }}
-                                title={`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC — ${
+                                aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
                                   isVisible ? 'Visible Above Horizon' : 'Below Horizon'
                                 }`}
-                                className={`w-[6px] h-[6px] rounded-full cursor-pointer ${
+                                aria-pressed={isCurrent}
+                                className="flex h-5 w-4 shrink-0 cursor-pointer items-center justify-center"
+                              >
+                                <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
                                   isVisible ? 'bg-[var(--signal-cobalt)]' : 'bg-[#E2E5EC]'
-                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`}
-                              />
+                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`} />
+                              </button>
                             );
                           });
 
@@ -902,6 +931,7 @@ export const SkyTonight: React.FC = () => {
                             e.stopPropagation();
                             focusOnConstellation(con.id);
                           }}
+                          aria-label={`Focus ${con.name} in sky canvas`}
                           className="tactile-pill text-[9px] py-1 px-2 uppercase hover:bg-[var(--bg-pill-active)] hover:text-[var(--signal-cobalt)]"
                           title={`Focus ${con.name} in sky canvas`}
                         >
@@ -925,15 +955,16 @@ export const SkyTonight: React.FC = () => {
                   filteredBrightStars.map(star => (
                     <div
                       key={star.id}
-                      className="px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs transition-colors group cursor-pointer"
-                      onClick={() => focusOnStar(star.id)}
+                      className="px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs group"
                     >
                       <div className="w-56 shrink-0">
-                        <div className="font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
-                          {star.proper || star.name}
-                        </div>
-                        <div className="text-[10px] text-[var(--ink-muted)] uppercase">
-                          {star.con} // HIP {star.hip || '—'}
+                        <div>
+                          <span className="block font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
+                            {star.proper || star.name}
+                          </span>
+                          <span className="block text-[10px] text-[var(--ink-muted)] uppercase">
+                            {star.con} // HIP {star.hip || '—'}
+                          </span>
                         </div>
                       </div>
 
@@ -960,13 +991,16 @@ export const SkyTonight: React.FC = () => {
                                   e.stopPropagation();
                                   handleSetQuantumTime(hour, minute);
                                 }}
-                                title={`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC — ${
+                                aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
                                   isVisible ? 'Visible' : 'Below Horizon'
                                 }`}
-                                className={`w-[6px] h-[6px] rounded-full cursor-pointer ${
+                                aria-pressed={isCurrent}
+                                className="flex h-5 w-4 shrink-0 cursor-pointer items-center justify-center"
+                              >
+                                <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
                                   isVisible ? 'bg-[var(--signal-cobalt)]' : 'bg-[#E2E5EC]'
-                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`}
-                              />
+                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`} />
+                              </button>
                             );
                           });
 
@@ -984,6 +1018,7 @@ export const SkyTonight: React.FC = () => {
                             e.stopPropagation();
                             focusOnStar(star.id);
                           }}
+                          aria-label={`Focus ${star.proper || star.name} in sky canvas`}
                           className="tactile-pill text-[9px] py-1 px-2 uppercase hover:bg-[var(--bg-pill-active)] hover:text-[var(--signal-cobalt)]"
                         >
                           FOCUS ↗
@@ -996,7 +1031,7 @@ export const SkyTonight: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* 3. Bottom Row: 3 Lower Modules matching Frame 5 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0">
@@ -1007,16 +1042,18 @@ export const SkyTonight: React.FC = () => {
           </div>
 
           <div className="space-y-2 mt-2">
-            {recommendedWindows.map((item, idx) => {
-              const isSelected = item.id === activeSelectedId || idx === 0;
+            {recommendedWindows.map(item => {
+              const isSelected = item.id === activeSelectedId;
               return (
-                <div
+                <button
                   key={item.id}
+                  type="button"
                   onClick={() => {
                     setSelectedConId(item.id);
                     focusOnConstellation(item.id);
                   }}
-                  className={`p-2 rounded-[10px] flex items-center justify-between cursor-pointer border ${
+                  aria-pressed={isSelected}
+                  className={`w-full p-2 rounded-[10px] flex items-center justify-between text-left border ${
                     isSelected
                       ? 'bg-[#EAF0FC] border-[#C7D5EC]'
                       : 'bg-[#F8FAFC] border-transparent hover:border-[#E2E5EC]'
@@ -1028,16 +1065,17 @@ export const SkyTonight: React.FC = () => {
                       <div className="font-bold text-xs uppercase text-[var(--ink-primary)]">
                         {item.name}
                       </div>
-                      <div className="text-[10px] text-[var(--ink-secondary)] font-mono">
-                        {item.windowStr}
+                      <div className="text-[9px] text-[var(--ink-secondary)] font-mono">
+                        <span className="text-[var(--ink-muted)]">ALTITUDE WINDOW · </span>{item.windowStr} UTC
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-[10px] font-bold text-[var(--ink-secondary)] font-mono text-right">
-                    {item.durationStr}
+                  <div className="shrink-0 text-right font-mono">
+                    <div className="text-[9px] font-normal text-[var(--ink-muted)]">SAMPLE COVERAGE</div>
+                    <div className="text-[10px] font-bold text-[var(--ink-secondary)]">{item.durationStr}</div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -1094,6 +1132,6 @@ export const SkyTonight: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
