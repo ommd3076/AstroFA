@@ -87,7 +87,7 @@ export const App: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.dispatchEvent(new CustomEvent('costellar:open-observer'))}
-                className="hidden sm:inline-flex h-7 gap-1.5 px-2 text-[11px] font-mono text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+                className={`${activeView === 'sky' ? 'hidden' : 'hidden sm:inline-flex'} h-7 max-w-[180px] gap-1.5 px-2 text-[11px] font-mono text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]`}
                 title="Change observer location"
               >
                 <CompassIcon className="size-3.5 text-[var(--signal-mid)]" aria-hidden="true" />

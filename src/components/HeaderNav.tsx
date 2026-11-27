@@ -405,7 +405,7 @@ export const HeaderNav: React.FC = () => {
                   <span className="truncate font-semibold tracking-wider text-xs text-[var(--ink-primary)] uppercase">
                     COSTELLAR
                   </span>
-                  <span className="truncate text-[10px] font-mono text-[var(--ink-muted)] uppercase">
+                  <span className="truncate text-[11px] font-mono text-[var(--ink-secondary)] uppercase">
                     Observing Atlas
                   </span>
                 </div>
@@ -439,7 +439,7 @@ export const HeaderNav: React.FC = () => {
         <SidebarContent>
           {navGroups.map(group => (
             <SidebarGroup key={group.label}>
-              <SidebarGroupLabel className="text-[10px] font-mono font-medium uppercase tracking-[0.08em] text-[var(--ink-muted)]">
+              <SidebarGroupLabel className="text-[11px] font-mono font-medium uppercase tracking-[0.04em] text-[var(--ink-secondary)]">
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -491,7 +491,7 @@ export const HeaderNav: React.FC = () => {
                   <span className="truncate text-[11px] font-semibold text-[var(--ink-primary)]">
                     {observer.name.split(',')[0]}
                   </span>
-                  <span className="truncate text-[10px] font-mono tabular-nums text-[var(--ink-muted)]">
+                  <span className="truncate text-[11px] font-mono tabular-nums text-[var(--ink-secondary)]">
                     {formatObserverCoordinates(observer.latitude, observer.longitude)}
                   </span>
                 </div>
