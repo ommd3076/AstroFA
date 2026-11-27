@@ -20,6 +20,9 @@ interface SkyCanvasProps {
   showDeepSky?: boolean;
 }
 
+const MIN_SKY_FOV = 4;
+const MAX_SKY_FOV = 85;
+
 export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgOverlayRef = useRef<SVGSVGElement>(null);
@@ -57,6 +60,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const skyDomeMeshRef = useRef<THREE.Mesh | null>(null);
   const skyDomeTexRef = useRef<THREE.Texture | null>(null);
   const starPointsRef = useRef<THREE.Points | null>(null);
+  const starMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
   const normalLinesMeshRef = useRef<THREE.LineSegments | null>(null);
   const focusedLinesMeshRef = useRef<THREE.LineSegments | null>(null);
   const traceLineMeshRef = useRef<THREE.Line | null>(null);
@@ -77,6 +81,9 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const lastSvgContentRef = useRef<string>('');
   const isRenderScheduled = useRef(false);
   const animFrameId = useRef<number | null>(null);
+  const pickFrameId = useRef<number | null>(null);
+  const latestPointerRef = useRef({ x: 0, y: 0 });
+  const lastPickTimeRef = useRef(0);
 
   // 1. Initialize Scene & Three.js Canvas
   useEffect(() => {
@@ -185,6 +192,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     const colors = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
     const alphas = new Float32Array(starCount);
+    const magnitudes = new Float32Array(starCount);
 
     const tempColor = new THREE.Color();
     for (let i = 0; i < starCount; i++) {
@@ -202,6 +210,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       // Magnitude scaling: Sirius (-1.44) ~ 11.9px, mag 6.5 ~ 1.8px
       sizes[i] = Math.max(1.8, 10.0 - 1.3 * star.mag);
       alphas[i] = Math.max(0.28, Math.min(1.0, 1.04 - 0.115 * star.mag));
+      magnitudes[i] = star.mag;
     }
 
     const starGeometry = new THREE.BufferGeometry();
@@ -209,21 +218,30 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     starGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
     starGeometry.setAttribute('aAlpha', new THREE.BufferAttribute(alphas, 1));
+    starGeometry.setAttribute('aMagnitude', new THREE.BufferAttribute(magnitudes, 1));
 
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     const starMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uPixelRatio: { value: pixelRatio },
+        uFov: { value: camera.fov },
       },
       vertexShader: `
         attribute float aSize;
         attribute float aAlpha;
+        attribute float aMagnitude;
         uniform float uPixelRatio;
+        uniform float uFov;
         varying vec3 vColor;
         varying float vAlpha;
         void main() {
           vColor = color;
-          vAlpha = aAlpha;
+          // Keep the wide sky readable and reveal the deeper HYG catalog as it is magnified.
+          float zoomDepth = clamp(log(60.0 / uFov) / log(60.0 / 4.0), 0.0, 1.0);
+          float magnitudeLimit = mix(6.5, 10.5, zoomDepth);
+          float magnitudeVisibility = 1.0 - smoothstep(magnitudeLimit - 0.25, magnitudeLimit + 0.65, aMagnitude);
+          // A dim floor preserves hover and trace discoverability for faint catalog entries.
+          vAlpha = aAlpha * mix(0.012, 1.0, magnitudeVisibility);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           gl_PointSize = clamp(aSize * uPixelRatio, 1.5, 28.0);
         }
@@ -252,6 +270,7 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     const starPoints = new THREE.Points(starGeometry, starMaterial);
     celestialGroup.add(starPoints);
     starPointsRef.current = starPoints;
+    starMaterialRef.current = starMaterial;
 
     // --- Build Constellation Lines ---
     const normalLinePositions: number[] = [];
@@ -455,6 +474,9 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       resizeObserver.disconnect();
       skyDomeTexRef.current?.dispose();
       skyDomeTexRef.current = null;
+      starMaterialRef.current = null;
+      if (pickFrameId.current !== null) cancelAnimationFrame(pickFrameId.current);
+      pickFrameId.current = null;
       scene.traverse(obj => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.Points) {
           obj.geometry?.dispose();
@@ -761,14 +783,17 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
 
   // Zoom event listener for external toolbar controls
   useEffect(() => {
+    const applyFov = (fov: number) => {
+      if (!cameraRef.current) return;
+      cameraRef.current.fov = Math.max(MIN_SKY_FOV, Math.min(MAX_SKY_FOV, fov));
+      cameraRef.current.updateProjectionMatrix();
+      if (starMaterialRef.current) starMaterialRef.current.uniforms.uFov.value = cameraRef.current.fov;
+      window.dispatchEvent(new CustomEvent('sky-zoom-change', { detail: { fov: cameraRef.current.fov } }));
+      requestRenderRef.current();
+    };
     const handleCustomZoom = (e: Event) => {
-      const customEvent = e as CustomEvent<{ delta: number }>;
-      if (cameraRef.current && customEvent.detail) {
-        const nextFov = cameraRef.current.fov + customEvent.detail.delta;
-        cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
-        cameraRef.current.updateProjectionMatrix();
-        requestRenderRef.current();
-      }
+      const customEvent = e as CustomEvent<{ factor?: number }>;
+      if (cameraRef.current && customEvent.detail?.factor) applyFov(cameraRef.current.fov * customEvent.detail.factor);
     };
     window.addEventListener('sky-zoom', handleCustomZoom);
     return () => window.removeEventListener('sky-zoom', handleCustomZoom);
@@ -805,23 +830,32 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       return;
     }
 
-    // Raycast / hover picking
-    if (!containerRef.current || !cameraRef.current || !starPointsRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const ndcX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const ndcY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    // Coalesce mouse movement into one 3D point-cloud query per frame.
+    latestPointerRef.current = { x: e.clientX, y: e.clientY };
+    if (pickFrameId.current !== null) return;
+    pickFrameId.current = requestAnimationFrame(() => {
+      pickFrameId.current = null;
+      const now = performance.now();
+      if (now - lastPickTimeRef.current < 40) return;
+      lastPickTimeRef.current = now;
+      const { x, y } = latestPointerRef.current;
+      if (!containerRef.current || !cameraRef.current || !starPointsRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const ndcX = ((x - rect.left) / rect.width) * 2 - 1;
+      const ndcY = -((y - rect.top) / rect.height) * 2 + 1;
 
-    const raycaster = new THREE.Raycaster();
-    raycaster.params.Points = { threshold: 14 }; // 14px picking threshold
-    raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cameraRef.current);
+      const raycaster = new THREE.Raycaster();
+      raycaster.params.Points = { threshold: 14 }; // 14px picking threshold
+      raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cameraRef.current);
 
-    const intersects = raycaster.intersectObject(starPointsRef.current, false);
-    if (intersects.length > 0 && intersects[0].index !== undefined) {
-      const idx = intersects[0].index;
-      setHoveredStar(STARS[idx]);
-    } else {
-      setHoveredStar(null);
-    }
+      const intersects = raycaster.intersectObject(starPointsRef.current, false);
+      if (intersects.length > 0 && intersects[0].index !== undefined) {
+        const idx = intersects[0].index;
+        setHoveredStar(STARS[idx]);
+      } else {
+        setHoveredStar(null);
+      }
+    });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -834,9 +868,11 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
 
   const handleWheel = (e: React.WheelEvent) => {
     if (!cameraRef.current) return;
-    const nextFov = cameraRef.current.fov + e.deltaY * 0.05;
-    cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
+    const nextFov = cameraRef.current.fov * Math.exp(e.deltaY * 0.0012);
+    cameraRef.current.fov = Math.max(MIN_SKY_FOV, Math.min(MAX_SKY_FOV, nextFov));
     cameraRef.current.updateProjectionMatrix();
+    if (starMaterialRef.current) starMaterialRef.current.uniforms.uFov.value = cameraRef.current.fov;
+    window.dispatchEvent(new CustomEvent('sky-zoom-change', { detail: { fov: cameraRef.current.fov } }));
     requestRenderRef.current();
   };
 

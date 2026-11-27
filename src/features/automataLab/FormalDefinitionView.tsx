@@ -1,7 +1,7 @@
 import React from 'react';
 import { MINIMIZED_DFA_MACHINE, DFA_MACHINE, NFA_MACHINE } from '../../data/astroData';
-import { Card } from '../../components/ui/space/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { Card } from './boardPrimitives';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
 
 export const FormalDefinitionView: React.FC = () => {
   const dfa = MINIMIZED_DFA_MACHINE;

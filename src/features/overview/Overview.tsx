@@ -2,10 +2,11 @@ import React, { useMemo } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATIONS, CONSTELLATION_BY_ID, REFERENCE_PATTERNS, STAR_BY_ID } from '../../data/astroData';
 import { getHorizontalCoordinates } from '../../astronomy/coordinates';
-import { Button } from '../../components/ui/space/button';
+import { Button } from '../../components/ui/board/base/buttons/button';
 import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
 import { Chip } from '../../components/ui/board/base/badges/chip';
 import { PageHeader } from '../../components/PageHeader';
+import './overview.css';
 
 const HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
 const HOUR_LABELS = ['18', '19', '20', '21', '22', '23', '00', '01', '02'];
@@ -47,11 +48,11 @@ const PatternPreview: React.FC<{ id: string; name: string; onSelect: (id: string
     <BoardButton
       variant="ghost"
       onClick={() => onSelect(id)}
-      className="h-auto min-h-[112px] w-full min-w-0 flex-col items-stretch rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-viewport)] p-2.5 text-left font-normal hover:border-[var(--signal-cobalt)]"
+      className={`h-auto ${id === 'Ori' ? 'min-h-[190px] sm:row-span-2' : 'min-h-[92px]'} w-full min-w-0 flex-col items-stretch rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-viewport)] p-2.5 text-left font-normal hover:border-[var(--signal-cobalt)]`}
       aria-label={`Focus ${name} in sky`}
     >
       <span className="flex w-full flex-col items-stretch">
-        <svg viewBox="0 0 80 48" className="h-16 w-full" aria-hidden="true">
+        <svg viewBox="0 0 80 48" className={`${id === 'Ori' ? 'h-32' : 'h-20'} w-full`} aria-hidden="true">
           {constellation?.lineSegments.map((segment, index) => {
             const a = nodeById.get(segment.starId1);
             const b = nodeById.get(segment.starId2);
@@ -182,7 +183,7 @@ export const Overview: React.FC = () => {
   };
 
   return (
-    <div className="boardui-surface mx-auto flex w-full max-w-[1440px] flex-col gap-6 font-sans text-[var(--ink-primary)] select-none">
+    <div className="overview-desk boardui-surface mx-auto flex w-full max-w-[1440px] flex-col gap-6 font-sans text-[var(--ink-primary)] select-none">
       {/* 1. Primary Observatory Landing Header */}
       <PageHeader
         eyebrow={`Observing site · ${observer.name}`}
@@ -240,7 +241,7 @@ export const Overview: React.FC = () => {
       {/* 2. Dominant Atlas Composition: Tonight Featured Strip + Evening Peak Curve */}
       <section aria-label="Nightly visibility atlas" className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         {/* Left: Dominant Tonight Target Matrix & Featured Asterisms */}
-        <div className="atlas-surface flex flex-col justify-between p-4 sm:p-5 lg:col-span-7">
+        <div className="overview-panel flex flex-col justify-between p-4 sm:p-5 lg:col-span-7">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
             <div>
               <h2 className="text-sm font-semibold text-[var(--ink-primary)]">Tonight visibility window</h2>
@@ -249,7 +250,7 @@ export const Overview: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="link" size="xs" onClick={() => setActiveView('tonight')} className="h-auto p-0 text-xs font-semibold text-[var(--signal-mid)]">
+              <Button variant="ghost" size="xs" onClick={() => setActiveView('tonight')} className="h-auto p-0 text-xs font-semibold text-[var(--signal-mid)]">
                 Full 88 planner →
               </Button>
             </div>
@@ -263,7 +264,7 @@ export const Overview: React.FC = () => {
                 key={row.id}
                 onClick={() => goToConstellation(row.id)}
                 title={`Focus ${row.name} in the sky`}
-                className="group h-auto w-full justify-start gap-3 rounded-md px-2 py-1.5 text-left font-normal hover:bg-[var(--bg-card-subtle)]"
+                className="overview-visibility-row group h-auto w-full justify-start gap-3 rounded-md px-2 py-1.5 text-left font-normal hover:bg-[var(--bg-card-subtle)]"
               >
                 <span className="grid w-[112px] shrink-0 grid-cols-[34px_1fr] items-center text-xs text-[var(--ink-secondary)]">
                   <b className="font-mono text-[11px] text-[var(--signal-mid)]">{row.id.toUpperCase()}</b>
@@ -295,11 +296,11 @@ export const Overview: React.FC = () => {
           <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
             <div className="mb-2.5 flex items-center justify-between">
               <span className="text-xs font-semibold text-[var(--ink-secondary)]">Featured asterism figures</span>
-              <Button variant="link" size="xs" onClick={() => setActiveView('constellations')} className="h-auto p-0 text-xs text-[var(--signal-mid)]">
+              <Button variant="ghost" size="xs" onClick={() => setActiveView('constellations')} className="h-auto p-0 text-xs text-[var(--signal-mid)]">
                 Browse all {CONSTELLATIONS.length} →
               </Button>
             </div>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:grid-rows-2">
               {FEATURED.slice(0, 3).map(item => (
                 <PatternPreview key={item.id} id={item.id} name={item.name} onSelect={goToConstellation} />
               ))}
@@ -308,7 +309,7 @@ export const Overview: React.FC = () => {
         </div>
 
         {/* Right: Hourly Horizon Density Distribution */}
-        <div className="atlas-surface flex flex-col justify-between p-4 sm:p-5 lg:col-span-5">
+        <div className="overview-panel flex flex-col justify-between p-4 sm:p-5 lg:col-span-5">
           <div className="flex items-start justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
             <div>
               <h2 className="text-sm font-semibold text-[var(--ink-primary)]">Constellations above horizon</h2>
@@ -339,14 +340,14 @@ export const Overview: React.FC = () => {
               <h2 className="text-sm font-semibold text-[var(--ink-primary)]">Quick reference traces</h2>
               <p className="text-xs text-[var(--ink-muted)]">Load a canonical star sequence directly into Trace Mode</p>
             </div>
-            <Button variant="link" size="xs" onClick={() => setActiveView('imageLab')} className="h-auto p-0 text-xs text-[var(--signal-mid)]">
+            <Button variant="ghost" size="xs" onClick={() => setActiveView('imageLab')} className="h-auto p-0 text-xs text-[var(--signal-mid)]">
               Image Lab ↗
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {samples.map(pattern => (
               <Button
-                variant="outline"
+                variant="secondary"
                 key={pattern.id}
                 onClick={() => loadSample(pattern.id)}
                 className="h-auto justify-between rounded-lg border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2.5 text-left text-xs font-normal hover:border-[var(--signal-cobalt)]"
@@ -366,7 +367,7 @@ export const Overview: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               {recognitionReport && (
-                <Button variant="outline" size="xs" onClick={() => setActiveView('results')} className="text-xs">
+                <Button variant="secondary" size="xs" onClick={() => setActiveView('results')} className="text-xs">
                   Report ↗
                 </Button>
               )}

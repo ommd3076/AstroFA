@@ -4,14 +4,18 @@ import { CONSTELLATIONS, REFERENCE_PATTERNS, STAR_BY_ID } from '../../data/astro
 import { getHorizontalCoordinates, getMeridianCulmination } from '../../astronomy/coordinates';
 import type { IAUConstellation, Star } from '../../types/astronomy';
 import { PageHeader } from '../../components/PageHeader';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
-import { Input } from '../../components/ui/space/input';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
-import { Switch } from '../../components/ui/space/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
-import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
+import { Button } from '../../components/ui/board/base/buttons/button';
+import { SearchField } from '../../components/ui/board/base/search-field/search-field';
+import { Select, SelectItem } from '../../components/ui/board/base/select/select';
+import { Switch } from '../../components/ui/board/base/switch/switch';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '../../components/ui/board/base/table/table';
+import { SegmentedControl, SegmentedControlItem } from '../../components/ui/board/base/segmented-control/segmented-control';
+import './constellationExplorer.css';
+
+// BoardUI has no card primitive; keep these surfaces semantic and local to the catalog.
+const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className, ...props }) => (
+  <section className={className} {...props} />
+);
 
 // Compass direction lookup from azimuth degrees
 const getAzimuthDirection = (az: number): string => {
@@ -512,7 +516,7 @@ export const ConstellationExplorer: React.FC = () => {
     else if (currentHor && currentHor.altitude > 0) visibilityCategory = 'LOW';
 
     return (
-      <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto pr-0.5">
+      <div className="constellation-catalog w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto pr-0.5">
         <PageHeader
           eyebrow={`IAU Constellation · ${selectedConstellation.family}`}
           title={selectedConstellation.name}
@@ -520,23 +524,23 @@ export const ConstellationExplorer: React.FC = () => {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
+                variant="secondary"
+                size="small"
                 onClick={() => setSelectedConstellation(null)}
                 className="text-xs font-semibold gap-1.5"
               >
                 <span aria-hidden="true">←</span>
                 <span>Back to catalog</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleFocusSky(selectedConstellation)} className="text-xs font-semibold">
+              <Button variant="secondary" size="small" onClick={() => handleFocusSky(selectedConstellation)} className="text-xs font-semibold">
                 Open in Sky ↗
               </Button>
-              <Button variant="default" size="sm" onClick={() => handleStartTrace(selectedConstellation)} className="text-xs font-semibold">
+              <Button variant="primary" size="small" onClick={() => handleStartTrace(selectedConstellation)} className="text-xs font-semibold">
                 Start trace ▷
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="secondary"
+                size="small"
                 onClick={() => handleInspectAutomaton(selectedConstellation)}
                 className="text-xs font-semibold"
                 title="Inspect in Automata Lab"
@@ -664,9 +668,9 @@ export const ConstellationExplorer: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-[10px] uppercase">Star</TableHead>
-                    <TableHead className="text-[10px] uppercase">Type</TableHead>
-                    <TableHead className="text-right text-[10px] uppercase">Mag</TableHead>
+                    <TableColumn isRowHeader className="text-[10px] uppercase">Star</TableColumn>
+                    <TableColumn className="text-[10px] uppercase">Type</TableColumn>
+                    <TableColumn className="text-right text-[10px] uppercase">Mag</TableColumn>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -936,15 +940,15 @@ export const ConstellationExplorer: React.FC = () => {
         description="Inspect any of the 88 IAU constellations, preview asterisms, or open reference DFA sequences."
         actions={
           <div className="w-full md:w-72">
-            <Input
-              type="text"
-              size="sm"
+            <SearchField
+              size="small"
               aria-label="SEARCH CONSTELLATIONS"
               placeholder="Search constellations..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={value => setSearch(value)}
               onKeyDown={e => e.stopPropagation()}
               className="w-full text-xs"
+              shape="rounded"
             />
           </div>
         }
@@ -952,66 +956,63 @@ export const ConstellationExplorer: React.FC = () => {
         {/* Filter Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <ToggleGroup
+            <SegmentedControl
               aria-label="Catalog filter tabs"
-              size="sm"
-              value={[activeFilter]}
-              onValueChange={vals => {
-                const next = vals.find(v => v !== activeFilter) ?? vals[0];
+              selectedKeys={new Set([activeFilter])}
+              onSelectionChange={keys => {
+                const next = [...keys][0];
                 if (next) setActiveFilter(next as typeof activeFilter);
               }}
-              className="bg-[var(--bg-card)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5 flex-wrap"
+              className="max-w-full flex-wrap"
             >
               {(['ALL', 'ZODIAC', 'SEASONAL', 'NORTHERN', 'SOUTHERN', 'FAVORITES'] as const).map(f => {
                 const label = f === 'FAVORITES' ? `Favorites${favorites.size ? ` (${favorites.size})` : ''}` : f.charAt(0) + f.slice(1).toLowerCase();
                 return (
-                  <ToggleGroupItem
+                  <SegmentedControlItem
                     key={f}
-                    value={f}
-                    className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    id={f}
+                    className="text-[11px] font-semibold"
                   >
                     {label}
-                  </ToggleGroupItem>
+                  </SegmentedControlItem>
                 );
               })}
-            </ToggleGroup>
+            </SegmentedControl>
 
             <Select
-              value={selectedFamily}
-              onValueChange={val => {
-                if (val) setSelectedFamily(val);
+              selectedKey={selectedFamily}
+              onSelectionChange={key => {
+                if (key) setSelectedFamily(String(key));
               }}
+              size="sm"
+              aria-label="Filter by constellation family"
+              className="w-auto min-w-[140px]"
             >
-              <SelectTrigger size="sm" aria-label="Filter by constellation family" className="w-auto min-w-[140px] text-xs">
-                <SelectValue>
-                  {val => (val === 'ALL' ? 'All families' : `${val} family`)}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectPopup>
                 {families.map(f => (
-                  <SelectItem key={f} value={f} className="text-xs">
+                  <SelectItem key={f} id={f}>
                     {f === 'ALL' ? 'All families' : `${f} family`}
                   </SelectItem>
                 ))}
-              </SelectPopup>
             </Select>
 
-            <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink-secondary)] cursor-pointer select-none">
+            <div className="inline-flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2.5 py-1">
               <Switch
-                checked={recognitionOnly}
-                onCheckedChange={checked => setRecognitionOnly(checked)}
+                isSelected={recognitionOnly}
+                onChange={setRecognitionOnly}
                 aria-label="DFA ready filter"
-              />
-              <span>
+                size="sm"
+              >
+                <span className="text-[11px] font-semibold text-[var(--ink-secondary)]">
                 {recognitionOnly ? `DFA ready (${REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').length})` : 'DFA ready only'}
-              </span>
-            </label>
+                </span>
+              </Switch>
+            </div>
           </div>
 
           {librarySelection && (
             <Button
-              variant="outline"
-              size="sm"
+              variant="secondary"
+              size="small"
               onClick={() => setMobileDetailsOpen(true)}
               className="xl:hidden w-full sm:w-auto justify-start text-xs font-semibold"
             >
@@ -1026,18 +1027,14 @@ export const ConstellationExplorer: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(340px,388px)] gap-4 flex-1 min-h-0 overflow-y-auto xl:overflow-hidden">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[304px] content-start gap-3.5 min-h-0 xl:overflow-y-auto xl:pr-1">
           {filtered.length === 0 ? (
-            <Card className="col-span-full rounded-[12px] border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)] p-8 shadow-none">
-              <Empty className="border-0 p-2">
-                <EmptyHeader>
-                  <EmptyTitle className="text-sm">No matching constellations</EmptyTitle>
-                  <EmptyDescription className="text-xs">
-                    {activeFilter === 'FAVORITES' && favorites.size === 0
-                      ? 'No favorites yet. Use the star on a constellation card to add one.'
-                      : 'No constellations match these filters.'}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            </Card>
+            <section aria-live="polite" className="col-span-full flex flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)] p-8 text-center shadow-none">
+              <h2 className="text-sm font-semibold text-[var(--ink-primary)]">No matching constellations</h2>
+              <p className="mt-1 text-xs text-[var(--ink-muted)]">
+                {activeFilter === 'FAVORITES' && favorites.size === 0
+                  ? 'No favorites yet. Use the star on a constellation card to add one.'
+                  : 'No constellations match these filters.'}
+              </p>
+            </section>
           ) : filtered.map(con => {
             const isFavorite = favorites.has(con.id);
             const hasPattern = REFERENCE_PATTERNS.some(p => p.constellationId === con.id);
@@ -1065,8 +1062,8 @@ export const ConstellationExplorer: React.FC = () => {
                   <div className="flex items-center gap-1.5">
                     {hasPattern && <span className="px-1.5 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-mono text-[9px] font-semibold uppercase rounded">DFA</span>}
                     <Button
-                      variant={isFavorite ? 'default' : 'outline'}
-                      size="icon-xs"
+                      variant={isFavorite ? 'primary' : 'secondary'}
+                      size="xs"
                       onClick={() => toggleFavorite(con.id)}
                       aria-label={isFavorite ? `Remove ${con.name} from favorites` : `Add ${con.name} to favorites`}
                       aria-pressed={isFavorite}
@@ -1115,7 +1112,7 @@ export const ConstellationExplorer: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">Catalog entry</span>
-                    <Button variant="outline" size="xs" onClick={() => setMobileDetailsOpen(false)} className="xl:hidden" aria-label="Close constellation details">
+                    <Button variant="secondary" size="xs" onClick={() => setMobileDetailsOpen(false)} className="xl:hidden" aria-label="Close constellation details">
                       Close
                     </Button>
                   </div>
@@ -1149,10 +1146,10 @@ export const ConstellationExplorer: React.FC = () => {
                 </section>
 
                 <div className="mt-auto grid grid-cols-2 gap-2 pt-2">
-                  <Button variant="default" size="sm" onClick={() => setSelectedConstellation(librarySelection)} className="text-xs font-semibold">
+                  <Button variant="primary" size="small" onClick={() => setSelectedConstellation(librarySelection)} className="text-xs font-semibold">
                     View details →
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleStartTrace(librarySelection)} className="text-xs font-semibold">
+                  <Button variant="secondary" size="small" onClick={() => handleStartTrace(librarySelection)} className="text-xs font-semibold">
                     Start trace →
                   </Button>
                 </div>

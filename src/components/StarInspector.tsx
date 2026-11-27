@@ -12,9 +12,7 @@ import {
   getMeridianCulmination,
 } from '../astronomy/coordinates';
 import type { Star } from '../types/astronomy';
-import { Button } from './ui/space/button';
-import { Card } from './ui/space/card';
-import { Button as BoardButton } from './ui/board/base/buttons/button';
+import { Button } from './ui/board/base/buttons/button';
 import { Chip } from './ui/board/base/badges/chip';
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from './ui/board/base/table/table';
 
@@ -134,8 +132,8 @@ export const StarInspector: React.FC = () => {
       <div className="w-full h-full flex items-start justify-end p-1">
         <Button
           onClick={() => setIsDismissed(false)}
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           aria-label="Reopen object inspector"
           className="text-xs font-semibold text-[var(--signal-mid)] bg-[var(--bg-card)] border-[var(--border-subtle)]"
           title="Open Inspector"
@@ -149,7 +147,7 @@ export const StarInspector: React.FC = () => {
   // --- VARIANT 1: SELECTED STAR ---
   if (selectedStar && starHorizontal) {
     return (
-      <Card className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
+      <div className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
         <div className="flex items-start justify-between border-b border-[var(--border-subtle)] pb-2.5 shrink-0">
           <div className="min-w-0">
             <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-0.5">
@@ -174,9 +172,9 @@ export const StarInspector: React.FC = () => {
           <Button
             onClick={() => setSelectedStarId(null)}
             variant="ghost"
-            size="icon-xs"
+            size="xs"
             aria-label="Return to constellation details"
-            className="text-[var(--ink-muted)] hover:text-[var(--ink-primary)] font-mono shrink-0"
+            className="size-6 p-0 text-[var(--ink-muted)] hover:text-[var(--ink-primary)] font-mono shrink-0"
             title="Back to Constellation"
           >
             ✕
@@ -223,7 +221,7 @@ export const StarInspector: React.FC = () => {
                 <dt className="text-[var(--ink-muted)]">Parent constellation</dt>
                 <dd>
                   <Button
-                    variant="link"
+                    variant="ghost"
                     size="xs"
                     onClick={() => {
                       setSelectedStarId(null);
@@ -240,7 +238,7 @@ export const StarInspector: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 pt-2.5 border-t border-[var(--border-subtle)] shrink-0">
-          <BoardButton
+          <Button
             onClick={() => {
               if (!isTraceMode) setIsTraceMode(true);
               addTracedStar(selectedStar);
@@ -250,23 +248,23 @@ export const StarInspector: React.FC = () => {
             className="flex-1"
           >
             Trace from star
-          </BoardButton>
+          </Button>
           <Button
             onClick={() => setSelectedStarId(null)}
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="small"
             className="text-xs font-semibold"
           >
             Back
           </Button>
         </div>
-      </Card>
+      </div>
     );
   }
 
   // --- VARIANT 2: SELECTED CONSTELLATION ---
   return (
-    <Card className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
+    <div className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 shrink-0">
         <div className="min-w-0">
           <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-0.5">
@@ -279,9 +277,9 @@ export const StarInspector: React.FC = () => {
         <div className="flex items-center gap-1 shrink-0">
           <Button
             onClick={handlePrevConstellation}
-            variant="outline"
-            size="icon-xs"
-            className="font-mono"
+            variant="secondary"
+            size="xs"
+            className="size-6 p-0 font-mono"
             title="Previous Constellation"
             aria-label="Previous constellation"
           >
@@ -289,9 +287,9 @@ export const StarInspector: React.FC = () => {
           </Button>
           <Button
             onClick={handleNextConstellation}
-            variant="outline"
-            size="icon-xs"
-            className="font-mono"
+            variant="secondary"
+            size="xs"
+            className="size-6 p-0 font-mono"
             title="Next Constellation"
             aria-label="Next constellation"
           >
@@ -300,8 +298,8 @@ export const StarInspector: React.FC = () => {
           <Button
             onClick={() => setIsDismissed(true)}
             variant="ghost"
-            size="icon-xs"
-            className="text-[var(--ink-muted)] hover:text-[var(--ink-primary)] font-mono ml-0.5"
+            size="xs"
+            className="size-6 p-0 text-[var(--ink-muted)] hover:text-[var(--ink-primary)] font-mono ml-0.5"
             title="Close Inspector"
             aria-label="Close inspector"
           >
@@ -381,23 +379,23 @@ export const StarInspector: React.FC = () => {
       </div>
 
       <div className="pt-2.5 border-t border-[var(--border-subtle)] flex items-center gap-2 shrink-0">
-        <BoardButton
+        <Button
           onClick={handleStartTrace}
           variant="primary"
           size="small"
           className="flex-1"
         >
           Start trace
-        </BoardButton>
-        <BoardButton
+        </Button>
+        <Button
           onClick={handleOpenDetails}
           variant="secondary"
           size="small"
           className="flex-1"
         >
           <span>Full entry</span>
-        </BoardButton>
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 };

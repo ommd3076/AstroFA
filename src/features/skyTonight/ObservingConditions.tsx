@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
-import { Alert, AlertDescription } from '../../components/ui/space/alert';
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/space/card';
+const Card: React.FC<React.HTMLAttributes<HTMLElement> & { render?: React.ReactElement }> = ({ className, children, render: _render, ...props }) => <section {...props} className={className}>{children}</section>;
+const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <header {...props} className={`flex ${className ?? ''}`}>{children}</header>;
+const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={className}>{children}</div>;
+const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, children, ...props }) => <h2 {...props} className={className}>{children}</h2>;
+const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => <p {...props} className={className}>{children}</p>;
+const CardAction: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={className}>{children}</div>;
+const Alert: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className, children, ...props }) => <div {...props} className={`rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] text-[var(--ink-secondary)] ${className ?? ''}`}>{children}</div>;
+const AlertDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => <p {...props} className={className}>{children}</p>;
 
 type WeatherHour = {
   time: string;

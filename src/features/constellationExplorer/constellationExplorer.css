@@ -1,0 +1,11 @@
+.constellation-catalog {
+  background: radial-gradient(circle at 70% 0%, color-mix(in srgb, var(--signal-mid) 7%, transparent), transparent 36%), var(--bg-shell);
+}
+
+.constellation-catalog [data-slot="card"] {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .025);
+}
+
+.constellation-catalog .catalog-grid {
+  align-items: start;
+}

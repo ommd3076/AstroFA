@@ -13,11 +13,8 @@ import { CreditsModal } from './components/CreditsModal';
 import { Overview } from './features/overview/Overview';
 import { RecognitionResultsModal } from './features/traceMode/RecognitionResultsModal';
 import { PatternAnalysisModal } from './features/traceMode/PatternAnalysisModal';
-import { TooltipProvider } from './components/ui/space/tooltip';
-import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/space/sidebar';
-import { Separator } from './components/ui/space/separator';
-import { Button } from './components/ui/space/button';
-import { Kbd } from './components/ui/space/kbd';
+import { Button } from './components/ui/board/base/buttons/button';
+import { Kbd } from './components/ui/board/base/kbd/kbd';
 import { SearchIcon, CompassIcon } from 'lucide-react';
 
 const VIEW_TITLES: Record<string, string> = {
@@ -48,18 +45,13 @@ export const App: React.FC = () => {
   const isStageRoute = activeView === 'sky' || activeView === 'hunt';
 
   return (
-    <TooltipProvider>
-      <SidebarProvider className="h-svh overflow-hidden bg-[var(--bg-shell)] text-[var(--ink-primary)]">
-        {/* Space UI Collapsible Sidebar & Global Command Palette */}
+    <div className="costellar-shell boardui-surface h-svh overflow-hidden bg-[var(--bg-shell)] text-[var(--ink-primary)]">
         <HeaderNav />
-
-        {/* Bounded Inset Workspace preserving WebGL canvas sizing */}
-        <SidebarInset className="min-w-0 min-h-0 flex-1 overflow-hidden bg-[var(--bg-tray)] border border-[var(--border-subtle)]">
+        <main className="costellar-main min-w-0 min-h-0 flex-1 overflow-hidden bg-[var(--bg-tray)] border border-[var(--border-subtle)]">
           {/* Compact Instrument Shell Header */}
           <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-shell)]/90 px-3">
             <div className="flex min-w-0 items-center gap-2">
-              <SidebarTrigger className="text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]" />
-              <Separator orientation="vertical" className="h-4" />
+              <span className="costellar-menu-mark" aria-hidden="true">/</span>
               <span className="truncate text-xs font-semibold tracking-tight text-[var(--ink-primary)]">
                 {currentLabel}
               </span>
@@ -72,8 +64,8 @@ export const App: React.FC = () => {
 
             <div className="flex shrink-0 items-center gap-1.5">
               <Button
-                variant="outline"
-                size="sm"
+                variant="secondary"
+                size="small"
                 onClick={() => window.dispatchEvent(new CustomEvent('costellar:open-command'))}
                 className="h-7 gap-2 border-[var(--border-subtle)] bg-[var(--bg-card)] px-2.5 text-[11px] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
                 aria-label="Open command search"
@@ -85,7 +77,7 @@ export const App: React.FC = () => {
 
               <Button
                 variant="ghost"
-                size="sm"
+                size="small"
                 onClick={() => window.dispatchEvent(new CustomEvent('costellar:open-observer'))}
                 className={`${activeView === 'sky' ? 'hidden' : 'hidden sm:inline-flex'} h-7 max-w-[180px] gap-1.5 px-2 text-[11px] font-mono text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]`}
                 title="Change observer location"
@@ -94,7 +86,7 @@ export const App: React.FC = () => {
                 <span className="max-w-[140px] truncate">{observer.name.split(',')[0]}</span>
               </Button>
             </div>
-          </header>
+        </header>
 
           {/* Main View Area */}
           <div
@@ -139,9 +131,8 @@ export const App: React.FC = () => {
               <PatternAnalysisModal onClose={() => setActiveView('sky')} />
             )}
           </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </TooltipProvider>
+        </main>
+    </div>
   );
 };
 

@@ -2,10 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { NFA_MACHINE } from '../../data/astroData';
 import { computeEpsilonClosure } from '../../automata/epsilonClosure';
 import type { StateId } from '../../automata/types';
-import { Alert, AlertDescription } from '../../components/ui/space/alert';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { Alert, AlertDescription, Button, Card } from './boardPrimitives';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
 
 export const EpsilonClosureView: React.FC = () => {
   const [selectedStates, setSelectedStates] = useState<StateId[]>(['q0']);

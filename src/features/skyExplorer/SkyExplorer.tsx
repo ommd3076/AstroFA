@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATIONS } from '../../data/astroData';
 import { getHorizontalCoordinates, PRESET_OBSERVERS } from '../../astronomy/coordinates';
@@ -7,25 +7,29 @@ import { SkyCanvas } from '../../sky/SkyCanvas';
 import { StarInspector } from '../../components/StarInspector';
 import { TraceHud } from '../traceMode/TraceHud';
 import { TimelineBar } from '../../components/TimelineBar';
-import { Button } from '../../components/ui/space/button';
 import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
 import { ButtonGroup, ButtonGroupItem } from '../../components/ui/board/base/buttons/button-group';
-import {
-  Dialog,
-  DialogClose,
-  DialogCreateHandle,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  DialogTrigger,
-} from '../../components/ui/space/dialog';
-import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator } from '../../components/ui/space/toolbar';
-import { handlePopupTabKeyDown } from '../../utils/dialogFocus';
 import type { ObserverLocation } from '../../types/astronomy';
 import * as Astronomy from 'astronomy-engine';
+
+type InstrumentButtonProps = Omit<React.ComponentProps<typeof BoardButton>, 'variant' | 'size'> & {
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'xs' | 'sm' | 'md' | 'icon-xs';
+};
+const Button: React.FC<InstrumentButtonProps> = ({ variant = 'default', size = 'md', children, ...props }) => (
+  <BoardButton
+    {...props}
+    variant={(variant === 'default' ? 'primary' : variant === 'outline' || variant === 'link' ? 'secondary' : variant) as 'primary' | 'secondary' | 'ghost'}
+    size={(size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size === 'md' ? 'medium' : size) as 'xs' | 'small' | 'medium'}
+  >
+    {children}
+  </BoardButton>
+);
+
+const Toolbar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div role="toolbar" {...props} className={`flex items-center ${className ?? ''}`} />;
+const ToolbarGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div {...props} className={`flex items-center ${className ?? ''}`} />;
+const ToolbarSeparator: React.FC<{ className?: string; orientation?: string }> = ({ className }) => <span aria-hidden="true" className={`w-px bg-[var(--border-subtle)] ${className ?? ''}`} />;
+const ToolbarButton: React.FC<{ render: React.ReactElement; onClick?: () => void; children?: React.ReactNode }> = ({ render, onClick, children }) => React.cloneElement(render, { onClick, children } as never);
 
 interface SkyExplorerProps {
   onOpenObserverModal?: () => void;
@@ -95,7 +99,7 @@ const MoonDiskSvg: React.FC<{ phaseDeg: number; fraction: number }> = ({ phaseDe
 };
 
 interface SkyTelemetryStripProps {
-  siteDialogHandle: ReturnType<typeof DialogCreateHandle>;
+  onOpenLocation: () => void;
   locationTriggerRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -103,7 +107,7 @@ interface SkyTelemetryStripProps {
  * Isolated compact telemetry readout so 100ms time playback ticks do not rerender the SkyExplorer shell/toolbar.
  */
 const SkyTelemetryStrip: React.FC<SkyTelemetryStripProps> = React.memo(({
-  siteDialogHandle,
+  onOpenLocation,
   locationTriggerRef,
 }) => {
   const observer = useAstroStore(state => state.observer);
@@ -136,17 +140,13 @@ const SkyTelemetryStrip: React.FC<SkyTelemetryStripProps> = React.memo(({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 min-w-0 text-[11px]">
-      <DialogTrigger
-        handle={siteDialogHandle}
-        render={
-          <Button
-            ref={locationTriggerRef}
-            variant="ghost"
-            size="xs"
-            title="Change Observer Location"
-            className="h-7 gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-normal hover:border-[var(--signal-surface)]"
-          />
-        }
+      <Button
+        ref={locationTriggerRef}
+        variant="ghost"
+        size="xs"
+        onClick={onOpenLocation}
+        title="Change Observer Location"
+        className="h-7 gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-normal hover:border-[var(--signal-surface)]"
       >
         <span className="font-mono text-[var(--signal-mid)]" aria-hidden="true">⌖</span>
         <span className="font-medium text-[var(--ink-primary)] truncate max-w-[110px]">
@@ -155,7 +155,7 @@ const SkyTelemetryStrip: React.FC<SkyTelemetryStripProps> = React.memo(({
         <span className="hidden lg:inline font-mono tabular-nums text-[10px] text-[var(--ink-muted)]">
           {formatObserverCoordinates(observer.latitude, observer.longitude, 1)}
         </span>
-      </DialogTrigger>
+      </Button>
 
       <Button
         variant="ghost"
@@ -199,12 +199,24 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
   const isTraceMode = useAstroStore(state => state.isTraceMode);
   const setIsTraceMode = useAstroStore(state => state.setIsTraceMode);
 
-  const siteDialogHandle = useMemo(() => DialogCreateHandle(), []);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showMobileInspector, setShowMobileInspector] = useState(false);
+  const [showInspector, setShowInspector] = useState(false);
   const [showDeepSky, setShowDeepSky] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [skyFov, setSkyFov] = useState(60);
+  const zoomLevel = Math.round((60 / skyFov) * 100);
+  const zoomAtMin = skyFov <= 4.001;
+  const zoomAtMax = skyFov >= 84.999;
   const locationTriggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleZoomChange = (event: Event) => {
+      const { fov } = (event as CustomEvent<{ fov?: number }>).detail ?? {};
+      if (typeof fov === 'number' && Number.isFinite(fov)) setSkyFov(fov);
+    };
+    window.addEventListener('sky-zoom-change', handleZoomChange);
+    return () => window.removeEventListener('sky-zoom-change', handleZoomChange);
+  }, []);
 
   const closeLocationPicker = () => {
     setShowLocationPicker(false);
@@ -219,13 +231,11 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
   };
 
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(200, prev + 20));
-    window.dispatchEvent(new CustomEvent('sky-zoom', { detail: { delta: -10 } }));
+    window.dispatchEvent(new CustomEvent('sky-zoom', { detail: { factor: 0.8 } }));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(50, prev - 20));
-    window.dispatchEvent(new CustomEvent('sky-zoom', { detail: { delta: 10 } }));
+    window.dispatchEvent(new CustomEvent('sky-zoom', { detail: { factor: 1.25 } }));
   };
 
   if (isTraceMode) {
@@ -246,7 +256,7 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
         className="px-2.5 py-1.5 flex-wrap items-center justify-between gap-2 shrink-0 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px]"
       >
         <SkyTelemetryStrip
-          siteDialogHandle={siteDialogHandle}
+          onOpenLocation={() => setShowLocationPicker(true)}
           locationTriggerRef={locationTriggerRef}
         />
 
@@ -260,25 +270,34 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
               render={
                 <Button
                   variant="ghost"
-                  size="icon-xs"
-                  className="text-[var(--ink-primary)] font-bold"
+                  size="xs"
+                  className="size-6 p-0 text-[var(--ink-primary)] font-bold"
                   title="Zoom Out"
                   aria-label="Zoom out"
+                  disabled={zoomAtMax}
                 />
               }
               onClick={handleZoomOut}
             >
               −
             </ToolbarButton>
-            <span className="px-1 font-medium text-[11px] text-[var(--ink-secondary)]">{zoomLevel}%</span>
+            <span
+              className="px-1 font-medium text-[11px] text-[var(--ink-secondary)]"
+              aria-label={`Zoom ${zoomLevel} percent, field of view ${skyFov.toFixed(1)} degrees`}
+              title={`Field of view: ${skyFov.toFixed(1)}°`}
+              aria-live="polite"
+            >
+              {zoomLevel}%
+            </span>
             <ToolbarButton
               render={
                 <Button
                   variant="ghost"
-                  size="icon-xs"
-                  className="text-[var(--ink-primary)] font-bold"
+                  size="xs"
+                  className="size-6 p-0 text-[var(--ink-primary)] font-bold"
                   title="Zoom In"
                   aria-label="Zoom in"
+                  disabled={zoomAtMin}
                 />
               }
               onClick={handleZoomIn}
@@ -315,8 +334,8 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
             render={
               <Button
                 variant="outline"
-                size="icon-xs"
-                className="h-7 w-7 text-[var(--ink-secondary)] hover:text-[var(--signal-mid)]"
+                size="xs"
+                className="size-7 p-0 text-[var(--ink-secondary)] hover:text-[var(--signal-mid)]"
                 title="Toggle Fullscreen"
                 aria-label="Toggle fullscreen"
               />
@@ -328,7 +347,7 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
         </div>
       </Toolbar>
 
-      {/* Dominant Planetarium Stage + Bounded Contextual Inspector */}
+      {/* Dominant planetarium stage. Details stay opt-in so the sky remains the primary instrument. */}
       <div className="flex-1 relative flex gap-2 min-h-[240px] overflow-hidden">
         <div className="atlas-stage flex-1 relative flex flex-col min-h-0">
           <div className="relative flex-1 min-h-0">
@@ -337,9 +356,22 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
           <TimelineBar />
         </div>
 
-        <aside className="w-[min(28vw,320px)] min-w-[268px] shrink-0 h-full overflow-hidden hidden md:block">
-          <StarInspector />
-        </aside>
+        {showInspector && (
+          <aside id="sky-inspector-desktop" className="absolute right-2 top-2 bottom-2 z-20 hidden w-[min(28vw,320px)] min-w-[268px] overflow-hidden md:block">
+            <StarInspector />
+          </aside>
+        )}
+
+        <Button
+          variant={showInspector ? 'secondary' : 'ghost'}
+          size="sm"
+          onClick={() => setShowInspector(value => !value)}
+          aria-expanded={showInspector}
+          aria-controls="sky-inspector-desktop"
+          className="absolute right-3 top-3 z-30 hidden border border-[var(--border-subtle)] bg-[var(--bg-card)]/90 text-[11px] font-semibold backdrop-blur-sm md:inline-flex"
+        >
+          {showInspector ? 'Hide details' : 'Inspect target'}
+        </Button>
 
         <Button
           variant="outline"
@@ -365,24 +397,15 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
         )}
       </div>
 
-      {/* Observation Site Picker Space UI Dialog */}
-      <Dialog
-        handle={siteDialogHandle}
-        open={showLocationPicker}
-        onOpenChange={setShowLocationPicker}
-      >
-        <DialogPopup
-          finalFocus={locationTriggerRef}
-          onKeyDown={handlePopupTabKeyDown}
-          className="max-w-md border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
-        >
-          <DialogHeader className="border-b border-[var(--border-subtle)]">
-            <DialogTitle className="text-sm font-semibold">Select observation site</DialogTitle>
-            <DialogDescription className="text-xs text-[var(--ink-secondary)]">
+      <dialog open={showLocationPicker} aria-labelledby="observer-dialog-title" className="fixed inset-0 z-50 m-auto w-[min(92vw,30rem)] rounded-[10px] border border-[var(--border-strong)] bg-[var(--bg-card)] p-0 text-[var(--ink-primary)] shadow-2xl backdrop:bg-black/60">
+        <div className="font-sans">
+          <header className="border-b border-[var(--border-subtle)] p-4">
+            <h2 id="observer-dialog-title" className="text-sm font-semibold">Select observation site</h2>
+            <p className="text-xs text-[var(--ink-secondary)]">
               Choose an observatory or city horizon for the sky projection.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogPanel className="space-y-1.5">
+            </p>
+          </header>
+          <div className="space-y-1.5 p-4">
             {PRESET_OBSERVERS.map((preset: ObserverLocation) => {
               const isSelected = preset.name === observer.name;
               return (
@@ -409,12 +432,12 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
                 </Button>
               );
             })}
-          </DialogPanel>
-          <DialogFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]">
-            <DialogClose render={<Button variant="ghost" size="sm" />}>Close</DialogClose>
-          </DialogFooter>
-        </DialogPopup>
-      </Dialog>
+          </div>
+          <footer className="flex justify-end border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] p-3">
+            <Button variant="ghost" size="sm" onClick={() => setShowLocationPicker(false)}>Close</Button>
+          </footer>
+        </div>
+      </dialog>
     </div>
   );
 };

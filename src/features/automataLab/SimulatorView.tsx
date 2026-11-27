@@ -2,12 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS } from '../../data/astroData';
 import { simulateDfa } from '../../automata/simulate';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/space/alert';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Input } from '../../components/ui/space/input';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { Alert, AlertDescription, AlertTitle, Button, Card, Input } from './boardPrimitives';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from './boardPrimitives';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
 
 const SPEED_CHOICES = [
   { value: '1200', label: '0.5X SLOW (1.2S)' },

@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { MINIMIZED_DFA_MACHINE, DFA_MACHINE } from '../../data/astroData';
 import type { DFA, StateId } from '../../automata/types';
-import { Card } from '../../components/ui/space/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
-import { Input } from '../../components/ui/space/input';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
-import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
+import { Card } from './boardPrimitives';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from './boardPrimitives';
+import { Input } from './boardPrimitives';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from './boardPrimitives';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
+import { ToggleGroup, ToggleGroupItem } from './boardPrimitives';
 
 export const TransitionTableView: React.FC = () => {
   const [machineChoice, setMachineChoice] = useState<'minimized' | 'original'>('minimized');

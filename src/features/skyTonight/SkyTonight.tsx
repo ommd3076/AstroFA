@@ -6,13 +6,33 @@ import { getHorizontalCoordinates, getMeridianCulmination } from '../../astronom
 import type { IAUConstellation, ObserverLocation } from '../../types/astronomy';
 import { ObservingConditions } from './ObservingConditions';
 import { PageHeader } from '../../components/PageHeader';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
-import { Input } from '../../components/ui/space/input';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
-import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
-import { Toolbar, ToolbarGroup } from '../../components/ui/space/toolbar';
+import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+import { SearchField } from '../../components/ui/board/base/search-field/search-field';
+import { Select, SelectItem } from '../../components/ui/board/base/select/select';
+import { SegmentedControl, SegmentedControlItem } from '../../components/ui/board/base/segmented-control/segmented-control';
+
+type InstrumentButtonProps = Omit<React.ComponentProps<typeof BoardButton>, 'variant' | 'size'> & {
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'xs' | 'sm' | 'md' | 'icon-xs';
+};
+
+/** Compatibility edge for the existing planner actions while the surrounding cards remain stable. */
+const Button: React.FC<InstrumentButtonProps> = ({ variant = 'default', size = 'md', children, ...props }) => (
+  <BoardButton
+    {...props}
+    variant={(variant === 'default' ? 'primary' : variant === 'outline' || variant === 'link' ? 'secondary' : variant) as 'primary' | 'secondary' | 'ghost'}
+    size={(size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size === 'md' ? 'medium' : size) as 'xs' | 'small' | 'medium'}
+  >
+    {children}
+  </BoardButton>
+);
+const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className, children, ...props }) => <section {...props} className={className}>{children}</section>;
+const Empty: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={`flex flex-col items-center justify-center text-center ${className ?? ''}`}>{children}</div>;
+const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={`space-y-1 ${className ?? ''}`}>{children}</div>;
+const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, children, ...props }) => <h3 {...props} className={className}>{children}</h3>;
+const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => <p {...props} className={className}>{children}</p>;
+const Toolbar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div role="toolbar" {...props} className={`flex items-center ${className ?? ''}`} />;
+const ToolbarGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div {...props} className={`flex items-center ${className ?? ''}`} />;
 
 // 11 distinct night hours matching Frame 5 (18:00 to 04:00 UTC)
 const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4] as const;
@@ -575,26 +595,25 @@ export const SkyTonight: React.FC = () => {
         meta={`${targetType === 'constellations' ? filteredConstellations.length : filteredBrightStars.length} ${targetType === 'constellations' ? 'constellations' : 'bright stars'} · ${currentUtcTimeStr} UTC`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <ToggleGroup
+            <SegmentedControl
               aria-label="Time window mode"
-              size="sm"
-              value={[timeMode]}
-              onValueChange={vals => {
-                const next = vals.find(v => v !== timeMode) ?? vals[0];
+              selectedKeys={new Set([timeMode])}
+              onSelectionChange={keys => {
+                const next = [...keys][0];
                 if (next) setTimeMode(next as typeof timeMode);
               }}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+              className="max-w-full overflow-x-auto"
             >
               {(['evening', 'night', 'full'] as const).map(mode => (
-                <ToggleGroupItem
+                <SegmentedControlItem
                   key={mode}
-                  value={mode}
-                  className="text-[11px] font-semibold uppercase data-pressed:bg-primary data-pressed:text-primary-foreground"
+                  id={mode}
+                  className="text-[11px] font-semibold uppercase"
                 >
                   {mode}
-                </ToggleGroupItem>
+                </SegmentedControlItem>
               ))}
-            </ToggleGroup>
+            </SegmentedControl>
 
             <Toolbar className="bg-[var(--bg-card-subtle)] border-[var(--border-subtle)] p-0.5 gap-0.5 shadow-none font-mono tabular-nums">
               <ToolbarGroup>
@@ -641,117 +660,102 @@ export const SkyTonight: React.FC = () => {
 
           {/* Accessible catalog & visibility filters */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <ToggleGroup
+            <SegmentedControl
               aria-label="Target type filter"
-              size="sm"
-              value={[targetType]}
-              onValueChange={vals => {
-                const next = vals.find(v => v !== targetType) ?? vals[0];
+              selectedKeys={new Set([targetType])}
+              onSelectionChange={keys => {
+                const next = [...keys][0];
                 if (next) setTargetType(next as typeof targetType);
               }}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+              className="max-w-full overflow-x-auto"
             >
-              <ToggleGroupItem
-                value="constellations"
-                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              <SegmentedControlItem
+                id="constellations"
+                className="text-[11px] font-semibold"
               >
                 Constellations ({aboveHorizonCount})
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="stars"
-                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              </SegmentedControlItem>
+              <SegmentedControlItem
+                id="stars"
+                className="text-[11px] font-semibold"
               >
                 Bright stars ({visibleBrightStarsCount})
-              </ToggleGroupItem>
-            </ToggleGroup>
+              </SegmentedControlItem>
+            </SegmentedControl>
 
-            <Input
-              type="text"
-              size="sm"
+            <SearchField
+              size="small"
               placeholder="Search constellation or star..."
               aria-label="Search constellations or bright stars"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={setSearchQuery}
               onKeyDown={e => e.stopPropagation()}
               className="w-52 sm:w-60 text-xs"
+              shape="rounded"
             />
 
-            <ToggleGroup
+            <SegmentedControl
               aria-label="Horizon visibility filter"
-              size="sm"
-              value={[horizonFilter]}
-              onValueChange={vals => {
-                const next = vals.find(v => v !== horizonFilter) ?? vals[0];
+              selectedKeys={new Set([horizonFilter])}
+              onSelectionChange={keys => {
+                const next = [...keys][0];
                 if (next) setHorizonFilter(next as typeof horizonFilter);
               }}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+              className="max-w-full overflow-x-auto"
             >
-              <ToggleGroupItem
-                value="above"
-                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              <SegmentedControlItem
+                id="above"
+                className="text-[11px] font-semibold"
               >
                 Above ({aboveHorizonCount})
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="all"
-                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              </SegmentedControlItem>
+              <SegmentedControlItem
+                id="all"
+                className="text-[11px] font-semibold"
               >
                 All 88
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="circumpolar"
-                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              </SegmentedControlItem>
+              <SegmentedControlItem
+                id="circumpolar"
+                className="text-[11px] font-semibold"
               >
                 Circumpolar ({circumpolarCount})
-              </ToggleGroupItem>
-            </ToggleGroup>
+              </SegmentedControlItem>
+            </SegmentedControl>
 
-            <ToggleGroup
+            <SegmentedControl
               aria-label="Hemisphere filter"
-              size="sm"
-              value={[hemisphereFilter]}
-              onValueChange={vals => {
-                const next = vals.find(v => v !== hemisphereFilter) ?? vals[0];
+              selectedKeys={new Set([hemisphereFilter])}
+              onSelectionChange={keys => {
+                const next = [...keys][0];
                 if (next) setHemisphereFilter(next as typeof hemisphereFilter);
               }}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+              className="max-w-full overflow-x-auto"
             >
               {(['all', 'north', 'south'] as const).map(hemi => (
-                <ToggleGroupItem
+                <SegmentedControlItem
                   key={hemi}
-                  value={hemi}
-                  className="text-[11px] font-semibold capitalize data-pressed:bg-primary data-pressed:text-primary-foreground"
+                  id={hemi}
+                  className="text-[11px] font-semibold capitalize"
                 >
                   {hemi === 'all' ? 'All skies' : hemi}
-                </ToggleGroupItem>
+                </SegmentedControlItem>
               ))}
-            </ToggleGroup>
+            </SegmentedControl>
 
             <Select
-              value={sortBy}
-              onValueChange={val => {
-                if (val) setSortBy(val as typeof sortBy);
+              selectedKey={sortBy}
+              onSelectionChange={key => {
+                if (key) setSortBy(String(key) as typeof sortBy);
               }}
+              aria-label="Sort visible targets"
+              size="sm"
+              className="w-auto min-w-[140px]"
             >
-              <SelectTrigger size="sm" aria-label="Sort visible targets" className="w-auto min-w-[140px] text-xs">
-                <SelectValue>
-                  {val =>
-                    val === 'altitude'
-                      ? 'Sort: Altitude'
-                      : val === 'transit'
-                        ? 'Sort: Transit'
-                        : val === 'name'
-                          ? 'Sort: Name (A–Z)'
-                          : 'Sort: Area'
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectPopup>
-                <SelectItem value="altitude" className="text-xs">Sort: Altitude</SelectItem>
-                <SelectItem value="transit" className="text-xs">Sort: Transit</SelectItem>
-                <SelectItem value="name" className="text-xs">Sort: Name (A–Z)</SelectItem>
-                <SelectItem value="area" className="text-xs">Sort: Area</SelectItem>
-              </SelectPopup>
+              <SelectItem id="altitude">Sort: Altitude</SelectItem>
+              <SelectItem id="transit">Sort: Transit</SelectItem>
+              <SelectItem id="name">Sort: Name (A–Z)</SelectItem>
+              <SelectItem id="area">Sort: Area</SelectItem>
             </Select>
           </div>
         </div>

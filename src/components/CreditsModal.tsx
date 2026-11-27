@@ -1,6 +1,7 @@
 import React from 'react';
+import starsData from '../data/stars.json';
 import { useAstroStore } from '../stores/useAstroStore';
-import { Button } from './ui/space/button';
+import { Button } from './ui/board/base/buttons/button';
 import { PageHeader } from './PageHeader';
 
 interface SourceRow {
@@ -21,7 +22,7 @@ const DATA_SOURCES: SourceRow[] = [
       'Combined Hipparcos, Yale Bright Star Catalogue (BSC5), and Henry Draper catalogs curated by David Nash / Astronexus.',
     href: 'https://codeberg.org/astronexus/hyg',
     linkLabel: 'Astronexus HYG ↗',
-    spec: '8,921 stars (mag ≤ 6.5)',
+    spec: `${starsData.length.toLocaleString()} HYG catalog stars; magnitude does not guarantee visibility`,
     frame: 'J2000 equatorial RA / Dec',
   },
   {
@@ -80,8 +81,8 @@ export const CreditsModal: React.FC = () => {
         description="Costellar runs on open astronomical catalogs, deterministic finite automata, and transparent geometry verification."
         actions={
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
+            size="small"
             onClick={() => setActiveView('sky')}
             className="text-xs font-semibold"
           >

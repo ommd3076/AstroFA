@@ -8,14 +8,51 @@ import { imagePointsToMath, recognizeTraceOnServer } from '../../recognition/cli
 import type { BackendRecognitionState } from '../../recognition/types';
 import { IMAGE_HEADER_SCAN_BYTES, isRasterDimensionsAllowed, parseRasterDimensions, projectReferencePointsToImage } from './imageUpload';
 import { PageHeader } from '../../components/PageHeader';
-import { Alert, AlertDescription } from '../../components/ui/space/alert';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../../components/ui/space/empty';
-import { Input } from '../../components/ui/space/input';
-import { Slider } from '../../components/ui/space/slider';
-import { Switch } from '../../components/ui/space/switch';
-import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
+import { Input } from '../../components/ui/board/base/input/input';
+import { Slider } from '../../components/ui/board/base/slider/slider';
+import { Switch } from '../../components/ui/board/base/switch/switch';
+import { SegmentedControl, SegmentedControlItem } from '../../components/ui/board/base/segmented-control/segmented-control';
+import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+
+// Keep the existing feature copy/API while routing every action through the
+// installed Board UI primitive. This avoids a second button language in the lab.
+const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
+  <BoardButton
+    {...props}
+    variant={variant === 'default' ? 'primary' : variant === 'outline' ? 'secondary' : variant}
+    size={size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size}
+  >
+    {children}
+  </BoardButton>
+);
+
+const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className = '', children, ...props }) => (
+  <section {...props} className={`atlas-surface flex flex-col ${className}`}>{children}</section>
+);
+const Empty: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
+  <div {...props} className={`flex flex-col items-center justify-center gap-3 text-center ${className}`}>{children}</div>
+);
+const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
+  <div {...props} className={`flex flex-col items-center gap-1.5 ${className}`}>{children}</div>
+);
+const EmptyContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
+  <div {...props} className={`flex items-center justify-center gap-2 ${className}`}>{children}</div>
+);
+const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className = '', children, ...props }) => (
+  <h3 {...props} className={`font-medium text-[var(--ink-primary)] ${className}`}>{children}</h3>
+);
+const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
+  <p {...props} className={`text-[var(--ink-secondary)] ${className}`}>{children}</p>
+);
+const EmptyMedia: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
+  <div {...props} className={`flex items-center justify-center ${className}`}>{children}</div>
+);
+const Alert: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
+  <div {...props} className={`border border-rose-400/40 bg-rose-400/10 text-rose-200 rounded-lg ${className}`}>{children}</div>
+);
+const AlertDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
+  <p {...props} className={className}>{children}</p>
+);
 
 // Deterministic Pseudo-Random Number Generator (Mulberry32) for reproducible synthetic sky
 function createSeededRandom(seed: number) {
@@ -542,7 +579,7 @@ export const ImageLab: React.FC = () => {
   };
 
   return (
-    <div className="image-lab w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto min-h-0 pr-0.5">
+    <div className="image-lab boardui-surface w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto min-h-0 pr-0.5">
       <style>{`
         .image-lab input[type="range"] { accent-color: var(--signal-mid); }
         .image-lab canvas { max-width: 100%; max-height: min(64vh, 640px); width: auto; height: auto; }
@@ -607,26 +644,25 @@ export const ImageLab: React.FC = () => {
                 )}
               </div>
 
-              <ToggleGroup
+              <SegmentedControl
                 aria-label="Preview overlay mode"
-                size="sm"
-                value={[previewMode]}
-                onValueChange={vals => {
-                  const next = vals.find(v => v !== previewMode) ?? vals[0];
+                selectedKeys={new Set([previewMode])}
+                onSelectionChange={keys => {
+                  const next = [...keys][0];
                   if (next === 'ORIGINAL' || next === 'DETECTED') setPreviewMode(next);
                 }}
-                className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+                className="max-w-full overflow-x-auto"
               >
                 {(['ORIGINAL', 'DETECTED'] as const).map(mode => (
-                  <ToggleGroupItem
+                  <SegmentedControlItem
                     key={mode}
-                    value={mode}
-                    className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+                    id={mode}
+                    className="text-[11px] font-semibold"
                   >
                     {mode === 'ORIGINAL' ? 'Original' : 'Detected'}
-                  </ToggleGroupItem>
+                  </SegmentedControlItem>
                 ))}
-              </ToggleGroup>
+              </SegmentedControl>
             </div>
 
             <div className="image-viewport relative flex-1 bg-[var(--bg-viewport)] rounded-lg overflow-hidden flex items-center justify-center p-2 border border-[var(--border-subtle)] min-h-[400px]">
@@ -771,8 +807,16 @@ export const ImageLab: React.FC = () => {
               <svg className="w-5 h-5 text-[var(--ink-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <div className="text-[11px] font-semibold text-[var(--ink-primary)]">
-                Drop or choose PNG / JPEG
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => { event.stopPropagation(); fileInputRef.current?.click(); }}
+                className="text-[11px] font-semibold"
+              >
+                Choose PNG / JPEG
+              </Button>
+              <div className="text-[10px] text-[var(--ink-muted)]">
+                or drop a file here
               </div>
               <div className="text-[10px] text-[var(--ink-muted)] font-mono">
                 Local browser decode
@@ -894,12 +938,14 @@ export const ImageLab: React.FC = () => {
 
             <div className="space-y-1 py-0.5">
               <Slider
-                min={50}
-                max={240}
+                minValue={50}
+                maxValue={240}
                 step={1}
                 value={threshold}
-                onValueChange={val => handleSetThreshold(typeof val === 'number' ? val : val[0])}
+                onChange={handleSetThreshold}
                 aria-label="Luminance detection threshold slider"
+                thumbLabel="Luminance threshold"
+                showTooltip={false}
               />
             </div>
 
@@ -910,14 +956,10 @@ export const ImageLab: React.FC = () => {
               <Input
                 id="image-lab-threshold"
                 type="number"
-                size="sm"
-                min={50}
-                max={240}
-                step={1}
+                size="small"
                 value={thresholdText}
                 onKeyDown={e => e.stopPropagation()}
-                onChange={e => {
-                  const raw = e.target.value;
+                onChange={raw => {
                   setThresholdText(raw);
                   if (/^\d+$/.test(raw)) {
                     const next = Number(raw);
@@ -945,9 +987,10 @@ export const ImageLab: React.FC = () => {
               </label>
               <Switch
                 id="image-lab-contrast-switch"
-                checked={filterActive}
-                onCheckedChange={checked => setFilterActive(checked)}
+                isSelected={filterActive}
+                onChange={setFilterActive}
                 aria-label="Enable detection contrast preprocessing"
+                size="sm"
               />
             </div>
 
@@ -957,12 +1000,14 @@ export const ImageLab: React.FC = () => {
                 <span className="font-mono tabular-nums text-[var(--signal-mid)] font-semibold">{contrast.toFixed(2)}×</span>
               </div>
               <Slider
-                min={0.5}
-                max={2.0}
+                minValue={0.5}
+                maxValue={2.0}
                 step={0.05}
                 value={contrast}
-                onValueChange={val => setContrast(typeof val === 'number' ? val : val[0])}
+                onChange={setContrast}
                 aria-label="Contrast scale"
+                thumbLabel="Contrast scale"
+                showTooltip={false}
               />
               <p className="text-[11px] leading-relaxed text-[var(--ink-muted)]">
                 Remaps luminance before thresholding. Denoise, debayer, and platesolve calibration are not applied.

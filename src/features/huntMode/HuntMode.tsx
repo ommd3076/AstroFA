@@ -3,8 +3,9 @@ import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATION_BY_ID } from '../../data/astroData';
 import { SkyCanvas } from '../../sky/SkyCanvas';
 import { TraceHud } from '../traceMode/TraceHud';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
+import { Button } from '../../components/ui/board/base/buttons/button';
+import { Chip } from '../../components/ui/board/base/badges/chip';
+import './huntMode.css';
 
 export const HuntMode: React.FC = () => {
   const huntEntryState = useRef<{
@@ -80,7 +81,7 @@ export const HuntMode: React.FC = () => {
     backendRecognition.result.bestMatch?.constellationId === huntTarget?.constellationId;
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[var(--bg-viewport)] overflow-hidden font-sans">
+    <div className="hunt-console relative w-full h-full flex flex-col bg-[var(--bg-viewport)] overflow-hidden font-sans">
       {/* Slim mission & hint strip anchored above the live sky stage */}
       <div className="shrink-0 z-20 border-b border-[var(--border-subtle)] bg-[var(--bg-tray)] px-3 py-2">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[var(--ink-primary)]">
@@ -118,7 +119,7 @@ export const HuntMode: React.FC = () => {
             </span>
             {huntHintLevel < 2 && (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="xs"
                 onClick={() => setHuntHintLevel(huntHintLevel + 1)}
                 aria-label={`Show hint ${huntHintLevel + 1} of 2`}
@@ -128,7 +129,7 @@ export const HuntMode: React.FC = () => {
               </Button>
             )}
             <Button
-              variant="outline"
+              variant="secondary"
               size="xs"
               onClick={() => startNewHunt()}
               aria-label="Start next hunt target"
@@ -163,7 +164,7 @@ export const HuntMode: React.FC = () => {
         {/* Verdict Surface */}
         {isSuccess && (
           <div className="absolute inset-0 z-40 bg-[#070709]/80 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
-            <Card className="atlas-surface border-[var(--signal-surface)] max-w-md w-full p-6 text-left gap-4 shadow-2xl">
+            <div className="hunt-verdict atlas-surface border-[var(--signal-surface)] max-w-md w-full p-6 text-left gap-4 shadow-2xl">
               <div className="space-y-1 border-b border-[var(--border-subtle)] pb-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)]">Hunt result</span>
@@ -199,16 +200,14 @@ export const HuntMode: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center pt-1.5 border-t border-[var(--border-subtle)]">
                   <dt className="text-[10px] text-[var(--ink-muted)] uppercase">Status</dt>
-                  <dd className="px-2 py-0.5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] text-[var(--signal-mid)] rounded text-[10px] font-semibold uppercase">
-                    Server full match
-                  </dd>
+                    <dd><Chip variant="caption" color="cyan">Server full match</Chip></dd>
                 </div>
               </dl>
 
               <div className="flex flex-col sm:flex-row gap-2 pt-1">
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
+                  size="small"
                   onClick={() => {
                     if (recognitionReport?.inputSymbols) {
                       setSimulatorSymbols(recognitionReport.inputSymbols);
@@ -221,15 +220,15 @@ export const HuntMode: React.FC = () => {
                   Inspect in Automata Lab ↗
                 </Button>
                 <Button
-                  variant="default"
-                  size="sm"
+                  variant="primary"
+                  size="small"
                   onClick={() => startNewHunt()}
                   className="flex-1 text-xs font-semibold"
                 >
                   Play another hunt
                 </Button>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>

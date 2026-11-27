@@ -12,10 +12,7 @@ import { simulateDfa } from '../../automata/simulate';
 import { computeProcrustesAlignment } from '../../geometry/similarity';
 import { normalizeGeometry } from '../../geometry/normalize';
 import { PageHeader } from '../../components/PageHeader';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { Button, Card, Select, SelectItem, SelectPopup, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../automataLab/boardPrimitives';
 
 export const AcademicWalkthrough: React.FC = () => {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('Cas_fwd');
@@ -66,7 +63,7 @@ export const AcademicWalkthrough: React.FC = () => {
   ];
 
   return (
-    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans p-3 sm:p-4 gap-4 overflow-y-auto" aria-label="Academic viva walkthrough">
+    <section className="boardui-surface w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans p-3 sm:p-4 gap-4 overflow-y-auto" aria-label="Academic viva walkthrough">
       <PageHeader
         eyebrow="Formal Proof · 11 Stages"
         title="Academic viva walkthrough"

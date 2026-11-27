@@ -2,27 +2,31 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { REFERENCE_PATTERNS, STAR_BY_ID } from '../../data/astroData';
 import { PROCRUSTES_RESIDUAL_THRESHOLD } from '../../geometry/similarity';
-import { Button } from '../../components/ui/space/button';
-import { Card } from '../../components/ui/space/card';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/space/alert';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '../../components/ui/space/empty';
-import {
-  Select,
-  SelectGroup,
-  SelectGroupLabel,
-  SelectItem,
-  SelectPopup,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/space/select';
-import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator } from '../../components/ui/space/toolbar';
+import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+
+type TraceButtonProps = Omit<React.ComponentProps<typeof BoardButton>, 'variant' | 'size'> & { variant?: 'default' | 'outline' | 'secondary' | 'ghost'; size?: 'xs' | 'sm' | 'icon-xs' };
+const Button: React.FC<TraceButtonProps> = ({ variant = 'default', size = 'xs', children, ...props }) => <BoardButton {...props} variant={(variant === 'default' ? 'primary' : variant === 'outline' ? 'secondary' : variant) as 'primary' | 'secondary' | 'ghost'} size={size === 'sm' ? 'small' : 'xs'}>{children}</BoardButton>;
+const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={className}>{children}</div>;
+const Alert: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className, children, ...props }) => <div {...props} className={`rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] ${className ?? ''}`}>{children}</div>;
+const AlertDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => <p {...props} className={className}>{children}</p>;
+const AlertTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, children, ...props }) => <h3 {...props} className={className}>{children}</h3>;
+const Empty: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={`flex flex-col items-center justify-center ${className ?? ''}`}>{children}</div>;
+const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...props }) => <div {...props} className={className}>{children}</div>;
+const EmptyMedia: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className, children, ...props }) => <div {...props} className={className}>{children}</div>;
+const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, children, ...props }) => <h3 {...props} className={className}>{children}</h3>;
+const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, children, ...props }) => <p {...props} className={className}>{children}</p>;
+const Toolbar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div role="toolbar" {...props} className={`flex items-center ${className ?? ''}`} />;
+const ToolbarGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => <div {...props} className={`flex items-center ${className ?? ''}`} />;
+const ToolbarSeparator: React.FC<{ className?: string; orientation?: string }> = ({ className }) => <span aria-hidden="true" className={`w-px bg-[var(--border-subtle)] ${className ?? ''}`} />;
+const ToolbarButton: React.FC<{ render: React.ReactElement; onClick?: () => void; disabled?: boolean; focusableWhenDisabled?: boolean; children?: React.ReactNode }> = ({ render, onClick, disabled, children }) => React.cloneElement(render, { onClick, disabled, children } as never);
+const SelectItem: React.FC<{ value?: string; id?: string; children?: React.ReactNode; className?: string }> = ({ value, id, children }) => <option value={value ?? id}>{children}</option>;
+const SelectGroup: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{children}</>;
+const SelectGroupLabel: React.FC<{ children?: React.ReactNode }> = () => null;
+const SelectSeparator: React.FC = () => null;
+const SelectTrigger: React.FC<{ children?: React.ReactNode; size?: string; className?: string; ['aria-label']?: string; title?: string }> = () => null;
+const SelectValue: React.FC<{ children?: React.ReactNode | ((value: unknown) => React.ReactNode); placeholder?: string }> = () => null;
+const SelectPopup: React.FC<{ children?: React.ReactNode; align?: string }> = ({ children }) => <>{children}</>;
+const Select: React.FC<{ value: string; onValueChange: (value: string) => void; children?: React.ReactNode; size?: string; className?: string; ['aria-label']?: string; title?: string }> = ({ value, onValueChange, children, size: _size, ...props }) => <select {...props} value={value} onChange={event => onValueChange(event.target.value)} className="h-7 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-mono text-[11px] text-[var(--ink-primary)]">{children}</select>;
 
 // Mini SVG Thumbnail renderer for constellation asterisms
 export const AsterismThumbnail: React.FC<{
@@ -341,9 +345,9 @@ export const TraceHud: React.FC = () => {
           </Button>
           <Button
             variant="outline"
-            size="icon-xs"
+            size="xs"
+            className="size-6 p-0 font-mono font-bold"
             onClick={() => document.querySelector('canvas')?.dispatchEvent(new WheelEvent('wheel', { deltaY: -120 }))}
-            className="font-mono font-bold"
             title="Zoom In"
             aria-label="Zoom in on sky"
           >
@@ -351,9 +355,9 @@ export const TraceHud: React.FC = () => {
           </Button>
           <Button
             variant="outline"
-            size="icon-xs"
+            size="xs"
+            className="size-6 p-0 font-mono font-bold"
             onClick={() => document.querySelector('canvas')?.dispatchEvent(new WheelEvent('wheel', { deltaY: 120 }))}
-            className="font-mono font-bold"
             title="Zoom Out"
             aria-label="Zoom out on sky"
           >

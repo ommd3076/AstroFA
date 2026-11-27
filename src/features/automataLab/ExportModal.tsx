@@ -1,32 +1,17 @@
 import React from 'react';
 import { MINIMIZED_DFA_MACHINE, NFA_MACHINE } from '../../data/astroData';
 import { useAstroStore } from '../../stores/useAstroStore';
-import { handlePopupTabKeyDown } from '../../utils/dialogFocus';
-import { Button } from '../../components/ui/space/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogCreateHandle,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-} from '../../components/ui/space/dialog';
+import { Button } from './boardPrimitives';
+import { Modal, ModalBody, ModalFooter, ModalHeader, useModalClose } from '../../components/ui/board/base/modal/modal';
 
 interface ExportModalProps {
-  handle: ReturnType<typeof DialogCreateHandle>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  finalFocus?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
-  handle,
   open,
   onOpenChange,
-  finalFocus,
 }) => {
   const recognitionReport = useAstroStore(state => state.recognitionReport);
   const simulatorSymbols = useAstroStore(state => state.simulatorSymbols);
@@ -150,24 +135,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <Dialog handle={handle} open={open} onOpenChange={onOpenChange}>
-      {open && (
-        <DialogPopup
-          finalFocus={finalFocus}
-          onKeyDown={handlePopupTabKeyDown}
-          className="max-w-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
-        >
-          <DialogHeader className="border-b border-[var(--border-subtle)]">
-            <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-[var(--ink-primary)]">
-              <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />
-              <span>Export telemetry &amp; automata suite</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-[var(--ink-secondary)]">
-              Download computed transition matrices, formal definitions, SVG diagrams, and active simulation traces.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogPanel className="space-y-2">
+    <Modal isOpen={open} onOpenChange={onOpenChange} size="lg" className="border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans">
+          <ModalHeader title={<span className="flex items-center gap-2 text-sm font-semibold text-[var(--ink-primary)]"><span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />Export telemetry &amp; automata suite</span>} description="Download computed transition matrices, formal definitions, SVG diagrams, and active simulation traces." />
+          <ModalBody className="space-y-2">
             <Button
               variant="outline"
               onClick={exportCsv}
@@ -257,13 +227,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 .JSON
               </span>
             </Button>
-          </DialogPanel>
-
-          <DialogFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]">
-            <DialogClose render={<Button variant="outline" size="sm" />}>Close</DialogClose>
-          </DialogFooter>
-        </DialogPopup>
-      )}
-    </Dialog>
+          </ModalBody>
+          <ModalFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]"><CloseExportButton /></ModalFooter>
+    </Modal>
   );
 };
+
+function CloseExportButton() {
+  const close = useModalClose();
+  return <Button variant="outline" size="sm" onClick={close}>Close</Button>;
+}

@@ -1,3 +1,5 @@
+@import "./theme-tokens.css";
+
 /* BoardUI utilities used only by the scoped Costellar atlas surfaces. */
 @theme inline {
   --color-button-primary: var(--bui-button-primary);
@@ -48,28 +50,28 @@
 }
 
 .boardui-surface {
-  --bui-button-primary: #8fa3ff;
+  --bui-button-primary: #89d6c6;
   --bui-button-danger: #d94a55;
-  --bui-gradient-button-primary-default: linear-gradient(180deg, #a8b8ff 0%, #8fa3ff 100%);
-  --bui-gradient-button-primary-hover: linear-gradient(180deg, #bfcbff 0%, #a8b8ff 100%);
-  --bui-gradient-button-primary-active: linear-gradient(180deg, #8fa3ff 0%, #788eef 100%);
+  --bui-gradient-button-primary-default: linear-gradient(180deg, #a7ebdf 0%, #89d6c6 100%);
+  --bui-gradient-button-primary-hover: linear-gradient(180deg, #c1f2e9 0%, #a7ebdf 100%);
+  --bui-gradient-button-primary-active: linear-gradient(180deg, #89d6c6 0%, #67bcae 100%);
   --bui-gradient-button-primary-disabled: linear-gradient(180deg, #444755 0%, #343641 100%);
   --bui-gradient-button-danger-default: linear-gradient(180deg, #ef737b 0%, #d94a55 100%);
-  --bui-ink-on-accent: #0b0b10;
-  --bui-ink-primary: #f3f1eb;
-  --bui-ink-secondary: #c0bec5;
-  --bui-ink-muted: #94939b;
-  --bui-surface: #151519;
-  --bui-surface-hover: #202027;
-  --bui-surface-active: #26262f;
-  --bui-surface-subtle: #1b1b20;
-  --bui-border: rgb(243 241 235 / 12%);
-  --bui-border-strong: rgb(168 184 255 / 38%);
-  --bui-ghost: rgb(143 163 255 / 12%);
-  --bui-ghost-hover: rgb(143 163 255 / 20%);
-  --bui-ghost-active: rgb(143 163 255 / 26%);
-  --bui-status-blue-bg: rgb(143 163 255 / 18%);
-  --bui-status-blue-ink: #c3ceff;
+  --bui-ink-on-accent: #10161d;
+  --bui-ink-primary: #eef1ed;
+  --bui-ink-secondary: #c5cfcd;
+  --bui-ink-muted: #8e9b9b;
+  --bui-surface: #1b2632;
+  --bui-surface-hover: #243341;
+  --bui-surface-active: #2c3b4a;
+  --bui-surface-subtle: #141d27;
+  --bui-border: #2c3b4a;
+  --bui-border-strong: rgb(137 214 198 / 48%);
+  --bui-ghost: rgb(137 214 198 / 12%);
+  --bui-ghost-hover: rgb(137 214 198 / 20%);
+  --bui-ghost-active: rgb(137 214 198 / 26%);
+  --bui-status-blue-bg: rgb(96 165 250 / 18%);
+  --bui-status-blue-ink: #a9d2ff;
   --bui-status-rose-bg: rgb(229 72 77 / 16%);
   --bui-status-rose-ink: #ff9a9e;
   --bui-status-yellow-bg: rgb(229 169 59 / 18%);

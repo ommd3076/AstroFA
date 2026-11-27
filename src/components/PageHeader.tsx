@@ -1,5 +1,6 @@
 import React from 'react';
-import { cn } from './ui/space/utils';
+// Keep the shared header independent from the legacy Space UI helper tree.
+const cn = (...values: Array<string | undefined>) => values.filter(Boolean).join(' ');
 
 interface PageHeaderProps {
   eyebrow?: string;

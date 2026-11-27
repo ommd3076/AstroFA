@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAstroStore, type AutomataTab } from '../../stores/useAstroStore';
 import { AutomataInstrumentPanel } from './AutomataInstrumentPanel';
 import { NfaView } from './NfaView';
@@ -10,9 +10,8 @@ import { SimulatorView } from './SimulatorView';
 import { FormalDefinitionView } from './FormalDefinitionView';
 import { TransitionTableView } from './TransitionTableView';
 import { ExportModal } from './ExportModal';
-import { Tabs, TabsList, TabsPanel, TabsTab } from '../../components/ui/space/tabs';
-import { Button } from '../../components/ui/space/button';
-import { DialogCreateHandle, DialogTrigger } from '../../components/ui/space/dialog';
+import { Tabs, TabList, TabPanel, Tab } from '../../components/ui/board/base/tabs/tabs';
+import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
 
 type LabTabValue = 'instrument' | AutomataTab;
 
@@ -24,7 +23,6 @@ export const AutomataLab: React.FC = () => {
   // intentionally handed a string or state inspection into the lab.
   const [isInstrumentPanel, setIsInstrumentPanel] = useState<boolean>(automataTab === 'nfa');
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
-  const exportDialogHandle = useMemo(() => DialogCreateHandle(), []);
   const exportTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Synchronize when automataTab is changed externally (e.g., from Trace mode handoff)
@@ -65,60 +63,47 @@ export const AutomataLab: React.FC = () => {
 
   return (
     <Tabs
-      value={activeValue}
-      onValueChange={value => handleTabChange(value as LabTabValue)}
-      className="flex-1 min-h-0 flex flex-col gap-0 bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans overflow-hidden"
+      selectedKey={activeValue}
+      onSelectionChange={value => handleTabChange(String(value) as LabTabValue)}
+      className="boardui-surface flex-1 min-h-0 flex flex-col gap-0 bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans overflow-hidden"
     >
-      {/* Sub-header navigation strip backed by Space UI Tabs (manual activation) */}
+      {/* Board UI tabs preserve the lesson key navigation while exposing a clear selected state. */}
       <div className="min-h-11 border-b border-[var(--border-subtle)] bg-[var(--bg-tray)] px-2.5 sm:px-4 py-1.5 flex flex-wrap items-center justify-between shrink-0 gap-2">
-        <TabsList
+        <TabList
           aria-label="Automata lessons"
-          activateOnFocus={false}
-          variant="default"
-          size="sm"
           className="flex min-w-0 flex-1 items-center justify-start gap-1 overflow-x-auto bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)]"
         >
-          <TabsTab
-            value="instrument"
-            title="Tactile Hardware Instrument Panel"
-            className="font-mono text-[10px] uppercase tracking-wider px-2.5 data-active:bg-primary data-active:text-primary-foreground"
+          <Tab
+            id="instrument"
+            aria-label="Tactile Hardware Instrument Panel"
+              className="font-mono text-[10px] uppercase tracking-wider px-2.5 data-selected:bg-[var(--signal-mid)] data-selected:text-[var(--bg-shell)]"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" aria-hidden="true" />
             <span>INSTRUMENT PANEL</span>
             <span className="hidden sm:inline text-[9px] opacity-75 font-semibold">LIVE + DEMO</span>
-          </TabsTab>
+          </Tab>
 
           {tabs.map(tab => (
-            <TabsTab
+            <Tab
               key={tab.id}
-              value={tab.id}
-              title={tab.label}
-              className="font-mono text-[10px] uppercase tracking-wider px-2 data-active:bg-primary data-active:text-primary-foreground"
+              id={tab.id}
+              aria-label={tab.label}
+              className="font-mono text-[10px] uppercase tracking-wider px-2 data-selected:bg-[var(--signal-mid)] data-selected:text-[var(--bg-shell)]"
             >
               <span className="sr-only">{tab.index} </span>
               <span>{tab.shortLabel}</span>
-            </TabsTab>
+            </Tab>
           ))}
-        </TabsList>
+        </TabList>
 
-        <DialogTrigger
-          handle={exportDialogHandle}
-          render={
-            <Button
-              ref={exportTriggerRef}
-              variant="outline"
-              size="sm"
-              className="font-mono text-[10px] uppercase tracking-wider text-[var(--signal-mid)] border-[var(--signal-surface)] shrink-0"
-            />
-          }
-        >
+        <BoardButton ref={exportTriggerRef} variant="secondary" size="small" onClick={() => setIsExportOpen(true)} className="font-mono text-[10px] uppercase tracking-wider text-[var(--signal-mid)] border-[var(--signal-surface)] shrink-0">
           <span>Export suite</span>
           <span className="text-[11px] leading-none" aria-hidden="true">↗</span>
-        </DialogTrigger>
+        </BoardButton>
       </div>
 
       {/* Main Content Surface */}
-      <TabsPanel value={activeValue} className="flex-1 min-h-0 bg-[var(--bg-shell)] overflow-hidden relative flex flex-col">
+      <TabPanel id={activeValue} className="flex-1 min-h-0 bg-[var(--bg-shell)] overflow-hidden relative flex flex-col">
         {isInstrumentPanel ? (
           <AutomataInstrumentPanel
             onOpenTab={handleSelectTab}
@@ -136,14 +121,12 @@ export const AutomataLab: React.FC = () => {
             {automataTab === 'table' && <TransitionTableView />}
           </div>
         )}
-      </TabsPanel>
+      </TabPanel>
 
-      {/* Space UI Export Dialog */}
+      {/* Board UI export modal */}
       <ExportModal
-        handle={exportDialogHandle}
         open={isExportOpen}
         onOpenChange={setIsExportOpen}
-        finalFocus={exportTriggerRef}
       />
     </Tabs>
   );
