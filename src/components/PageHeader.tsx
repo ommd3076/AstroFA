@@ -30,7 +30,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <header
       className={cn(
-        'shrink-0 border-b border-[var(--border-subtle)] pb-3.5 space-y-3',
+        'atlas-page-header field-page-heading shrink-0 border-b border-[var(--border-subtle)] pb-4 space-y-3',
         className
       )}
     >
@@ -44,7 +44,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1
               id={titleId}
-              className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--ink-primary)]"
+              className="atlas-page-title atlas-title text-xl sm:text-2xl font-semibold tracking-tight text-[var(--ink-primary)]"
             >
               {title}
             </h1>

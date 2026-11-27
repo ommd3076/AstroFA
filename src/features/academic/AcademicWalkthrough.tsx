@@ -63,14 +63,15 @@ export const AcademicWalkthrough: React.FC = () => {
   ];
 
   return (
-    <section className="boardui-surface w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans p-3 sm:p-4 gap-4 overflow-y-auto" aria-label="Academic viva walkthrough">
+    <section className="field-page boardui-surface w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans p-4 sm:p-6 gap-4 overflow-y-auto" aria-label="Academic viva walkthrough">
       <PageHeader
+        className="field-page-heading"
         eyebrow="Formal Proof · 11 Stages"
-        title="Academic viva walkthrough"
+        title="Walkthrough"
         meta={`Stage ${String(activeStep).padStart(2, '0')} / 11 · ${pattern.name}`}
-        description="Step-by-step formal theory of computation and Procrustes geometry proof across all 11 pipeline stages."
+        description="Follow one constellation through normalization, symbolic encoding, automata construction, acceptance, and geometric verification. Select a stage or use the arrow keys to move through the proof."
         actions={
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="field-actions flex items-center gap-2 shrink-0">
             <label htmlFor="viva-target-select" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">Target</label>
             <Select
               value={selectedPatternId}
@@ -132,8 +133,12 @@ export const AcademicWalkthrough: React.FC = () => {
       </Card>
 
       {/* Two-pane Desktop Viva Reader: Sticky 1..11 Stage Index Left, Focused Stage Proof Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 items-start flex-1 min-h-0">
-        <nav aria-label="Walkthrough stages" className="hidden lg:flex flex-col gap-1 atlas-surface rounded-xl p-2.5 sticky top-0">
+      <div className="field-walkthrough-grid grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-5 items-start flex-1 min-h-0">
+        <nav aria-label="Walkthrough stages" className="field-step-rail hidden lg:flex flex-col gap-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-2.5 sticky top-0">
+          <div className="border-b border-[var(--border-subtle)] px-2 pb-3 pt-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--ink-muted)]">Proof sequence</p>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--ink-secondary)]">Eleven checkpoints from catalog input to geometric verification.</p>
+          </div>
           {stepsList.map(step => {
             const isActive = step.num === activeStep;
             return (
@@ -142,7 +147,7 @@ export const AcademicWalkthrough: React.FC = () => {
                 variant={isActive ? 'secondary' : 'ghost'}
                 onClick={() => setActiveStep(step.num)}
                 aria-current={isActive ? 'step' : undefined}
-                className={`h-auto w-full justify-start px-2.5 py-2 rounded-lg text-left border font-normal gap-2.5 ${
+                className={`field-step h-auto w-full justify-start px-2.5 py-2.5 rounded-lg text-left border font-normal gap-2.5 transition-colors ${
                   isActive
                     ? 'bg-[var(--bg-pill-active)] border-[var(--signal-surface)] text-[var(--ink-primary)]'
                     : 'border-transparent text-[var(--ink-secondary)] hover:bg-[var(--bg-card-subtle)]'
@@ -163,7 +168,17 @@ export const AcademicWalkthrough: React.FC = () => {
         </nav>
 
         {/* Active Step Content Card */}
-        <Card className="atlas-surface p-5 sm:p-6 gap-4 rounded-xl shadow-none">
+        <Card className="field-article atlas-surface p-5 sm:p-7 gap-5 rounded-xl shadow-none">
+        <div className="field-article-lede flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--ink-muted)]">Proof checkpoint {String(activeStep).padStart(2, '0')}</p>
+            <h2 className="mt-1 text-lg font-semibold text-[var(--ink-primary)]">{stepsList[activeStep - 1].title}</h2>
+          </div>
+          <div className="w-full max-w-[220px] sm:w-52">
+            <div className="mb-1 flex justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--ink-muted)]"><span>Progress</span><span>{Math.round((activeStep / 11) * 100)}%</span></div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-pill-neutral)]"><div className="h-full rounded-full bg-[var(--signal-mid)] transition-[width] duration-300" style={{ width: `${(activeStep / 11) * 100}%` }} /></div>
+          </div>
+        </div>
         {/* Step 1: Input Star Pattern */}
         {activeStep === 1 && (
           <div className="space-y-3.5">

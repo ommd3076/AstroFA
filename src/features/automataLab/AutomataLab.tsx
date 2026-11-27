@@ -12,6 +12,7 @@ import { TransitionTableView } from './TransitionTableView';
 import { ExportModal } from './ExportModal';
 import { Tabs, TabList, TabPanel, Tab } from '../../components/ui/board/base/tabs/tabs';
 import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+import { PageHeader } from '../../components/PageHeader';
 
 type LabTabValue = 'instrument' | AutomataTab;
 
@@ -62,25 +63,47 @@ export const AutomataLab: React.FC = () => {
   };
 
   return (
-    <Tabs
-      selectedKey={activeValue}
-      onSelectionChange={value => handleTabChange(String(value) as LabTabValue)}
-      className="boardui-surface flex-1 min-h-0 flex flex-col gap-0 bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans overflow-hidden"
-    >
-      {/* Board UI tabs preserve the lesson key navigation while exposing a clear selected state. */}
-      <div className="min-h-11 border-b border-[var(--border-subtle)] bg-[var(--bg-tray)] px-2.5 sm:px-4 py-1.5 flex flex-wrap items-center justify-between shrink-0 gap-2">
+    <section className="field-page flex h-full min-h-0 flex-col gap-4 overflow-hidden bg-[var(--bg-shell)] p-4 sm:p-6" aria-label="Automata laboratory">
+      <PageHeader
+        className="field-page-heading"
+        eyebrow="Formal language · interactive instrument"
+        title="Automata lab"
+        meta="8 views · live machine state"
+        description="Inspect the recognizer from ε-NFA to minimized DFA, then replay a real encoded constellation trace. Every panel below reads from the same machine and simulator state."
+        actions={
+          <div className="field-actions flex flex-wrap items-center gap-2">
+            <span className="field-chip rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--ink-secondary)]">keyboard: ← →</span>
+            <BoardButton ref={exportTriggerRef} variant="secondary" size="small" onClick={() => setIsExportOpen(true)} className="font-mono text-[10px] uppercase tracking-wider text-[var(--signal-mid)]">
+              Export suite ↗
+            </BoardButton>
+          </div>
+        }
+      />
+
+      <Tabs
+        selectedKey={activeValue}
+        onSelectionChange={value => handleTabChange(String(value) as LabTabValue)}
+        className="boardui-surface flex-1 min-h-0 flex flex-col gap-0 overflow-hidden bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
+      >
+      <div className="field-lab-rail border-b border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-3 sm:px-5">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div>
+            <p className="field-instrument-heading font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--ink-muted)]">Lesson index</p>
+            <p className="text-xs text-[var(--ink-secondary)]">Choose a representation; the machine remains live between views.</p>
+          </div>
+          <span className="field-chip hidden rounded-full bg-[var(--bg-pill-active)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--signal-mid)] sm:inline-flex">{isInstrumentPanel ? 'instrument' : `${String(tabs.findIndex(tab => tab.id === automataTab) + 1).padStart(2, '0')} / ${tabs.length}`}</span>
+        </div>
         <TabList
           aria-label="Automata lessons"
-          className="flex min-w-0 flex-1 items-center justify-start gap-1 overflow-x-auto bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)]"
+          className="flex min-w-0 items-stretch justify-start gap-1 overflow-x-auto"
         >
           <Tab
             id="instrument"
             aria-label="Tactile Hardware Instrument Panel"
-              className="font-mono text-[10px] uppercase tracking-wider px-2.5 data-selected:bg-[var(--signal-mid)] data-selected:text-[var(--bg-shell)]"
+              className="field-tab min-w-[132px] justify-start gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2.5 py-2 text-left font-mono text-[10px] uppercase tracking-wider data-selected:border-[var(--signal-mid)] data-selected:bg-[var(--bg-pill-active)] data-selected:text-[var(--ink-primary)]"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" aria-hidden="true" />
-            <span>INSTRUMENT PANEL</span>
-            <span className="hidden sm:inline text-[9px] opacity-75 font-semibold">LIVE + DEMO</span>
+              <span className="flex flex-col"><span>Instrument</span><span className="text-[9px] opacity-70">live + demo</span></span>
           </Tab>
 
           {tabs.map(tab => (
@@ -88,18 +111,14 @@ export const AutomataLab: React.FC = () => {
               key={tab.id}
               id={tab.id}
               aria-label={tab.label}
-              className="font-mono text-[10px] uppercase tracking-wider px-2 data-selected:bg-[var(--signal-mid)] data-selected:text-[var(--bg-shell)]"
+              className="field-tab min-w-[104px] justify-start gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2.5 py-2 text-left font-mono text-[10px] uppercase tracking-wider data-selected:border-[var(--signal-mid)] data-selected:bg-[var(--bg-pill-active)] data-selected:text-[var(--ink-primary)]"
             >
-              <span className="sr-only">{tab.index} </span>
-              <span>{tab.shortLabel}</span>
+              <span className="text-[9px] text-[var(--ink-muted)]">{tab.index}</span>
+              <span className="flex flex-col"><span>{tab.shortLabel}</span><span className="text-[9px] normal-case tracking-normal opacity-70">{tab.label}</span></span>
             </Tab>
           ))}
         </TabList>
 
-        <BoardButton ref={exportTriggerRef} variant="secondary" size="small" onClick={() => setIsExportOpen(true)} className="font-mono text-[10px] uppercase tracking-wider text-[var(--signal-mid)] border-[var(--signal-surface)] shrink-0">
-          <span>Export suite</span>
-          <span className="text-[11px] leading-none" aria-hidden="true">↗</span>
-        </BoardButton>
       </div>
 
       {/* Main Content Surface */}
@@ -110,7 +129,11 @@ export const AutomataLab: React.FC = () => {
             onOpenExport={() => setIsExportOpen(true)}
           />
         ) : (
-          <div className="flex-1 min-h-0 p-2 sm:p-3 bg-[var(--bg-shell)] overflow-hidden relative flex flex-col gap-2">
+          <div className="field-lab-stage flex-1 min-h-0 bg-[var(--bg-shell)] p-2 sm:p-4 overflow-hidden relative flex flex-col gap-2">
+            <div className="field-note flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2 text-[11px] text-[var(--ink-secondary)]">
+              <span>Active lesson: <strong className="font-semibold text-[var(--ink-primary)]">{tabs.find(tab => tab.id === automataTab)?.label}</strong></span>
+              <span className="hidden font-mono text-[10px] uppercase tracking-wider text-[var(--ink-muted)] sm:inline">select a state to inspect its transitions</span>
+            </div>
             {automataTab === 'nfa' && <NfaView />}
             {automataTab === 'closure' && <EpsilonClosureView />}
             {automataTab === 'subset' && <SubsetConstructionView />}
@@ -128,6 +151,7 @@ export const AutomataLab: React.FC = () => {
         open={isExportOpen}
         onOpenChange={setIsExportOpen}
       />
-    </Tabs>
+      </Tabs>
+    </section>
   );
 };

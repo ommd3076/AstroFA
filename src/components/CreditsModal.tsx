@@ -72,12 +72,13 @@ export const CreditsModal: React.FC = () => {
 
   return (
     <section
-      className="mx-auto flex w-full max-w-5xl flex-col gap-6 font-sans text-[var(--ink-primary)]"
+      className="field-page mx-auto flex h-full w-full max-w-6xl flex-col gap-6 overflow-y-auto bg-[var(--bg-shell)] p-4 sm:p-6 font-sans text-[var(--ink-primary)]"
       aria-label="Credits and data sources"
     >
       <PageHeader
-        eyebrow="Attribution & Provenance"
-        title="Credits, data sources & licenses"
+        className="field-page-heading"
+        eyebrow="Attribution · provenance · privacy"
+        title="Credits & sources"
         description="Costellar runs on open astronomical catalogs, deterministic finite automata, and transparent geometry verification."
         actions={
           <Button
@@ -92,7 +93,11 @@ export const CreditsModal: React.FC = () => {
       />
 
       {/* Grouped Source Rows */}
-      <div className="atlas-surface divide-y divide-[var(--border-subtle)]">
+      <div className="field-source-ledger field-note atlas-surface overflow-hidden">
+        <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-6 border-b border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--ink-muted)] sm:grid">
+          <span>Source / license / purpose</span><span>Reference / coordinate frame</span>
+        </div>
+        <div className="divide-y divide-[var(--border-subtle)]">
         {DATA_SOURCES.map(source => (
           <div
             key={source.name}
@@ -128,10 +133,11 @@ export const CreditsModal: React.FC = () => {
             </div>
           </div>
         ))}
+        </div>
       </div>
 
       {/* Methodological & Privacy Notes */}
-      <div className="grid grid-cols-1 gap-6 border-t border-[var(--border-subtle)] pt-5 md:grid-cols-2">
+      <div className="field-notes grid grid-cols-1 gap-6 border-t border-[var(--border-subtle)] pt-5 md:grid-cols-2">
         <div className="space-y-1.5">
           <h2 className="text-sm font-semibold text-[var(--ink-primary)]">
             IAU constellations vs. traditional asterisms
