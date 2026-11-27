@@ -1,0 +1,62 @@
+{
+  "upstream": "BoardUI/boardui",
+  "commit": "c87984b6bb7cb691a1cd560e9ae2a75a7ffb6c89",
+  "license": "MIT",
+  "source": "components/application/docs/components-index.ts",
+  "snapshotPolicy": "free-source-only; no app, docs previews, media, API routes, credentials, or Pro source",
+  "catalog": {
+    "checkedInFreeEntryCount": 62,
+    "upstreamReadmeClaim": 90,
+    "discrepancy": "README prose claims 90 free items; pinned catalog data contains 62 shipped free entries.",
+    "sections": {
+      "foundations": 2,
+      "base": 49,
+      "blocks": 9,
+      "charts": 1,
+      "templates": 1
+    },
+    "freeEntries": [
+      "Color", "Typography", "Accordion", "Announcement", "Avatar", "Breadcrumb", "Button", "Button Group", "Carousel", "Checkbox", "Chip", "Close Button", "Command Palette", "Token Input", "Context Menu", "Color Picker", "Combobox", "Date Calendar", "Date Picker", "Divider", "Drawer", "Dropdown", "File Upload", "Icon Button", "Input", "Input OTP", "Link Button", "Meter", "Modal", "Notification", "Number Field", "Pagination", "Popover", "Progress", "Radio", "Segmented Control", "Search Field", "Select", "Skeleton", "Slider", "Social Button", "Spinner", "Switch", "Table", "Tabs", "Tag Group", "Textarea", "Time Field", "Toast", "Tree View", "Tooltip", "Agent Thinking", "Composer Loader", "Auth Card", "Data Grid", "Data Table", "Notification Center", "Settings Modal", "Sidebar", "Stat Cards", "Revenue Chart", "Chat Starter"
+    ]
+  },
+  "includedSourceRoots": [
+    "components/base",
+    "components/foundations",
+    "components/application/agent-chat",
+    "components/application/agent-thinking",
+    "components/application/composer-loader",
+    "components/application/app-shell",
+    "components/application/auth",
+    "components/application/dashboard",
+    "components/application/data-grid",
+    "components/application/data-table",
+    "components/application/notification-center",
+    "components/application/settings",
+    "components/application/theme",
+    "hooks",
+    "utils",
+    "styles/theme.css",
+    "styles/typography.css"
+  ],
+  "excludedSourceRoots": [
+    "app",
+    "components/application/docs",
+    "components/application/landing",
+    "components/application/medical",
+    "components/application/templates",
+    "public",
+    "plugins",
+    ".env.example"
+  ],
+  "registryKnownFreeItems": [
+    {
+      "name": "Orders Chart",
+      "registry": "https://www.boardui.com/r/orders-chart-card.json",
+      "sourcePath": "components/application/dashboard/orders-chart-card.tsx",
+      "license": "MIT",
+      "verification": "Source is present in the pinned public checkout; tracked separately because the pinned components-index.ts does not enumerate this registry item."
+    }
+  ],
+  "runtime": "No vendor source is imported by AstroFA; runtime integration remains selective under src/components/ui/board.",
+  "dependencyNote": "components/application/app-shell/pro-offer-card.tsx is retained only because the free Chat Starter source imports this public upsell dependency; it is not counted as a Pro catalog entry."
+}
