@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '../../components/ui/board/base/table/table';
 import { Chip } from '../../components/ui/board/base/badges/chip';
+import './traceMode.css';
 
 const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
   <BoardButton
@@ -143,7 +144,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
   );
 
   return (
-    <div className="boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
+    <div className="trace-field boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
       <div className="mx-auto w-full max-w-6xl space-y-4 p-3 sm:p-5">
         <PageHeader
           eyebrow="Trace workspace / geometry"
@@ -238,7 +239,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
             </Empty>
           </Card>
         ) : (
-          <>
+          <section className="geometry-workbench" aria-label="Geometry evidence">
             <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
               <Card className={surface}>
                 <h2 className="text-sm font-semibold text-[var(--ink-primary)]">Normalized trace</h2>
@@ -360,7 +361,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
                 </Button>
               </div>
             </Card>
-          </>
+          </section>
         )}
       </div>
     </div>

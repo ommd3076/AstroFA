@@ -1,0 +1,47 @@
+.trace-field {
+  --field-paper: #f3f1e9;
+  --field-panel: #fcfaf5;
+  --field-line: #d8d4c8;
+  --field-ink: #212925;
+  --field-muted: #5a665e;
+  --field-green: #24584c;
+  --field-plate: #121c22;
+  background: var(--field-paper) !important;
+  color: var(--field-ink) !important;
+  min-height: 100%;
+  padding: clamp(14px, 2vw, 30px) clamp(14px, 3vw, 42px) 34px;
+}
+.trace-field .atlas-surface {
+  background: var(--field-panel) !important;
+  border: 1px solid var(--field-line) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 8px 22px rgba(33,41,37,.045) !important;
+}
+.trace-field .text-\[var\(--ink-primary\)\] { color: var(--field-ink) !important; }
+.trace-field .text-\[var\(--ink-secondary\)\], .trace-field .text-\[var\(--ink-muted\)\] { color: var(--field-muted) !important; }
+.trace-field .text-\[var\(--signal-mid\)\] { color: var(--field-green) !important; }
+.trace-field .border-\[var\(--border-subtle\)\] { border-color: var(--field-line) !important; }
+.trace-field [role="img"] { background: var(--field-plate); border: 1px solid #283a3b; border-radius: 3px; }
+.trace-field svg rect[fill="url(#analysis-dots)"] { fill: var(--field-plate); }
+.trace-field svg polyline { stroke: #8ed0bd; }
+.trace-field table { background: transparent; }
+.trace-field [data-slot="table-header"] { border-bottom-color: var(--field-line); }
+.trace-field .recognition-workbench, .trace-field .geometry-workbench { display: grid; gap: 14px; }
+.trace-field .recognition-workbench > section:first-child { grid-column: 1 / -1; }
+.trace-field .recognition-workbench > article:nth-child(2) { grid-column: 1 / -1; }
+.trace-field .geometry-workbench > section:first-child { grid-column: 1 / -1; }
+.trace-field .geometry-workbench > article { min-width: 0; }
+@media (min-width: 960px) {
+  .trace-field .recognition-workbench { grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); }
+  .trace-field .recognition-workbench > section:first-child { grid-column: 1 / -1; }
+  .trace-field .recognition-workbench > article:nth-child(2) { grid-column: 1; }
+  .trace-field .recognition-workbench > article:nth-child(3) { grid-column: 2; align-self: start; }
+  .trace-field .geometry-workbench { grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr); align-items: start; }
+  .trace-field .geometry-workbench > section:first-child { grid-column: 1 / -1; }
+  .trace-field .geometry-workbench > article:nth-child(2) { grid-column: 1; }
+  .trace-field .geometry-workbench > article:nth-child(3) { grid-column: 2; }
+}
+.trace-field button { letter-spacing: .01em; }
+@media (prefers-reduced-motion: reduce) {
+  .trace-field * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

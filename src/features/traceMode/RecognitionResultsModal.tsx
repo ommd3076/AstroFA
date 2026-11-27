@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '../../components/ui/board/base/table/table';
 import { Chip } from '../../components/ui/board/base/badges/chip';
+import './traceMode.css';
 
 const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
   <BoardButton
@@ -141,7 +142,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
   const surface = 'atlas-surface rounded-xl p-4 sm:p-5 gap-0 shadow-none';
 
   return (
-    <div className="boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
+    <div className="trace-field boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
       <div className="mx-auto w-full max-w-6xl space-y-4 p-3 sm:p-5">
         <PageHeader
           eyebrow="Trace workspace / report"
@@ -219,7 +220,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
             </Empty>
           </Card>
         ) : (
-          <>
+          <section className="recognition-workbench" aria-label="Recognition evidence">
             <section className="grid gap-3 lg:grid-cols-[1.35fr_1fr]">
               <Card className={`${surface} flex flex-col justify-between`}>
                 <div>
@@ -345,27 +346,8 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
                     : 'This report contains no symbols to simulate.'}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportReport}
-                  className="text-xs font-semibold"
-                >
-                  Export JSON
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handoff}
-                  disabled={!report.inputSymbols.length}
-                  className="text-xs font-semibold"
-                >
-                  Open in Automata Lab
-                </Button>
-              </div>
             </Card>
-          </>
+          </section>
         )}
       </div>
     </div>
