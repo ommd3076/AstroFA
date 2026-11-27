@@ -921,103 +921,13 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
         className="absolute inset-0 pointer-events-none z-10 w-full h-full"
       />
 
-      {/* Hovered Star Tooltip Telemetry Readout (Costellar HUD Reticle) */}
       {hoveredStar && (
-        <div className="hud-reticle absolute pointer-events-none z-20 bottom-6 left-6 p-3 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] text-xs space-y-2 font-mono" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
-          <div className="flex items-center justify-between gap-3 border-b border-[#1E293B] pb-1.5">
-            <span className="font-bold text-[#E0E8F9] text-xs uppercase tracking-[0.08em]">
-              {hoveredStar.proper || hoveredStar.name}
-            </span>
-            {hoveredStar.con && (
-              <span className="px-1.5 py-0.5 bg-[#101827] border border-[#232D42] rounded-[3px] text-[9px] text-[#8FA4C4] uppercase tracking-wider font-semibold">
-                {hoveredStar.con}
-              </span>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[#8C93A0] text-[10px] uppercase tracking-wider">
-            <span className="flex items-baseline gap-1">
-              <span>MAG:</span>
-              <strong className="font-dot text-xs text-[var(--signal-cobalt)] font-bold">
-                {hoveredStar.mag.toFixed(2)}
-              </strong>
-            </span>
-            <span className="flex items-baseline gap-1">
-              <span>B-V:</span>
-              <strong className="text-[#C7D5EC]">{hoveredStar.ci ?? 'N/A'}</strong>
-            </span>
-            <span className="flex items-baseline gap-1">
-              <span>RA:</span>
-              <strong className="text-[#C7D5EC]">{(hoveredStar.ra / 15).toFixed(2)}H</strong>
-            </span>
-            <span className="flex items-baseline gap-1">
-              <span>DEC:</span>
-              <strong className="text-[#C7D5EC]">{hoveredStar.dec.toFixed(1)}°</strong>
-            </span>
-          </div>
-          {isTraceMode && (
-            <div className="pt-1 text-[9px] text-[#6892F6] flex items-center gap-1.5 border-t border-[#1E293B]/60 uppercase tracking-[0.08em]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)]" />
-              CLICK STAR TO APPEND TRACE
-            </div>
-          )}
+        <div className="field-hover-star" aria-hidden="true">
+          <strong>{hoveredStar.proper || hoveredStar.name}</strong>
+          <span>{hoveredStar.mag.toFixed(2)} mag · {(hoveredStar.ra / 15).toFixed(2)}h RA · {hoveredStar.dec.toFixed(1)}° Dec</span>
+          {isTraceMode && <span>Click to add this star to the trace</span>}
         </div>
       )}
-
-      {/* Bottom Horizon Silhouette & Azimuth Scale (Matching Frame 2) */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none overflow-hidden select-none">
-        {/* Azimuth Compass Scale */}
-        <div className="w-full pb-1 flex items-center justify-center relative h-7">
-          <svg className="w-full h-7 overflow-visible" preserveAspectRatio="none">
-            <line x1="0" y1="18" x2="100%" y2="18" stroke="#334155" strokeWidth="1" strokeDasharray="3 4" opacity="0.6" />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-between px-8 text-[9px] font-mono font-semibold text-[#94A3B8] tracking-widest uppercase">
-            <span>120°</span>
-            <span className="text-[#64748B]">SE</span>
-            <span>150°</span>
-            <span className="text-[var(--signal-cobalt)] font-bold text-[10px]">180° S</span>
-            <span>210°</span>
-            <span className="text-[#64748B]">SW</span>
-            <span>240°</span>
-          </div>
-        </div>
-
-        {/* Low Mountain Ridge Silhouette */}
-        <svg viewBox="0 0 1200 48" className="w-full h-5 block text-[#020617] fill-current" preserveAspectRatio="none">
-          <path d="M0,48 L0,26 L40,20 L90,24 L150,14 L210,22 L270,12 L330,20 L400,10 L470,23 L540,13 L620,26 L690,14 L760,22 L840,9 L910,20 L980,13 L1060,24 L1130,16 L1200,22 L1200,48 Z" />
-        </svg>
-      </div>
-
-      {/* Precision 360° Azimuth Telemetry Strip with HUD Corner Ticks */}
-      <div className="hud-reticle absolute bottom-6 right-6 z-20 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] px-3.5 py-2 text-[10px] font-mono text-[#8C93A0] pointer-events-none uppercase tracking-[0.08em] space-y-1" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
-        <div className="flex items-center justify-between gap-4 text-[9px] text-[#525866]">
-          <span>AZIMUTH TELEMETRY</span>
-          <span className="text-[var(--signal-cobalt)] font-semibold">360° HORIZON</span>
-        </div>
-        <div className="flex items-center gap-2 text-[10px]">
-          <span className="font-bold text-[#EF4444]">N</span>
-          <span className="text-[#C7D5EC]">000°</span>
-          <span className="text-[#232D42]">|</span>
-          <span className="font-bold text-[#6892F6]">E</span>
-          <span className="text-[#C7D5EC]">090°</span>
-          <span className="text-[#232D42]">|</span>
-          <span className="font-bold text-[#8FA4C4]">S</span>
-          <span className="text-[#C7D5EC]">180°</span>
-          <span className="text-[#232D42]">|</span>
-          <span className="font-bold text-[#6892F6]">W</span>
-          <span className="text-[#C7D5EC]">270°</span>
-        </div>
-        {/* Discrete Segment Ticks Ruler */}
-        <div className="flex items-center justify-between gap-1 pt-0.5">
-          {Array.from({ length: 16 }).map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 w-[2px] ${
-                i % 4 === 0 ? 'bg-[var(--signal-cobalt)] h-2' : 'bg-[#232D42]'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
