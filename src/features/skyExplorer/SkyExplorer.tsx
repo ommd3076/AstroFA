@@ -8,6 +8,8 @@ import { StarInspector } from '../../components/StarInspector';
 import { TraceHud } from '../traceMode/TraceHud';
 import { TimelineBar } from '../../components/TimelineBar';
 import { Button } from '../../components/ui/space/button';
+import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+import { ButtonGroup, ButtonGroupItem } from '../../components/ui/board/base/buttons/button-group';
 import {
   Dialog,
   DialogClose,
@@ -228,7 +230,7 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
 
   if (isTraceMode) {
     return (
-      <div className="atlas-stage w-full h-full min-h-0 relative select-none">
+      <div className="atlas-stage boardui-surface w-full h-full min-h-0 relative select-none">
         <SkyCanvas showDeepSky={showDeepSky} />
         <TraceHud />
       </div>
@@ -236,7 +238,7 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col gap-1.5 min-h-0 select-none">
+    <div className="boardui-surface w-full h-full flex flex-col gap-1.5 min-h-0 select-none">
       {/* Unified Compact Stage Header + Layer & Zoom Dock (leaves maximum height for SkyCanvas) */}
       <Toolbar
         aria-label="Sky display controls and ephemeris"
@@ -288,94 +290,21 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
           <ToolbarSeparator orientation="vertical" className="hidden sm:block h-4" />
 
           {/* Layer toggles: CONST, LABELS, DEEP, GRID, HORIZON */}
-          <ToolbarGroup aria-label="Sky display layers" className="flex-wrap gap-1">
-            <ToolbarButton
-              render={
-                <Button
-                  variant={showConstellationLines ? 'default' : 'outline'}
-                  size="xs"
-                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
-                  title="Toggle Constellation Lines"
-                  aria-pressed={showConstellationLines}
-                  aria-label="Show constellation lines"
-                />
-              }
-              onClick={() => setShowConstellationLines(!showConstellationLines)}
-            >
-              CONST
-            </ToolbarButton>
-            <ToolbarButton
-              render={
-                <Button
-                  variant={showConstellationLabels ? 'default' : 'outline'}
-                  size="xs"
-                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
-                  title="Toggle Constellation Labels"
-                  aria-pressed={showConstellationLabels}
-                  aria-label="Show constellation labels"
-                />
-              }
-              onClick={() => setShowConstellationLabels(!showConstellationLabels)}
-            >
-              LABELS
-            </ToolbarButton>
-            <ToolbarButton
-              render={
-                <Button
-                  variant={showDeepSky ? 'default' : 'outline'}
-                  size="xs"
-                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
-                  title="Toggle NASA Milky Way Deep-Sky Backdrop"
-                  aria-pressed={showDeepSky}
-                  aria-label="Show Milky Way deep-sky backdrop"
-                />
-              }
-              onClick={() => setShowDeepSky(value => !value)}
-            >
-              DEEP
-            </ToolbarButton>
-            <ToolbarButton
-              render={
-                <Button
-                  variant={showEquatorialGrid ? 'default' : 'outline'}
-                  size="xs"
-                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
-                  title="Toggle Equatorial Coordinate Grid"
-                  aria-pressed={showEquatorialGrid}
-                  aria-label="Show equatorial grid"
-                />
-              }
-              onClick={() => setShowEquatorialGrid(!showEquatorialGrid)}
-            >
-              GRID
-            </ToolbarButton>
-            <ToolbarButton
-              render={
-                <Button
-                  variant={showHorizon ? 'default' : 'outline'}
-                  size="xs"
-                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
-                  title="Toggle horizon and azimuth markers"
-                  aria-pressed={showHorizon}
-                  aria-label="Show horizon and azimuth markers"
-                />
-              }
-              onClick={() => setShowHorizon(!showHorizon)}
-            >
-              HORIZON
-            </ToolbarButton>
-          </ToolbarGroup>
+          <ButtonGroup size="small" aria-label="Sky display layers" className="max-w-full overflow-x-auto">
+            <ButtonGroupItem selected={showConstellationLines} aria-pressed={showConstellationLines} onClick={() => setShowConstellationLines(!showConstellationLines)} title="Toggle constellation lines" aria-label="Show constellation lines">Lines</ButtonGroupItem>
+            <ButtonGroupItem selected={showConstellationLabels} aria-pressed={showConstellationLabels} onClick={() => setShowConstellationLabels(!showConstellationLabels)} title="Toggle constellation labels" aria-label="Show constellation labels">Labels</ButtonGroupItem>
+            <ButtonGroupItem selected={showDeepSky} aria-pressed={showDeepSky} onClick={() => setShowDeepSky(value => !value)} title="Toggle the Milky Way deep-sky backdrop" aria-label="Show Milky Way deep-sky backdrop">Milky Way</ButtonGroupItem>
+            <ButtonGroupItem selected={showEquatorialGrid} aria-pressed={showEquatorialGrid} onClick={() => setShowEquatorialGrid(!showEquatorialGrid)} title="Toggle the equatorial coordinate grid" aria-label="Show equatorial grid">Grid</ButtonGroupItem>
+            <ButtonGroupItem selected={showHorizon} aria-pressed={showHorizon} onClick={() => setShowHorizon(!showHorizon)} title="Toggle horizon and azimuth markers" aria-label="Show horizon and azimuth markers">Horizon</ButtonGroupItem>
+          </ButtonGroup>
 
           <ToolbarSeparator orientation="vertical" className="hidden sm:block h-4" />
 
           <ToolbarButton
             render={
-              <Button
-                variant="secondary"
-                size="xs"
-                className="h-7 text-[11px] font-semibold text-[var(--signal-mid)]"
-                title="Switch to Trace Mode"
-              />
+              <BoardButton variant="ghost" size="small" title="Switch to Trace Mode" className="h-8 px-2">
+                Trace
+              </BoardButton>
             }
             onClick={() => setIsTraceMode(true)}
           >
