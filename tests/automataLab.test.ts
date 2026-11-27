@@ -131,9 +131,10 @@ describe('AUTOMATA-01: Automata Lab Hardware Instrument Panel & Frame 10 Visual 
       }
     });
 
-    it('integrates ExportModal via Space UI DialogTrigger labeled Export suite', () => {
-      expect(labSource).toContain('DialogTrigger');
-      expect(labSource).toContain('exportDialogHandle');
+    it('integrates the board export trigger with ExportModal state', () => {
+      expect(labSource).toContain('exportTriggerRef');
+      expect(labSource).toContain('isExportOpen');
+      expect(labSource).toContain('setIsExportOpen(true)');
       expect(labSource).toContain('ExportModal');
       expect(labSource).toContain('Export suite');
     });
