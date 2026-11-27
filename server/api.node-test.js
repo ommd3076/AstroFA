@@ -77,7 +77,7 @@ test('observing conditions validates and maps the Open-Meteo daily/hourly respon
     assert.match(data.sourceUrl, /^https:\/\/api\.open-meteo\.com\/v1\/forecast\?/)
     assert.match(requested.url, /latitude=12\.97/)
     assert.match(requested.url, /longitude=77\.59/)
-    assert.match(requested.userAgent, /Costellar AstroFA/)
+    assert.match(requested.userAgent, /Costellar/)
     const second = await invoke('/api/observing-conditions?date=2026-11-26&lat=12.971&lon=77.594')
     assert.equal(second.status, 200)
     assert.equal(calls, 1)
@@ -103,20 +103,20 @@ test('recognition endpoint invokes the selected worker and validates its JSON re
 })
 
 test('Windows selects the project WASI runner and never falls back to a native executable', () => {
-  const root = 'C:\\astrofa'
+  const root = 'C:\\costellar'
   const exists = value => value.endsWith('recognizer.wasm') || value.endsWith('runner.mjs') || value.endsWith('recognizer.exe')
   const launch = resolveRecognizerLaunch({ platform: 'win32', root, exists, nodePath: 'C:\\node\\node.exe' })
   assert.equal(launch.backend, 'wasi')
   assert.equal(launch.command, 'C:\\node\\node.exe')
-  assert.deepEqual(launch.args, ['C:\\astrofa\\native\\runner.mjs'])
-  assert.equal(launch.artifact, 'C:\\astrofa\\native\\.build\\recognizer.wasm')
+  assert.deepEqual(launch.args, ['C:\\costellar\\native\\runner.mjs'])
+  assert.equal(launch.artifact, 'C:\\costellar\\native\\.build\\recognizer.wasm')
   assert.throws(() => resolveRecognizerLaunch({
     platform: 'win32', root, exists: value => value.endsWith('runner.mjs') || value.endsWith('recognizer.exe'),
   }), /WASI recognizer or runner is not built/)
 })
 
 test('non-Windows keeps the native worker mode', () => {
-  const root = path.resolve('astrofa-test-root')
+  const root = path.resolve('costellar-test-root')
   const executable = path.join(root, 'native', '.build', 'recognizer')
   const launch = resolveRecognizerLaunch({ platform: 'linux', root, exists: value => value === executable })
   assert.equal(launch.backend, 'native')

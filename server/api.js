@@ -163,7 +163,7 @@ function requestObservingConditions(date, latitude, longitude) {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
     try {
-      const response = await fetch(url, { signal: controller.signal, headers: { 'user-agent': 'Costellar AstroFA/1.0 (observing-conditions)' } })
+      const response = await fetch(url, { signal: controller.signal, headers: { 'user-agent': 'Costellar/1.0 (observing-conditions)' } })
       if (!response.ok) throw new Error(`Open-Meteo returned HTTP ${response.status}`)
       const payload = await readBoundedJson(response)
       const utcZone = (payload.timezone === 'UTC' && (payload.utc_offset_seconds === undefined || payload.utc_offset_seconds === 0))

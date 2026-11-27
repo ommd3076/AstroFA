@@ -1,4 +1,4 @@
-# AstroFA / Costellar Space UI Refinement Plan
+# Costellar Space UI Refinement Plan
 
 ## Direction
 
