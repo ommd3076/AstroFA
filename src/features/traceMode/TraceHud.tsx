@@ -2,18 +2,39 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { REFERENCE_PATTERNS, STAR_BY_ID } from '../../data/astroData';
 import { PROCRUSTES_RESIDUAL_THRESHOLD } from '../../geometry/similarity';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Alert, AlertDescription, AlertTitle } from '../../components/ui/space/alert';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '../../components/ui/space/empty';
+import {
+  Select,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectItem,
+  SelectPopup,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/space/select';
+import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator } from '../../components/ui/space/toolbar';
 
 // Mini SVG Thumbnail renderer for constellation asterisms
 export const AsterismThumbnail: React.FC<{
   points?: { x: number; y: number }[];
   size?: number;
   className?: string;
-}> = ({ points, size = 44, className = '' }) => {
+}> = ({ points, size = 40, className = '' }) => {
   if (!points || points.length === 0) {
     return (
       <span
         style={{ width: size, height: size }}
-        className={`bg-[#0A0F1D] rounded-[6px] border border-[#202738] flex items-center justify-center text-[10px] text-gray-400 shrink-0 ${className}`}
+        className={`bg-[var(--bg-viewport)] rounded-md border border-[var(--border-subtle)] flex items-center justify-center text-[10px] text-[var(--ink-muted)] shrink-0 ${className}`}
       >
         ✦
       </span>
@@ -50,14 +71,14 @@ export const AsterismThumbnail: React.FC<{
       width={size}
       height={size}
       viewBox={`0 0 ${vSize} ${vSize}`}
-      className={`bg-[#0A0F1D] rounded-[6px] border border-[#202738] shrink-0 ${className}`}
+      className={`bg-[var(--bg-viewport)] rounded-md border border-[var(--border-subtle)] shrink-0 ${className}`}
       aria-hidden="true"
     >
       {polylineStr && (
         <polyline
           points={polylineStr}
           fill="none"
-          stroke="#3B82F6"
+          stroke="var(--signal-cobalt)"
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -69,7 +90,7 @@ export const AsterismThumbnail: React.FC<{
           cx={p.x}
           cy={p.y}
           r={idx === 0 || idx === mapped.length - 1 ? '2.5' : '1.8'}
-          fill={idx === mapped.length - 1 ? '#60A5FA' : '#93C5FD'}
+          fill={idx === mapped.length - 1 ? 'var(--signal-mid)' : '#F3F1EB'}
         />
       ))}
     </svg>
@@ -77,40 +98,43 @@ export const AsterismThumbnail: React.FC<{
 };
 
 export const TraceHud: React.FC = () => {
-  const {
-    isTraceMode,
-    setIsTraceMode,
-    showTraceHints,
-    setShowTraceHints,
-    setShowPatternAnalysisModal,
-    setShowRecognitionResultsModal,
-    tracedStarIds,
-    tracedPoints,
-    recognitionReport,
-    undoLastTracePoint,
-    clearTrace,
-    loadPresetTrace,
-    addTracedCustomPoint,
-    setActiveView,
-    setAutomataTab,
-    setSimulatorSymbols,
-  } = useAstroStore();
+  const isTraceMode = useAstroStore(state => state.isTraceMode);
+  const setIsTraceMode = useAstroStore(state => state.setIsTraceMode);
+  const showTraceHints = useAstroStore(state => state.showTraceHints);
+  const setShowTraceHints = useAstroStore(state => state.setShowTraceHints);
+  const setShowPatternAnalysisModal = useAstroStore(state => state.setShowPatternAnalysisModal);
+  const setShowRecognitionResultsModal = useAstroStore(state => state.setShowRecognitionResultsModal);
+  const tracedStarIds = useAstroStore(state => state.tracedStarIds);
+  const tracedPoints = useAstroStore(state => state.tracedPoints);
+  const recognitionReport = useAstroStore(state => state.recognitionReport);
+  const backendRecognition = useAstroStore(state => state.backendRecognition);
+  const undoLastTracePoint = useAstroStore(state => state.undoLastTracePoint);
+  const clearTrace = useAstroStore(state => state.clearTrace);
+  const loadPresetTrace = useAstroStore(state => state.loadPresetTrace);
+  const addTracedCustomPoint = useAstroStore(state => state.addTracedCustomPoint);
+  const setActiveView = useAstroStore(state => state.setActiveView);
+  const setAutomataTab = useAstroStore(state => state.setAutomataTab);
+  const setSimulatorSymbols = useAstroStore(state => state.setSimulatorSymbols);
 
   const [showAllCandidates, setShowAllCandidates] = useState(false);
   const [showMobileCandidates, setShowMobileCandidates] = useState(false);
+  const [selectedSample, setSelectedSample] = useState<string>('');
 
-  // Global keydown shortcut for Undo (Z)
+  // Guarded Undo shortcut (Z): never fires when typing in inputs/selects/contentEditable or when a modal dialog is open.
   useEffect(() => {
     if (!isTraceMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target;
       if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLSelectElement
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
       ) {
         return;
       }
-      if ((e.key === 'z' || e.key === 'Z') && !e.metaKey && !e.ctrlKey) {
+      if (document.querySelector('[role="dialog"]')) return;
+      if ((e.key === 'z' || e.key === 'Z') && !e.metaKey && !e.ctrlKey && !e.altKey) {
         if (tracedStarIds.length > 0 || tracedPoints.length > 0) {
           undoLastTracePoint();
         }
@@ -141,7 +165,6 @@ export const TraceHud: React.FC = () => {
     setActiveView('patterns');
   };
 
-  // Handle Preset Dropdown Selection including Demo cases (Rejection & Invariance)
   const handlePresetSelect = (val: string) => {
     if (!val) return;
 
@@ -171,8 +194,7 @@ export const TraceHud: React.FC = () => {
       const a3 = a2 + (155 * Math.PI) / 180;
       const p4 = { x: p3.x + 240 * Math.cos(a3), y: p3.y + 240 * Math.sin(a3) };
 
-      const distortedPoints = [p0, p1, p2, p3, p4];
-      for (const p of distortedPoints) {
+      for (const p of [p0, p1, p2, p3, p4]) {
         addTracedCustomPoint(p);
       }
       return;
@@ -200,8 +222,21 @@ export const TraceHud: React.FC = () => {
     if (pat) loadPresetTrace(pat);
   };
 
-  // Derive candidate matches list
   const candidatesList = useMemo(() => {
+    if (backendRecognition?.state === 'available') {
+      return backendRecognition.result.candidates.map(score => {
+        const refPattern = REFERENCE_PATTERNS.find(p => p.id === score.patternId);
+        return {
+          id: score.patternId,
+          name: score.patternName,
+          constellationId: score.constellationId,
+          residual: score.residual,
+          isVerified: score.isVerified,
+          isBestMatch: backendRecognition.result.bestMatch?.patternId === score.patternId,
+          points: refPattern?.referencePoints,
+        };
+      });
+    }
     if (recognitionReport && recognitionReport.geometricScores.length > 0) {
       return recognitionReport.geometricScores.map(score => {
         const refPattern = REFERENCE_PATTERNS.find(p => p.id === score.patternId || p.constellationId === score.constellationId);
@@ -234,383 +269,400 @@ export const TraceHud: React.FC = () => {
     }
 
     return [];
-  }, [recognitionReport]);
+  }, [recognitionReport, backendRecognition]);
 
-  const displayedCandidates = showAllCandidates ? candidatesList : candidatesList.slice(0, 3);
+  const displayedCandidates = showAllCandidates ? candidatesList : candidatesList.slice(0, 4);
 
-  // Active candidates text for top metric tile
   const activeCandidatesDisplay = useMemo(() => {
-    if (!recognitionReport) return 'CLICK STARS TO DISCOVER CANDIDATES';
+    if (backendRecognition?.state === 'pending') return 'Checking server...';
+    if (backendRecognition?.state === 'unavailable') return 'Server unavailable';
+    if (backendRecognition?.state === 'available') {
+      const matchName = backendRecognition.result.bestMatch?.patternName;
+      return backendRecognition.result.status === 'AMBIGUOUS'
+        ? `Ambiguous${matchName ? ` · ${matchName}` : ''}`
+        : matchName ?? backendRecognition.result.status.replace('_', ' ');
+    }
+    if (backendRecognition?.state === 'not-requested' && backendRecognition.reason === 'educational-demo') return 'Educational demo · Local DFA';
+    if (!recognitionReport) return 'Select stars to trace';
     if (recognitionReport.status === 'FULL_MATCH') {
-      return (
-        recognitionReport.bestMatch?.patternName?.toUpperCase() ||
-        recognitionReport.bestMatch?.constellationId?.toUpperCase() || 'MATCH FOUND'
-      );
+      return recognitionReport.bestMatch?.patternName || recognitionReport.bestMatch?.constellationId || 'Match found';
     }
     if (recognitionReport.status === 'VALID_PREFIX') {
       const labels = recognitionReport.prefixMatch.reachableAcceptingLabels;
-      return labels.length > 0 ? labels.slice(0, 4).join(', ').toUpperCase() : 'SEARCHING PREFIX TREE...';
+      return labels.length > 0 ? labels.slice(0, 3).join(', ') : 'Valid prefix...';
     }
-    if (recognitionReport.status === 'GEOMETRIC_REJECT') {
-      return 'GEOMETRIC REJECT';
-    }
-    if (recognitionReport.status === 'SYMBOLIC_REJECT') {
-      return 'SYMBOLIC REJECT (NO ACCEPTING DFA STATE)';
-    }
-    return 'ANALYZING PATH...';
-  }, [recognitionReport]);
+    if (recognitionReport.status === 'GEOMETRIC_REJECT') return 'Geometric reject';
+    if (recognitionReport.status === 'SYMBOLIC_REJECT') return 'Symbolic reject';
+    return 'Analyzing...';
+  }, [recognitionReport, backendRecognition]);
 
   if (!isTraceMode) return null;
 
   return (
-    <>
-      {/* Trace workspace overlay */}
-      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-3.5 sm:p-4 font-mono text-xs select-none">
-        {/* Top Region: Header and Metric Stats Band (Frame 7) */}
-        <div className="pointer-events-auto space-y-2.5">
-          {/* Main Title & Exit Control */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="font-mono text-sm sm:text-base font-bold text-white uppercase tracking-[0.10em] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt)]" />
-                TRACE-TO-RECOGNIZE
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsTraceMode(false)}
-                className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--bg-tray)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] border border-[#D0D5DD] rounded-[6px] text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors cursor-pointer flex items-center gap-1.5"
-                title="Exit Trace Mode"
-              >
-                <span>✕</span>
-                <span>EXIT TRACE</span>
-              </button>
-            </div>
+    <div className="absolute inset-0 z-20 h-full min-h-0 overflow-hidden pointer-events-none flex flex-col justify-between gap-2 p-2 sm:p-2.5 font-sans text-xs select-none">
+      {/* Slim Top Telemetry Strip (stage-first; no 4-box telemetry wall) */}
+      <div className="pointer-events-auto shrink-0 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)]/90 px-3 py-1.5 backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt)] shrink-0" aria-hidden="true" />
+            <h1 className="font-sans text-xs font-semibold text-[var(--ink-primary)] tracking-tight">
+              Trace-to-Recognize
+            </h1>
           </div>
 
-          {/* Trace state and sequence metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-            {/* 1. Selected Stars */}
-            <div className="hud-reticle-4corner bg-[var(--bg-card)]/95 backdrop-blur-sm border border-[#D0D5DD] rounded-[10px] p-3 space-y-1">
-              <div className="text-[9px] uppercase font-semibold text-[var(--ink-muted)] tracking-[0.08em]">
-                TRACE POINTS
-              </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-dot text-2xl font-bold text-[var(--signal-cobalt)]">
-                  {pointCount}
-                </span>
-              </div>
+          <dl className="flex flex-wrap items-center gap-x-3.5 gap-y-0.5 text-[11px] font-mono tabular-nums">
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-[var(--ink-muted)]">Pts</dt>
+              <dd className="font-semibold text-[var(--ink-primary)]">{pointCount}</dd>
             </div>
-
-            {/* 2. Symbol Sequence Length */}
-            <div className="hud-reticle-4corner bg-[var(--bg-card)]/95 backdrop-blur-sm border border-[#D0D5DD] rounded-[10px] p-3 space-y-1">
-              <div className="text-[9px] uppercase font-semibold text-[var(--ink-muted)] tracking-[0.08em]">
-                SYMBOL SEQUENCE LENGTH
-              </div>
-              <div className="font-dot text-2xl font-bold text-[var(--signal-cobalt)]">
-                {symbolCount}
-              </div>
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-[var(--ink-muted)]">Sym</dt>
+              <dd className="font-semibold text-[var(--ink-primary)]">{symbolCount}</dd>
             </div>
-
-            {/* 3. Active Candidates */}
-            <div className="hud-reticle-4corner bg-[var(--bg-card)]/95 backdrop-blur-sm border border-[#D0D5DD] rounded-[10px] p-3 space-y-1 overflow-hidden">
-              <div className="text-[9px] uppercase font-semibold text-[var(--ink-muted)] tracking-[0.08em]">
-                ACTIVE CANDIDATES
-              </div>
-              <div
-                className="font-mono text-xs font-bold text-[var(--ink-primary)] truncate uppercase"
-                title={activeCandidatesDisplay}
-              >
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <dt className="text-[var(--ink-muted)]">Match</dt>
+              <dd className="font-semibold text-[var(--signal-mid)] truncate max-w-[180px]" title={activeCandidatesDisplay}>
                 {activeCandidatesDisplay}
-              </div>
+              </dd>
             </div>
-
-            {/* Trace state */}
-            <div className="hud-reticle-4corner bg-[var(--bg-card)]/95 backdrop-blur-sm border border-[#D0D5DD] rounded-[10px] p-3 flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="text-[9px] uppercase font-semibold text-[var(--ink-muted)] tracking-[0.08em]">
-                  TRACE STATUS
-                </div>
-                <div className="font-dot text-sm font-bold text-[var(--signal-cobalt)] uppercase">
-                  {pointCount > 0 ? 'TRACING' : 'STANDBY'}
-                </div>
-              </div>
-            </div>
-          </div>
+          </dl>
         </div>
 
-        {/* Middle Region: Center Sky Reticle & Right Candidate Matches Panel (Frame 7) */}
-        <div className="flex-1 relative flex gap-3 min-h-0 my-3 pointer-events-none items-stretch">
-          {/* Central Sky Reticle Viewport Overlay: Click pass-through to SkyCanvas */}
-          <div className="flex-1 relative pointer-events-none flex flex-col justify-between p-2">
-            {/* Top Corners of Sky Reticle */}
-            <div className="flex items-center justify-between pointer-events-auto">
-              <div
-                className="w-7 h-7 rounded-[6px] bg-[#060A14]/70 border border-[#2B354C] flex items-center justify-center text-gray-300 text-xs cursor-default backdrop-blur-xs"
-                title="Sky Reticle Active Viewport"
-              >
-                ⛶
-              </div>
-              <div className="flex items-center gap-1 bg-[#060A14]/70 border border-[#2B354C] rounded-[6px] p-0.5 backdrop-blur-xs">
-                <button
-                  type="button"
-                  onClick={() => setShowMobileCandidates(value => !value)}
-                  aria-expanded={showMobileCandidates}
-                  aria-controls="trace-candidate-panel"
-                  className="sm:hidden min-h-10 rounded px-2 text-gray-100 hover:bg-[#1E293B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-                >
-                  {showMobileCandidates ? 'HIDE MATCHES' : `MATCHES${candidatesList.length ? ` (${candidatesList.length})` : ''}`}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const canvas = document.querySelector('canvas');
-                    if (canvas) {
-                      canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: -120 }));
-                    }
-                  }}
-                  className="min-h-10 min-w-10 flex items-center justify-center text-gray-100 hover:text-white rounded-[4px] hover:bg-[#1E293B] cursor-pointer text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-                  title="Zoom In"
-                  aria-label="Zoom in on sky"
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const canvas = document.querySelector('canvas');
-                    if (canvas) {
-                      canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: 120 }));
-                    }
-                  }}
-                  className="min-h-10 min-w-10 flex items-center justify-center text-gray-100 hover:text-white rounded-[4px] hover:bg-[#1E293B] cursor-pointer text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-                  title="Zoom Out"
-                  aria-label="Zoom out on sky"
-                >
-                  −
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Status Ticker within Sky Reticle */}
-            {pointCount > 0 && (
-              <div className="pointer-events-auto self-start bg-[#060A14]/80 backdrop-blur-xs border border-[#2B354C] rounded-[6px] px-2.5 py-1 text-[10px] text-gray-300 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)]" />
-                <span>{pointCount} {pointCount === 1 ? 'POINT' : 'POINTS'} TRACED</span>
-                {tracedStarIds.length > 0 && (
-                  <span className="text-gray-400 border-l border-gray-700 pl-2">
-                    LAST: {STAR_BY_ID.get(tracedStarIds[tracedStarIds.length - 1])?.name || `ID ${tracedStarIds[tracedStarIds.length - 1]}`}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Candidate Matches Panel matching Frame 7 */}
-          <div id="trace-candidate-panel" className={`${showMobileCandidates ? 'flex' : 'hidden'} sm:flex w-[min(100%,380px)] sm:w-[340px] lg:w-[380px] max-h-[34vh] sm:max-h-full absolute bottom-0 left-0 sm:static pointer-events-auto bg-[var(--bg-card)]/95 backdrop-blur-md border border-[#D0D5DD] rounded-[12px] p-3.5 flex-col overflow-hidden shadow-none space-y-3`}>
-            {/* Candidate count */}
-            <div className="flex items-center justify-between border-b border-[#E2E5EC] pb-2.5">
-              <h3 className="font-mono text-xs font-bold text-[var(--ink-primary)] uppercase tracking-[0.08em]">
-                CANDIDATE MATCHES
-              </h3>
-                <span className="text-[10px] text-[var(--ink-muted)] font-mono" aria-live="polite">{candidatesList.length} MATCHES</span>
-            </div>
-
-            {/* Candidate Cards List matching Frame 7 */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {displayedCandidates.length > 0 ? (
-                displayedCandidates.map((cand, idx) => {
-                  const isSelected = cand.isBestMatch || idx === 0;
-                  return (
-                    <button
-                      type="button"
-                      key={cand.id + idx}
-                      aria-label={`Open recognition details for ${cand.name}${cand.residual === null ? ', prefix candidate' : `, geometric residual ${cand.residual.toFixed(4)}`}`}
-                      className={`w-full p-2.5 rounded-[10px] border transition-all cursor-pointer flex items-center justify-between gap-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--signal-cobalt)] ${
-                        isSelected
-                          ? 'border-[var(--signal-cobalt)] bg-[#EDF2FE]'
-                          : 'border-[#D0D5DD] bg-[var(--bg-card)] hover:bg-[var(--bg-card-subtle)]'
-                      }`}
-                      onClick={handleOpenResults}
-                    >
-                      {/* Left: Asterism Topology Thumbnail */}
-                      <AsterismThumbnail points={cand.points} size={48} />
-
-                      {/* Candidate name and actual geometric residual */}
-                      <span className="flex-1 min-w-0 space-y-1">
-                        <span className="block font-mono text-xs font-bold text-[var(--ink-primary)] uppercase tracking-wide truncate">
-                          {cand.name}
-                        </span>
-                        <span className="flex items-center justify-between text-[10px] text-[var(--ink-secondary)]">
-                          <span className="uppercase text-[9px] tracking-wider text-[var(--ink-muted)]">{cand.residual === null ? 'MATCH TYPE' : 'NORMALIZED RMSE'}</span>
-                          <span className="font-mono font-bold text-[var(--ink-primary)]">
-                            {cand.residual === null ? 'PREFIX' : cand.residual.toFixed(4)}
-                          </span>
-                        </span>
-                      </span>
-
-                      {/* Right: Right Arrow */}
-                      <span className="text-[var(--ink-muted)] text-sm font-bold pl-1">
-                        ›
-                      </span>
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="p-4 bg-[var(--bg-tray)] border border-[#D8DCE5] rounded-[8px] text-[var(--ink-muted)] text-[10px] uppercase tracking-[0.08em] leading-relaxed text-center space-y-2">
-                  <div className="text-xl">✨</div>
-                  <p>CLICK STARS IN SEQUENCE ON THE SKY CANVAS TO INITIATE ASTERISM PATTERN RECOGNITION.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Show All Candidates Action Button */}
-            {candidatesList.length > 3 && (
-              <button
-                onClick={() => setShowAllCandidates(!showAllCandidates)}
-                aria-expanded={showAllCandidates}
-                aria-label={showAllCandidates ? 'Show top three candidates' : `Show all ${candidatesList.length} candidates`}
-                className="w-full py-1.5 bg-[var(--bg-tray)] hover:bg-[#D8DCE5] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-[0.08em] transition-colors border border-[#D0D5DD] cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <span>{showAllCandidates ? 'SHOW TOP 3 CANDIDATES' : `SHOW ALL CANDIDATES (${candidatesList.length})`}</span>
-                <span>→</span>
-              </button>
-            )}
-
-            {/* Recognition Status Summary Card */}
-            {recognitionReport && (
-              <div
-                className={`p-2.5 rounded-[8px] border text-[10px] space-y-1 ${
-                  recognitionReport.status === 'FULL_MATCH'
-                    ? 'bg-[#EBF3FF] border-[var(--signal-surface)] text-[var(--signal-cobalt)]'
-                    : recognitionReport.status === 'VALID_PREFIX'
-                      ? 'bg-[var(--bg-tray)] border-[#D8DCE5] text-[var(--ink-secondary)]'
-                      : recognitionReport.status === 'GEOMETRIC_REJECT'
-                        ? 'bg-[#FEF3C7] border-[#FCD34D] text-[#92400E]'
-                        : 'bg-[#FEE2E2] border-[#FCA5A5] text-[#991B1B]'
-                }`}
-              >
-                <div className="font-bold uppercase tracking-wider flex items-center justify-between">
-                  <span>{recognitionReport.status}</span>
-                  <span className="text-[9px]">DFA: {recognitionReport.dfaAccepted ? 'YES' : 'NO'}</span>
-                </div>
-                <p className="text-[9px] leading-tight uppercase tracking-wide truncate">
-                  {recognitionReport.explanation}
-                </p>
-                {recognitionReport.geometricScores.length > 0 && (
-                  <p className="text-[9px] leading-tight uppercase tracking-wide">
-                    GEOMETRIC MATCH LIMIT: RMSE ≤ {PROCRUSTES_RESIDUAL_THRESHOLD}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bottom Region: Hardware Control Action Bar (Frame 7) */}
-        <div className="pointer-events-auto bg-[var(--bg-card)]/95 backdrop-blur-md border border-[#D0D5DD] rounded-[12px] p-2.5 sm:p-3 flex flex-wrap items-center justify-between gap-2.5 shadow-none">
-          {/* Left Primary Action Group matching Frame 7 */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* 1. Undo (Z) */}
-            <button
-              onClick={undoLastTracePoint}
-              disabled={pointCount === 0}
-              className="px-3.5 py-2 bg-[var(--bg-tray)] hover:bg-[#D8DCE5] disabled:opacity-40 text-[var(--ink-primary)] rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-[0.08em] transition-colors border border-[#D0D5DD] cursor-pointer flex items-center gap-1.5"
-              title="Undo Last Star (Shortcut: Z)"
-            >
-              <span>↩</span>
-              <span>UNDO (Z)</span>
-            </button>
-
-            {/* 2. Clear Path */}
-            <button
-              onClick={clearTrace}
-              disabled={pointCount === 0}
-              className="px-3.5 py-2 bg-[var(--bg-tray)] hover:bg-[#D8DCE5] disabled:opacity-40 text-[var(--ink-primary)] rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-[0.08em] transition-colors border border-[#D0D5DD] cursor-pointer flex items-center gap-1.5"
-              title="Clear Current Traced Path"
-            >
-              <span>🗑</span>
-              <span>CLEAR PATH</span>
-            </button>
-
-            {/* 3. Show Hints */}
-            <button
-              onClick={() => setShowTraceHints(!showTraceHints)}
-              className={`px-3.5 py-2 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-[0.08em] transition-colors border cursor-pointer flex items-center gap-1.5 ${
-                showTraceHints
-                  ? 'bg-[var(--signal-cobalt)] text-white border-[var(--signal-mid)]'
-                  : 'bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] border-[#D8DCE5] hover:text-[var(--ink-primary)]'
-              }`}
-              title="Toggle Constellation Guide Hint Lines"
-            >
-              <span>💡</span>
-              <span>{showTraceHints ? 'HINTS: ON' : 'SHOW HINTS'}</span>
-            </button>
-
-            {/* 4. Complete Trace */}
-            <button
-                onClick={handleOpenResults}
-              disabled={!recognitionReport}
-              className="px-4 py-2 bg-[var(--signal-cobalt)] hover:bg-[#1644C5] disabled:opacity-40 text-white rounded-[6px] text-[10px] font-mono font-bold uppercase tracking-[0.08em] transition-colors border border-[#1644C5] cursor-pointer shadow-none flex items-center gap-1.5"
-              title="Open Constellation Recognition Result Report"
-            >
-              <span>✓</span>
-              <span>COMPLETE TRACE</span>
-            </button>
-          </div>
-
-          {/* Right Auxiliary Tools Group */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Geometry Analysis Button */}
-            <button
-                onClick={handleOpenPatternAnalysis}
-              disabled={pointCount < 2}
-              className="px-3 py-2 bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] disabled:opacity-40 text-[var(--ink-primary)] rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-[0.08em] transition-colors border border-[#D0D5DD] cursor-pointer flex items-center gap-1.5"
-              title="Inspect Normalized Geometry & Turn Angle Distributions"
-            >
-              <span>📐</span>
-              <span>GEOMETRY</span>
-            </button>
-
-            {/* Presets & Demonstrations Dropdown */}
-            <select
-              onChange={e => handlePresetSelect(e.target.value)}
-              defaultValue=""
-              className="bg-[var(--bg-tray)] border border-[#D0D5DD] rounded-[6px] px-2.5 py-1.5 text-[10px] font-mono text-[var(--ink-primary)] cursor-pointer uppercase tracking-wider max-w-[200px]"
-              title="Load a reference trace sample or academic demo"
-              aria-label="Load a reference trace sample or academic demo"
-            >
-              <option value="" disabled>-- TRACE SAMPLES / DEMOS --</option>
-              <optgroup label="Real Constellation References">
-                {REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name.toUpperCase()} ({p.orderedStarIds.length} STARS)
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Academic Demonstrations">
-                <option value="DEMO_SYMBOLIC_REJECT">DEMO: SYMBOLIC REJECT</option>
-                <option value="DEMO_GEOMETRIC_REJECT">DEMO: GEOMETRIC REJECT</option>
-                <option value="DEMO_INVARIANCE">DEMO: INVARIANCE (ROT 137°)</option>
-              </optgroup>
-            </select>
-
-            {/* Automata Lab Drilldown */}
-            {recognitionReport && (
-              <button
-                onClick={handleOpenAutomataLab}
-                className="px-3 py-2 bg-[var(--signal-cobalt)] hover:bg-[#1644C5] text-white rounded-[6px] font-mono font-bold text-[10px] uppercase tracking-[0.08em] flex items-center gap-1.5 transition-colors border border-[#1644C5] cursor-pointer shadow-none"
-                title="Send Input Symbols directly to Automata Simulator"
-              >
-                <span>⚡</span>
-                <span>INSPECT DFA</span>
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setShowMobileCandidates(value => !value)}
+            aria-expanded={showMobileCandidates}
+            aria-controls="trace-candidate-panel"
+            className="sm:hidden text-[11px] font-semibold"
+          >
+            {showMobileCandidates ? 'Hide' : `Matches (${candidatesList.length})`}
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-xs"
+            onClick={() => document.querySelector('canvas')?.dispatchEvent(new WheelEvent('wheel', { deltaY: -120 }))}
+            className="font-mono font-bold"
+            title="Zoom In"
+            aria-label="Zoom in on sky"
+          >
+            +
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-xs"
+            onClick={() => document.querySelector('canvas')?.dispatchEvent(new WheelEvent('wheel', { deltaY: 120 }))}
+            className="font-mono font-bold"
+            title="Zoom Out"
+            aria-label="Zoom out on sky"
+          >
+            −
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => setIsTraceMode(false)}
+            className="text-[11px] font-semibold text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+            title="Exit Trace Mode"
+          >
+            ✕ Exit
+          </Button>
         </div>
       </div>
 
-    </>
+      {/* Middle Region: Maximum Open Sky Reticle + Bounded Candidate Column */}
+      <div className="flex-1 relative flex gap-2.5 min-h-0 pointer-events-none items-stretch overflow-hidden">
+        <div className="flex-1 min-w-0 min-h-0 relative pointer-events-none flex flex-col justify-end p-1">
+          {pointCount > 0 && (
+            <div className="pointer-events-auto self-start bg-[var(--bg-card)]/90 backdrop-blur-sm border border-[var(--border-subtle)] rounded-md px-2.5 py-1 text-[10px] font-mono text-[var(--ink-secondary)] flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)]" aria-hidden="true" />
+              <span className="tabular-nums text-[var(--ink-primary)]">
+                {pointCount} {pointCount === 1 ? 'point' : 'points'}
+              </span>
+              {tracedStarIds.length > 0 && (
+                <span className="text-[var(--ink-muted)] border-l border-[var(--border-subtle)] pl-2">
+                  Last: {STAR_BY_ID.get(tracedStarIds[tracedStarIds.length - 1])?.name || `ID ${tracedStarIds[tracedStarIds.length - 1]}`}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Bounded Scrollable Candidate Panel */}
+        <Card
+          id="trace-candidate-panel"
+          className={`${showMobileCandidates ? 'flex' : 'hidden'} sm:flex w-[min(100%,336px)] sm:w-[300px] lg:w-[336px] max-h-[42vh] sm:max-h-full min-h-0 absolute bottom-0 left-0 sm:static pointer-events-auto bg-[var(--bg-card)]/94 backdrop-blur-md border-[var(--border-subtle)] rounded-[10px] p-3 gap-0 flex-col overflow-hidden shadow-none`}
+        >
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2 mb-2 shrink-0 gap-2">
+            <h3 className="font-sans text-xs font-semibold text-[var(--ink-primary)] truncate">
+              {backendRecognition?.state === 'available' ? 'Server candidates' : 'Local candidates'}
+            </h3>
+            <span className="text-[10px] text-[var(--ink-muted)] font-mono tabular-nums shrink-0" aria-live="polite">
+              {candidatesList.length} matches
+            </span>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-1.5">
+            {displayedCandidates.length > 0 ? (
+              displayedCandidates.map((cand, idx) => {
+                const isSelected = cand.isBestMatch || idx === 0;
+                return (
+                  <Button
+                    variant={isSelected ? 'secondary' : 'outline'}
+                    key={cand.id + idx}
+                    aria-label={`Open recognition details for ${cand.name}${cand.residual === null ? ', prefix candidate' : `, geometric residual ${cand.residual.toFixed(4)}`}`}
+                    className={`h-auto w-full p-2 rounded-lg flex items-center justify-between gap-2.5 text-left font-normal ${
+                      isSelected
+                        ? 'border-[var(--signal-cobalt)] bg-[var(--bg-pill-active)]'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] hover:border-[var(--signal-surface)]'
+                    }`}
+                    onClick={handleOpenResults}
+                  >
+                    <AsterismThumbnail points={cand.points} size={40} />
+
+                    <span className="flex-1 min-w-0 space-y-0.5">
+                      <span className="block font-sans text-xs font-semibold text-[var(--ink-primary)] truncate">
+                        {cand.name}
+                      </span>
+                      <span className="flex items-center justify-between text-[10px] text-[var(--ink-secondary)]">
+                        <span className="text-[var(--ink-muted)]">
+                          {cand.residual === null ? 'Prefix match' : 'Residual RMSE'}
+                        </span>
+                        <span className="font-mono tabular-nums font-semibold text-[var(--signal-mid)]">
+                          {cand.residual === null ? 'PREFIX' : cand.residual.toFixed(4)}
+                        </span>
+                      </span>
+                    </span>
+
+                    <span className="text-[var(--ink-muted)] text-sm font-mono pl-1" aria-hidden="true">›</span>
+                  </Button>
+                );
+              })
+            ) : (
+              <Empty className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-lg p-4 gap-2">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="text-[var(--signal-mid)] font-mono">
+                    ✦
+                  </EmptyMedia>
+                  <EmptyTitle className="text-xs">Stage ready</EmptyTitle>
+                  <EmptyDescription className="text-[11px]">
+                    Click catalog stars in sequence on the sky dome to evaluate DFA prefix paths.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+
+            {candidatesList.length > 4 && (
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setShowAllCandidates(!showAllCandidates)}
+                aria-expanded={showAllCandidates}
+                aria-label={showAllCandidates ? 'Show top candidates' : `Show all ${candidatesList.length} candidates`}
+                className="w-full text-[11px] font-sans font-semibold text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+              >
+                <span>{showAllCandidates ? 'Show fewer' : `Show all (${candidatesList.length})`}</span>
+              </Button>
+            )}
+
+            {recognitionReport && (
+              <Alert
+                variant={
+                  recognitionReport.status === 'FULL_MATCH'
+                    ? 'info'
+                    : recognitionReport.status === 'VALID_PREFIX'
+                      ? 'default'
+                      : recognitionReport.status === 'GEOMETRIC_REJECT'
+                        ? 'warning'
+                        : 'error'
+                }
+                className="p-2.5 text-[10px]"
+              >
+                <AlertTitle className="font-mono text-[10px] font-semibold uppercase tracking-wider flex items-center justify-between gap-2">
+                  <span>{recognitionReport.status.replace('_', ' ')}</span>
+                  <span className="text-[9px]">DFA: {recognitionReport.dfaAccepted ? 'YES' : 'NO'}</span>
+                </AlertTitle>
+                <AlertDescription className="space-y-1 text-[10px]">
+                  <p className="leading-snug text-[var(--ink-secondary)]">
+                    {recognitionReport.explanation}
+                  </p>
+                  <p className="text-[9px] font-mono leading-tight uppercase tracking-wide text-[var(--signal-mid)]" aria-live="polite">
+                    {backendRecognition?.state === 'pending'
+                      ? 'Server shape check pending'
+                      : backendRecognition?.state === 'unavailable'
+                        ? `Server unavailable · ${backendRecognition.error}`
+                        : backendRecognition?.state === 'available'
+                          ? `Server shape: ${backendRecognition.result.status}`
+                          : backendRecognition?.state === 'not-requested' && backendRecognition.reason === 'educational-demo'
+                            ? 'Local educational report · server not queried'
+                            : `Local provisional · RMSE ≤ ${PROCRUSTES_RESIDUAL_THRESHOLD}`}
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Bottom Compact Space UI Toolbar Dock */}
+      <Toolbar
+        aria-label="Trace workspace actions"
+        onKeyDown={e => e.stopPropagation()}
+        className="pointer-events-auto shrink-0 bg-[var(--bg-card)]/95 backdrop-blur-md border-[var(--border-subtle)] rounded-[10px] p-1.5 flex-wrap items-center justify-between gap-2"
+      >
+        <ToolbarGroup aria-label="Primary trace controls" className="flex-wrap gap-1.5">
+          <ToolbarButton
+            disabled={pointCount === 0}
+            focusableWhenDisabled={false}
+            render={
+              <Button
+                variant="outline"
+                size="xs"
+                className="h-7 text-[11px] font-semibold"
+                title="Undo Last Star (Shortcut: Z)"
+              />
+            }
+            onClick={undoLastTracePoint}
+          >
+            <span className="font-mono" aria-hidden="true">↩</span>
+            <span>Undo (Z)</span>
+          </ToolbarButton>
+
+          <ToolbarButton
+            disabled={pointCount === 0}
+            focusableWhenDisabled={false}
+            render={
+              <Button
+                variant="outline"
+                size="xs"
+                className="h-7 text-[11px] font-semibold"
+                title="Clear Current Traced Path"
+              />
+            }
+            onClick={clearTrace}
+          >
+            <span>Clear</span>
+          </ToolbarButton>
+
+          <ToolbarButton
+            render={
+              <Button
+                variant={showTraceHints ? 'default' : 'outline'}
+                size="xs"
+                aria-pressed={showTraceHints}
+                className="h-7 text-[11px] font-semibold"
+                title="Toggle Constellation Guide Hint Lines"
+              />
+            }
+            onClick={() => setShowTraceHints(!showTraceHints)}
+          >
+            <span>{showTraceHints ? 'Hints: On' : 'Hints'}</span>
+          </ToolbarButton>
+
+          <ToolbarButton
+            disabled={!recognitionReport}
+            focusableWhenDisabled={false}
+            render={
+              <Button
+                variant="default"
+                size="xs"
+                className="h-7 text-[11px] font-semibold"
+                title="Open Constellation Recognition Result Report"
+              />
+            }
+            onClick={handleOpenResults}
+          >
+            <span>Complete report ↗</span>
+          </ToolbarButton>
+        </ToolbarGroup>
+
+        <ToolbarSeparator orientation="vertical" className="hidden lg:block h-4" />
+
+        <ToolbarGroup aria-label="Trace analysis and presets" className="flex-wrap gap-1.5">
+          <ToolbarButton
+            disabled={pointCount < 2}
+            focusableWhenDisabled={false}
+            render={
+              <Button
+                variant="outline"
+                size="xs"
+                className="h-7 text-[11px] font-semibold"
+                title="Inspect Normalized Geometry & Turn Angle Distributions"
+              />
+            }
+            onClick={handleOpenPatternAnalysis}
+          >
+            <span>Geometry</span>
+          </ToolbarButton>
+
+          <Select
+            value={selectedSample}
+            onValueChange={val => {
+              if (!val) return;
+              setSelectedSample(val);
+              handlePresetSelect(val);
+            }}
+          >
+            <SelectTrigger
+              size="sm"
+              aria-label="Load a reference trace sample or academic demo"
+              title="Load a reference trace sample or academic demo"
+              className="w-auto min-w-[170px] max-w-[210px] h-7 font-mono text-[11px]"
+            >
+              <SelectValue placeholder="Sample traces / demos">
+                {val => {
+                  if (!val) return 'Sample traces / demos';
+                  if (val === 'DEMO_SYMBOLIC_REJECT') return 'DEMO: SYMBOLIC REJECT';
+                  if (val === 'DEMO_GEOMETRIC_REJECT') return 'DEMO: GEOMETRIC REJECT';
+                  if (val === 'DEMO_INVARIANCE') return 'DEMO: INVARIANCE (137°)';
+                  const found = REFERENCE_PATTERNS.find(p => p.id === val);
+                  return found ? `${found.name} (${found.orderedStarIds.length})` : String(val);
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end">
+              <SelectGroup>
+                <SelectGroupLabel>Reference Constellations</SelectGroupLabel>
+                {REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').map(p => (
+                  <SelectItem key={p.id} value={p.id} className="font-mono text-xs">
+                    {p.name.toUpperCase()} ({p.orderedStarIds.length} STARS)
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectSeparator />
+              <SelectGroup>
+                <SelectGroupLabel>Academic Demonstrations</SelectGroupLabel>
+                <SelectItem value="DEMO_SYMBOLIC_REJECT" className="font-mono text-xs">
+                  DEMO: SYMBOLIC REJECT
+                </SelectItem>
+                <SelectItem value="DEMO_GEOMETRIC_REJECT" className="font-mono text-xs">
+                  DEMO: GEOMETRIC REJECT
+                </SelectItem>
+                <SelectItem value="DEMO_INVARIANCE" className="font-mono text-xs">
+                  DEMO: INVARIANCE (ROT 137°)
+                </SelectItem>
+              </SelectGroup>
+            </SelectPopup>
+          </Select>
+
+          {recognitionReport && (
+            <ToolbarButton
+              render={
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  className="h-7 text-[11px] font-semibold text-[var(--signal-mid)]"
+                  title="Send Input Symbols directly to Automata Simulator"
+                />
+              }
+              onClick={handleOpenAutomataLab}
+            >
+              <span>Inspect DFA →</span>
+            </ToolbarButton>
+          )}
+        </ToolbarGroup>
+      </Toolbar>
+    </div>
   );
 };

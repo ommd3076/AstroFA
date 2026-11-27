@@ -7,6 +7,13 @@ import {
 } from '../../data/astroData';
 import type { DFA, StateId } from '../../automata/types';
 import { simulateDfa } from '../../automata/simulate';
+import { Alert, AlertDescription } from '../../components/ui/space/alert';
+import { Button } from '../../components/ui/space/button';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Switch } from '../../components/ui/space/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 import {
   FRAME_10_DFA,
   FRAME_10_METRICS,
@@ -337,83 +344,74 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
   };
 
   return (
-    <div className="flex-1 flex flex-col p-3.5 gap-3 bg-[var(--bg-shell,#ECEEF2)] text-[var(--ink-primary,#181A20)] font-mono  overflow-y-auto overflow-x-hidden">
-      {/* =========================================================================
-          ROW 1: FOUR HARDWARE METRIC TILES (FRAME 10 TOP STRIP)
-          ========================================================================= */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+    <div className="flex-1 flex flex-col p-3 sm:p-4 gap-3.5 bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans overflow-y-auto overflow-x-hidden">
+      {/* Compact inline machine summary telemetry bar (no 4 boxed HUD tiles) */}
+      <dl className="atlas-surface rounded-xl px-4 py-2.5 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2 shrink-0">
         {metricCards.map((m, idx) => (
-          <div
-            key={idx}
-            className="hud-reticle-4corner bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] flex flex-col justify-between gap-1 shadow-none transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono font-semibold tracking-wider text-[var(--ink-secondary,#525866)] uppercase">
-                {m.label}
-              </span>
-              <span className="text-[12px] text-[var(--ink-muted,#8C93A0)] font-mono leading-none">↗</span>
-            </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <div className="text-3xl font-bold font-['Doto',monospace] tracking-wider text-[var(--ink-primary,#181A20)]">
-                {m.value}
-              </div>
-              <span className="text-[9px] font-mono text-[var(--ink-muted,#8C93A0)] uppercase tracking-wider font-semibold">
-                {m.sub}
-              </span>
-            </div>
+          <div key={idx} className="flex items-baseline justify-between gap-2">
+            <dt className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-muted)] uppercase">
+              {m.label}
+            </dt>
+            <dd className="flex items-baseline gap-1.5 font-mono tabular-nums">
+              <strong className="text-lg font-bold text-[var(--ink-primary)]">{m.value}</strong>
+              <span className="hidden xl:inline text-[9px] text-[var(--ink-muted)] uppercase">{m.sub}</span>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
 
       {/* =========================================================================
           ROW 2: CENTER BODY (AUTOMATA LAB GRAPH CARD + FORMAL DEFINITION CARD)
           ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 shrink-0">
-        {/* CENTER LEFT: AUTOMATA LAB GRAPH CARD (~62% / 7.5 COLS) */}
-        <div className="lg:col-span-8 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-4 rounded-[12px] flex flex-col gap-2.5 min-h-[360px] shadow-none">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 shrink-0">
+        {/* CENTER LEFT: AUTOMATA LAB GRAPH CARD (~66% / 8 COLS) */}
+        <div className="lg:col-span-8 atlas-surface p-4 rounded-xl flex flex-col gap-2.5 min-h-[390px] shadow-none">
           {/* Header Row: Title, Rocker Switch, Reset, Expand */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--bg-tray,#E2E5EC)] pb-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--signal-cobalt,#1D55F5)]" />
-              <h2 className="text-[13px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary,#181A20)]">
+              <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />
+              <h2 className="text-xs font-bold font-mono tracking-widest uppercase text-[var(--ink-primary)]">
                 AUTOMATA LAB
               </h2>
 
               {/* Fixture Toggle: Live Engine vs Frame 10 Benchmark */}
-              <div className="ml-2 flex items-center bg-[var(--bg-tray,#E2E5EC)] rounded-[6px] p-0.5 border border-[rgba(0,0,0,0.06)]">
-                <button
-                  onClick={() => handleSelectFixture('live')}
-                  className={`px-2 py-0.5 rounded-[4px] text-[9px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
-                    fixtureSource === 'live'
-                      ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
-                      : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
-                  }`}
+              <ToggleGroup
+                aria-label="Automaton fixture source"
+                size="sm"
+                value={[fixtureSource]}
+                onValueChange={vals => {
+                  const next = vals.find(v => v !== fixtureSource) ?? vals[0];
+                  if (next === 'live' || next === 'frame10') handleSelectFixture(next);
+                }}
+                className="ml-2 bg-[var(--bg-card-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)] gap-0.5"
+              >
+                <ToggleGroupItem
+                  value="live"
+                  className="h-6 px-2 text-[9px] font-mono font-semibold uppercase tracking-wider data-pressed:bg-primary data-pressed:text-primary-foreground"
                   title="Live Determinized/Minimized Constellation Engine"
                 >
                   LIVE ENGINE
-                </button>
-                <button
-                  onClick={() => handleSelectFixture('frame10')}
-                  className={`px-2 py-0.5 rounded-[4px] text-[9px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
-                    fixtureSource === 'frame10'
-                      ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
-                      : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
-                  }`}
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="frame10"
+                  className="h-6 px-2 text-[9px] font-mono font-semibold uppercase tracking-wider data-pressed:bg-primary data-pressed:text-primary-foreground"
                   title="Frame 10 Benchmark Reference Model"
                 >
                   FRAME 10 REF
-                </button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Rocker Switch: NFA | DFA | MINIMIZED (Matches Frame 10 Rocker) */}
-              <div className="flex items-center bg-[var(--bg-tray,#E2E5EC)] rounded-[6px] p-0.5 border border-[rgba(0,0,0,0.06)]">
+              {/* Rocker Switch: NFA | DFA | MINIMIZED */}
+              <div role="group" aria-label="Automaton view mode" className="flex items-center bg-[var(--bg-card-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)] gap-0.5">
                 {(['nfa', 'dfa', 'minimized'] as const).map(choice => {
                   const isActive = choice !== 'nfa' && rockerChoice === choice && fixtureSource === 'live';
                   return (
-                    <button
+                    <Button
                       key={choice}
+                      variant={isActive ? 'default' : 'ghost'}
+                      size="xs"
                       onClick={() => {
                         if (choice === 'nfa') {
                           onOpenTab('nfa');
@@ -423,87 +421,106 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                         setRockerChoice(choice);
                       }}
                       title={choice === 'nfa' ? 'Open the epsilon-NFA lesson' : `Show the ${choice === 'minimized' ? 'minimized DFA' : 'original DFA'}`}
-                      className={`px-2.5 py-1 rounded-[4px] text-[10px] font-mono font-bold uppercase tracking-wider cursor-pointer transition-colors ${
-                        isActive
-                          ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
-                          : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
-                      }`}
+                      className="h-6 px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider"
                     >
                       {choice === 'nfa' ? 'ε-NFA' : choice.toUpperCase()}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
 
               {/* Reset Graph Button */}
-              <button
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={handleResetGraph}
-                className="hud-reticle p-1.5 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.08)] text-[var(--ink-primary,#181A20)] text-[12px] cursor-pointer transition-colors"
                 title="Reset Graph Zoom & Simulator"
+                aria-label="Reset graph zoom and simulator"
               >
                 ⟳
-              </button>
+              </Button>
 
               {/* Expand Full Tab View */}
-              <button
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={() => onOpenTab(rockerChoice)}
-                className="hud-reticle p-1.5 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.08)] text-[var(--ink-primary,#181A20)] text-[12px] cursor-pointer transition-colors"
                 title="Expand Full Screen Teaching View"
+                aria-label="Expand full screen teaching view"
               >
                 ⛶
-              </button>
+              </Button>
 
               {/* Export Suite Quick Action */}
               {onOpenExport && (
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-sm"
                   onClick={onOpenExport}
-                  className="hud-reticle p-1.5 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.08)] text-[var(--signal-cobalt,#1D55F5)] text-[12px] cursor-pointer transition-colors font-bold"
+                  className="text-[var(--signal-mid)] font-bold"
                   title="Open Export Suite"
+                  aria-label="Open Export Suite"
                 >
                   ↗
-                </button>
+                </Button>
               )}
             </div>
           </div>
 
           {/* Graph Sub-toolbar (Constellation Filter in Live Mode) */}
           {fixtureSource === 'live' && (
-            <div className="flex items-center justify-between text-[10px] font-mono text-[var(--ink-secondary,#525866)] px-1">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-[var(--ink-secondary)] px-1">
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold uppercase">TRACE PATH:</span>
-                <select
+                <Select
                   value={highlightConstellation}
-                  onChange={e => setHighlightConstellation(e.target.value)}
-                  className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[4px] px-2 py-0.5 text-[10px] font-mono uppercase cursor-pointer"
+                  onValueChange={val => {
+                    if (val) setHighlightConstellation(val);
+                  }}
                 >
-                  <option value="ALL">ALL MACHINE STATES</option>
-                  <option value="Ori">ORION (ORI)</option>
-                  <option value="Cas">CASSIOPEIA (CAS)</option>
-                  <option value="UMa">URSA MAJOR (BIG DIPPER)</option>
-                  <option value="Cyg">CYGNUS (NORTHERN CROSS)</option>
-                </select>
+                  <SelectTrigger size="sm" aria-label="Filter traced constellation path" className="w-auto min-w-[170px] h-7 text-[10px] font-mono uppercase">
+                    <SelectValue>
+                      {val => {
+                        if (val === 'ALL') return 'ALL MACHINE STATES';
+                        if (val === 'Ori') return 'ORION (ORI)';
+                        if (val === 'Cas') return 'CASSIOPEIA (CAS)';
+                        if (val === 'UMa') return 'URSA MAJOR (BIG DIPPER)';
+                        if (val === 'Cyg') return 'CYGNUS (NORTHERN CROSS)';
+                        return String(val);
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectPopup>
+                    <SelectItem value="ALL" className="text-xs font-mono">ALL MACHINE STATES</SelectItem>
+                    <SelectItem value="Ori" className="text-xs font-mono">ORION (ORI)</SelectItem>
+                    <SelectItem value="Cas" className="text-xs font-mono">CASSIOPEIA (CAS)</SelectItem>
+                    <SelectItem value="UMa" className="text-xs font-mono">URSA MAJOR (BIG DIPPER)</SelectItem>
+                    <SelectItem value="Cyg" className="text-xs font-mono">CYGNUS (NORTHERN CROSS)</SelectItem>
+                  </SelectPopup>
+                </Select>
               </div>
-              <span className="text-[9px] text-[var(--ink-muted,#8C93A0)] uppercase font-semibold">
+              <span className="text-[9px] text-[var(--ink-muted)] uppercase font-semibold">
                 DRAG TO PAN • SCROLL TO ZOOM • CLICK NODE TO INSPECT
               </span>
             </div>
           )}
 
           {fixtureSource === 'live' && activeMachine.states.length > 18 && (
-            <div className="flex items-center justify-between px-1 text-[9px] font-mono uppercase tracking-wider text-[var(--ink-muted,#8C93A0)]">
+            <div className="flex items-center justify-between px-1 text-[9px] font-mono uppercase tracking-wider text-[var(--ink-muted)]">
               <span>{showAllGraphStates ? 'FULL MACHINE' : `TRACE WINDOW / ${graphStates.length} OF ${activeMachine.states.length} STATES`}</span>
-              <button
-                type="button"
+              <Button
+                variant="link"
+                size="xs"
                 onClick={() => setShowAllGraphStates(value => !value)}
                 aria-pressed={showAllGraphStates}
-                className="font-bold text-[var(--signal-cobalt,#1D55F5)] hover:underline cursor-pointer"
+                className="h-auto p-0 text-[9px] font-bold text-[var(--signal-mid)]"
               >
                 {showAllGraphStates ? 'FOCUS TRACE' : `SHOW ALL ${activeMachine.states.length}`}
-              </button>
+              </Button>
             </div>
           )}
           {/* Interactive Automaton SVG Graph */}
-          <div className="flex-1 min-h-[260px] bg-[var(--bg-tray,#E2E5EC)]/40 rounded-[8px] border border-[rgba(0,0,0,0.06)] relative overflow-hidden flex items-center justify-center">
+          <div className="flex-1 min-h-[280px] bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] relative overflow-hidden flex items-center justify-center">
             <svg
               viewBox="0 0 740 310"
               className="w-full h-full touch-none cursor-grab active:cursor-grabbing"
@@ -536,7 +553,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               }}
             >
               <defs>
-                {/* Cobalt Arrowhead Marker */}
+                {/* Soft Periwinkle Arrowhead Marker */}
                 <marker
                   id="arrowhead"
                   markerWidth="8"
@@ -545,7 +562,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                   refY="3"
                   orient="auto"
                 >
-                  <polygon points="0 0, 8 3, 0 6" fill="#1D55F5" />
+                  <polygon points="0 0, 8 3, 0 6" fill="#8FA3FF" />
                 </marker>
                 {/* Entry Arrowhead Marker */}
                 <marker
@@ -556,7 +573,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                   refY="3"
                   orient="auto"
                 >
-                  <polygon points="0 0, 8 3, 0 6" fill="#181A20" />
+                  <polygon points="0 0, 8 3, 0 6" fill="#A8B8FF" />
                 </marker>
               </defs>
 
@@ -568,14 +585,14 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                     y1={nodePositions[activeMachine.initialState].y}
                     x2={nodePositions[activeMachine.initialState].x - 26}
                     y2={nodePositions[activeMachine.initialState].y}
-                    stroke="#181A20"
+                    stroke="#A8B8FF"
                     strokeWidth="2"
                     markerEnd="url(#entry-arrowhead)"
                   />
                   <text
                     x={nodePositions[activeMachine.initialState].x - 65}
                     y={nodePositions[activeMachine.initialState].y - 6}
-                    fill="#525866"
+                    fill="#B5B2A9"
                     fontSize="9"
                     fontFamily="IBM Plex Mono, monospace"
                     fontWeight="bold"
@@ -604,7 +621,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                       <path
                         d={`M ${src.x - 12} ${src.y - 20} C ${src.x - 22} ${src.y - 65}, ${src.x + 22} ${src.y - 65}, ${src.x + 12} ${src.y - 20}`}
                         fill="none"
-                        stroke="#1D55F5"
+                        stroke="#8FA3FF"
                         strokeWidth="1.75"
                         markerEnd="url(#arrowhead)"
                       />
@@ -614,15 +631,15 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                         width="16"
                         height="14"
                         rx="3"
-                        fill="#F5F6F8"
-                        stroke="#E2E5EC"
+                        fill="#151519"
+                        stroke="#2A2A32"
                         strokeWidth="1"
                       />
                       <text
                         x={src.x}
                         y={src.y - 59}
                         textAnchor="middle"
-                        fill="#181A20"
+                        fill="#A8B8FF"
                         fontSize="10"
                         fontFamily="IBM Plex Mono, monospace"
                         fontWeight="bold"
@@ -672,7 +689,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                     <path
                       d={pathD}
                       fill="none"
-                      stroke="#1D55F5"
+                      stroke="#8FA3FF"
                       strokeWidth="1.75"
                       markerEnd="url(#arrowhead)"
                     />
@@ -682,15 +699,15 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                       width="20"
                       height="14"
                       rx="3"
-                      fill="#F5F6F8"
-                      stroke="#E2E5EC"
+                      fill="#151519"
+                      stroke="#2A2A32"
                       strokeWidth="0.8"
                     />
                     <text
                       x={labelX}
                       y={labelY + 2}
                       textAnchor="middle"
-                      fill="#181A20"
+                      fill="#A8B8FF"
                       fontSize="9"
                       fontFamily="IBM Plex Mono, monospace"
                       fontWeight="bold"
@@ -733,7 +750,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                         cy={pos.y}
                         r="31"
                         fill="none"
-                        stroke="#1D55F5"
+                        stroke="#F3F1EB"
                         strokeWidth="1.5"
                         strokeDasharray="4 2"
                       />
@@ -746,7 +763,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                         cy={pos.y}
                         r="27"
                         fill="none"
-                        stroke="#1D55F5"
+                        stroke="#8FA3FF"
                         strokeWidth="2"
                       />
                     )}
@@ -756,8 +773,8 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                       cx={pos.x}
                       cy={pos.y}
                       r="22"
-                      fill={isAccepting ? '#1D55F5' : '#EBF2FE'}
-                      stroke="#1D55F5"
+                      fill={isAccepting ? '#8FA3FF' : '#1B1B20'}
+                      stroke="#A8B8FF"
                       strokeWidth="2"
                     />
 
@@ -766,7 +783,7 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                       x={pos.x}
                       y={pos.y + 4.5}
                       textAnchor="middle"
-                      fill={isAccepting ? '#FFFFFF' : '#181A20'}
+                      fill={isAccepting ? '#0B0B10' : '#F3F1EB'}
                       fontSize="12"
                       fontFamily="IBM Plex Mono, monospace"
                       fontWeight="bold"
@@ -780,24 +797,26 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
           </div>
         </div>
 
-        {/* CENTER RIGHT: FORMAL DEFINITION CARD (~38% / 4.5 COLS) */}
-        <div className="lg:col-span-4 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-4 rounded-[12px] flex flex-col justify-between gap-3 min-h-[360px] shadow-none">
+        {/* CENTER RIGHT: FORMAL DEFINITION CARD (~34% / 4 COLS) */}
+        <div className="lg:col-span-4 atlas-surface p-4 rounded-xl flex flex-col justify-between gap-3 min-h-[390px] shadow-none">
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--bg-tray,#E2E5EC)] pb-2">
-              <h3 className="text-[12px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary,#181A20)]">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+              <h3 className="text-xs font-bold font-mono tracking-widest uppercase text-[var(--ink-primary)]">
                 FORMAL DEFINITION
               </h3>
-              <button
+              <Button
+                variant="link"
+                size="xs"
                 onClick={() => onOpenTab('formal')}
-                className="text-[10px] font-mono text-[var(--signal-cobalt,#1D55F5)] hover:underline uppercase tracking-wider font-semibold cursor-pointer"
+                className="h-auto p-0 text-[10px] font-mono text-[var(--signal-mid)] uppercase tracking-wider font-semibold"
               >
                 TUPLE DETAIL ↗
-              </button>
+              </Button>
             </div>
 
             {/* Canonical Tuple Formula Pill Box */}
-            <div className="py-2.5 px-3 bg-[var(--bg-tray,#E2E5EC)] rounded-[8px] border border-[rgba(0,0,0,0.06)] text-center">
-              <div className="text-base font-mono font-medium text-[var(--ink-primary,#181A20)] tracking-widest">
+            <div className="py-2.5 px-3 bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] text-center">
+              <div className="text-base font-mono font-medium text-[var(--ink-primary)] tracking-widest">
                 M = (Q, Σ, δ, q₀, F)
               </div>
             </div>
@@ -805,10 +824,10 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             {/* Formal Definition Rows */}
             <div className="space-y-2 text-[11px] font-mono">
               {/* Q: Set of States */}
-              <div className="flex items-start justify-between py-1 border-b border-[rgba(0,0,0,0.04)] gap-2">
-                <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">Q</span>
-                <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
-                <div className="flex-1 text-right text-[var(--ink-primary,#181A20)] truncate">
+              <div className="flex items-start justify-between py-1 border-b border-[var(--border-subtle)] gap-2">
+                <span className="font-bold text-[var(--ink-secondary)] shrink-0 w-8">Q</span>
+                <span className="text-[var(--ink-secondary)] shrink-0">=</span>
+                <div className="flex-1 text-right text-[var(--ink-primary)] truncate">
                   <span title={`{${activeMachine.states.map(state => state.id).join(', ')}}`}>
                     {`{${activeMachine.states.slice(0, 6).map(s => s.id).join(', ')}${activeMachine.states.length > 6 ? ', …' : ''}} (|Q|=${activeMachine.states.length})`}
                   </span>
@@ -816,10 +835,10 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               </div>
 
               {/* Σ: Finite Alphabet */}
-              <div className="flex items-start justify-between py-1 border-b border-[rgba(0,0,0,0.04)] gap-2">
-                <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">Σ</span>
-                <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
-                <div className="flex-1 text-right text-[var(--ink-primary,#181A20)] truncate">
+              <div className="flex items-start justify-between py-1 border-b border-[var(--border-subtle)] gap-2">
+                <span className="font-bold text-[var(--ink-secondary)] shrink-0 w-8">Σ</span>
+                <span className="text-[var(--ink-secondary)] shrink-0">=</span>
+                <div className="flex-1 text-right text-[var(--ink-primary)] truncate">
                   <span title={`{${activeMachine.alphabet.join(', ')}}`}>
                     {`{${activeMachine.alphabet.slice(0, 5).join(', ')}${activeMachine.alphabet.length > 5 ? ', …' : ''}} (|Σ|=${activeMachine.alphabet.length})`}
                   </span>
@@ -827,28 +846,28 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
               </div>
 
               {/* δ: Transition Mapping Signature */}
-              <div className="flex items-start justify-between py-1 border-b border-[rgba(0,0,0,0.04)] gap-2">
-                <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">δ</span>
-                <span className="text-[var(--ink-secondary,#525866)] shrink-0">:</span>
-                <div className="flex-1 text-right text-[var(--ink-primary,#181A20)]">
+              <div className="flex items-start justify-between py-1 border-b border-[var(--border-subtle)] gap-2">
+                <span className="font-bold text-[var(--ink-secondary)] shrink-0 w-8">δ</span>
+                <span className="text-[var(--ink-secondary)] shrink-0">:</span>
+                <div className="flex-1 text-right text-[var(--ink-primary)]">
                   Q × Σ → Q
                 </div>
               </div>
 
               {/* q0: Initial Start State */}
-              <div className="flex items-start justify-between py-1 border-b border-[rgba(0,0,0,0.04)] gap-2">
-                <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">q₀</span>
-                <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
-                <div className="flex-1 text-right text-[var(--signal-cobalt,#1D55F5)] font-bold">
+              <div className="flex items-start justify-between py-1 border-b border-[var(--border-subtle)] gap-2">
+                <span className="font-bold text-[var(--ink-secondary)] shrink-0 w-8">q₀</span>
+                <span className="text-[var(--ink-secondary)] shrink-0">=</span>
+                <div className="flex-1 text-right text-[var(--signal-mid)] font-bold">
                   {activeMachine.initialState}
                 </div>
               </div>
 
               {/* F: Set of Accepting Final States */}
               <div className="flex items-start justify-between py-1 gap-2">
-                <span className="font-bold text-[var(--ink-secondary,#525866)] shrink-0 w-8">F</span>
-                <span className="text-[var(--ink-secondary,#525866)] shrink-0">=</span>
-                <div className="flex-1 text-right text-[var(--signal-cobalt,#1D55F5)] font-bold truncate">
+                <span className="font-bold text-[var(--ink-secondary)] shrink-0 w-8">F</span>
+                <span className="text-[var(--ink-secondary)] shrink-0">=</span>
+                <div className="flex-1 text-right text-[var(--signal-mid)] font-bold truncate">
                   <span title={`{${activeMachine.acceptingStates.join(', ')}}`}>
                     {`{${activeMachine.acceptingStates.slice(0, 4).join(', ')}${activeMachine.acceptingStates.length > 4 ? ', …' : ''}} (|F|=${activeMachine.acceptingStates.length})`}
                   </span>
@@ -859,14 +878,14 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
 
           {/* Active State Metadata Box */}
           {selectedStateId && (
-            <div className="p-2.5 bg-[var(--bg-tray,#E2E5EC)]/60 rounded-[8px] border border-[rgba(0,0,0,0.06)] text-[10px] space-y-1">
+            <div className="p-2.5 bg-[var(--bg-card-subtle)] rounded-lg border border-[var(--border-subtle)] text-[10px] font-mono space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[var(--ink-secondary,#525866)] font-semibold uppercase">INSPECTED STATE:</span>
-                <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold">{selectedStateId}</span>
+                <span className="text-[var(--ink-secondary)] font-semibold uppercase">INSPECTED STATE:</span>
+                <span className="text-[var(--signal-mid)] font-bold">{selectedStateId}</span>
               </div>
-              <div className="flex items-center justify-between text-[9px] text-[var(--ink-muted,#8C93A0)]">
+              <div className="flex items-center justify-between text-[9px] text-[var(--ink-muted)]">
                 <span>ACCEPTING:</span>
-                <span className={activeMachine.acceptingStates.includes(selectedStateId) ? 'text-emerald-600 font-bold' : ''}>
+                <span className={activeMachine.acceptingStates.includes(selectedStateId) ? 'text-emerald-400 font-bold' : ''}>
                   {activeMachine.acceptingStates.includes(selectedStateId) ? 'YES (TERMINAL)' : 'NO (INTERMEDIATE)'}
                 </span>
               </div>
@@ -878,206 +897,220 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
       {/* =========================================================================
           ROW 3: LOWER DECK (TRANSITION TABLE CARD + STRING SIMULATOR CARD)
           ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 shrink-0">
-        {/* LOWER LEFT: TRANSITION TABLE (δ) (~38% / 4.5 COLS) */}
-        <div className="lg:col-span-5 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] flex flex-col gap-2 min-h-[310px] shadow-none">
-          <div className="flex items-center justify-between border-b border-[var(--bg-tray,#E2E5EC)] pb-2">
-            <h3 className="text-[12px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary,#181A20)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 shrink-0">
+        {/* LOWER LEFT: TRANSITION TABLE (δ) */}
+        <div className="lg:col-span-5 atlas-surface p-3.5 rounded-xl flex flex-col gap-2 min-h-[300px] shadow-none">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+            <h3 className="text-xs font-bold font-mono tracking-widest uppercase text-[var(--ink-primary)]">
               TRANSITION PREVIEW · δ
             </h3>
-            <button
+            <Button
+              variant="link"
+              size="xs"
               onClick={() => onOpenTab('table')}
-              className="text-[10px] font-mono text-[var(--signal-cobalt,#1D55F5)] hover:underline uppercase tracking-wider font-semibold cursor-pointer"
+              className="h-auto p-0 text-[10px] font-mono text-[var(--signal-mid)] uppercase tracking-wider font-semibold"
             >
               OPEN FULL TABLE ↗
-            </button>
+            </Button>
           </div>
 
-          <p className="text-[10px] text-[var(--ink-muted,#777d85)]">
+          <p className="text-[11px] text-[var(--ink-muted)]">
             Showing {tableStates.length} of {activeMachine.states.length} states and {tableAlphabet.length} of {activeMachine.alphabet.length} symbols. The full table includes every transition.
           </p>
 
-          {/* Table Container with Sticky Light Header */}
-          <div className="flex-1 border border-[rgba(0,0,0,0.06)] rounded-[8px] bg-[var(--bg-card,#F5F6F8)] overflow-auto max-h-[240px]">
-            <table className="w-full text-left text-[11px] border-collapse font-mono">
-              <thead className="sticky top-0 bg-[#E5EEF9] text-[var(--ink-primary,#181A20)] z-10 border-b border-[rgba(0,0,0,0.08)]">
-                <tr>
-                  <th className="py-2 px-3 font-bold uppercase tracking-wider">STATE</th>
+          {/* Table Container with Space UI Table */}
+          <div className="flex-1 border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-viewport)] overflow-auto max-h-[240px]">
+            <Table className="text-[11px] font-mono">
+              <TableHeader className="sticky top-0 bg-[var(--bg-card-subtle)] z-10">
+                <TableRow>
+                  <TableHead className="py-2 px-3 font-bold uppercase tracking-wider">STATE</TableHead>
                   {tableAlphabet.map(sym => (
-                    <th key={sym} className="py-2 px-2.5 font-bold uppercase tracking-wider text-center">
+                    <TableHead key={sym} className="py-2 px-2.5 font-bold uppercase tracking-wider text-center">
                       {sym}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[rgba(0,0,0,0.05)]">
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {tableStates.map(s => {
                   const isSelected = s.id === highlightedStateId;
                   const isAccepting = activeMachine.acceptingStates.includes(s.id);
                   const isInitial = s.id === activeMachine.initialState;
 
                   return (
-                    <tr
+                    <TableRow
                       key={s.id}
                       onClick={() => setSelectedStateId(s.id)}
-                      className={`cursor-pointer transition-colors ${
+                      className={`cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--bg-pill-active,#E0E8F9)] font-bold text-[var(--signal-cobalt,#1D55F5)]'
-                          : 'hover:bg-[var(--bg-tray,#E2E5EC)]/40 text-[var(--ink-primary,#181A20)]'
+                          ? 'bg-[var(--bg-pill-active)] font-bold text-[var(--signal-mid)]'
+                          : 'hover:bg-[var(--bg-card-subtle)] text-[var(--ink-primary)]'
                       }`}
                     >
-                      <td className="py-1.5 px-3 whitespace-nowrap">
+                      <TableCell className="py-1.5 px-3 whitespace-nowrap">
                         <span className="inline-flex items-center gap-1.5">
-                          {isInitial && <span className="text-[var(--signal-cobalt,#1D55F5)]">→</span>}
+                          {isInitial && <span className="text-[var(--signal-mid)]">→</span>}
                           <span>{s.id}</span>
                           {isAccepting && (
-                            <span className="text-[9px] px-1 py-0.2 rounded bg-[var(--signal-cobalt,#1D55F5)] text-white font-normal">
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-primary text-primary-foreground font-semibold">
                               F
                             </span>
                           )}
                         </span>
-                      </td>
+                      </TableCell>
                       {tableAlphabet.map(sym => {
                         const target = tableMatrix.get(`${s.id}:::${sym}`);
                         return (
-                          <td key={sym} className="py-1.5 px-2.5 text-center whitespace-nowrap">
+                          <TableCell key={sym} className="py-1.5 px-2.5 text-center whitespace-nowrap">
                             {target || '—'}
-                          </td>
+                          </TableCell>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
 
-        {/* LOWER RIGHT: STRING SIMULATOR (~62% / 7.5 COLS) */}
-        <div className="lg:col-span-7 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] flex flex-col justify-between gap-3 min-h-[310px] shadow-none">
+        {/* LOWER RIGHT: STRING SIMULATOR */}
+        <div className="lg:col-span-7 atlas-surface p-3.5 rounded-xl flex flex-col justify-between gap-3 min-h-[300px] shadow-none">
           {/* Header Row: STRING SIMULATOR + STEP MODE Toggle */}
-          <div className="flex items-center justify-between border-b border-[var(--bg-tray,#E2E5EC)] pb-2">
-            <h3 className="text-[12px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary,#181A20)]">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
+            <h3 className="text-[12px] font-bold font-mono tracking-widest uppercase text-[var(--ink-primary)]">
               STRING SIMULATOR
             </h3>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-secondary,#525866)] uppercase">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <span className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-secondary)] uppercase">
                 STEP MODE
               </span>
-              <button
-                onClick={() => {
-                  setStepMode(!stepMode);
-                  if (!stepMode) setLocalIsPlaying(false);
+              <Switch
+                checked={stepMode}
+                onCheckedChange={checked => {
+                  setStepMode(checked);
+                  if (checked) setLocalIsPlaying(false);
                 }}
                 aria-label="Toggle step mode"
-                aria-pressed={stepMode}
-                className={`w-9 h-5 rounded-full p-0.5 cursor-pointer transition-colors flex items-center ${
-                  stepMode ? 'bg-[var(--signal-cobalt,#1D55F5)] justify-end' : 'bg-[var(--bg-tray,#E2E5EC)] justify-start'
-                }`}
                 title="Toggle Step Mode"
-              >
-                <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
-              </button>
-            </div>
+              />
+            </label>
           </div>
 
           {/* Input Row: INPUT STRING, text input, RUN, prev, next, reset */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <span className="text-[11px] font-mono font-semibold tracking-wider text-[var(--ink-secondary,#525866)] uppercase shrink-0">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[var(--ink-secondary)] uppercase shrink-0">
               INPUT STRING
             </span>
 
-            <div className="flex-1 flex items-center relative">
-              <input
+            <div className="flex-1 flex items-center gap-1">
+              <Input
                 type="text"
+                size="sm"
                 value={localInputRaw}
                 onChange={e => {
                   setLocalInputRaw(e.target.value);
                   setLocalStep(0);
                   setLocalIsPlaying(false);
                 }}
+                onKeyDown={e => e.stopPropagation()}
                 placeholder={fixtureSource === 'frame10' ? '010110' : 'LL:M RR:M L:M'}
                 aria-label="Input string for the active automaton"
                 aria-invalid={!hasValidInput}
-                className="w-full bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] pl-3 pr-8 py-1.5 text-[12px] font-mono font-semibold tracking-wider text-[var(--ink-primary,#181A20)] uppercase"
+                className="flex-1 font-mono font-semibold tracking-wider uppercase text-xs"
               />
               {localInputRaw && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => {
                     setLocalInputRaw('');
                     setLocalStep(0);
                     setLocalIsPlaying(false);
                   }}
-                  className="absolute right-2.5 text-[var(--ink-muted,#8C93A0)] hover:text-[var(--ink-primary,#181A20)] text-[12px] cursor-pointer"
                   title="Clear input"
+                  aria-label="Clear input string"
                 >
                   ✕
-                </button>
+                </Button>
               )}
             </div>
 
             {/* Run / Pause Button */}
-            <button
+            <Button
+              variant="default"
+              size="sm"
               onClick={handleToggleRun}
               disabled={!hasValidInput || simResult.steps.length === 0 || (stepMode && localStep >= simResult.steps.length)}
               aria-label={stepMode ? 'Advance one transition' : localIsPlaying ? 'Pause simulation' : 'Run simulation'}
-              className="hud-reticle active px-4 py-1.5 bg-[var(--signal-cobalt,#1D55F5)] hover:bg-[#1546D8] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-[6px] text-[11px] font-mono uppercase tracking-wider font-bold cursor-pointer flex items-center gap-1.5 shrink-0 transition-colors"
+              className="text-[11px] font-mono uppercase tracking-wider font-bold shrink-0"
             >
               <span>{stepMode ? '› NEXT STEP' : localIsPlaying ? '⏸ PAUSE' : '▶ RUN'}</span>
-            </button>
+            </Button>
 
             {/* Stepper Buttons */}
             <div className="flex items-center gap-1 shrink-0">
-              <button
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={handleStepBack}
                 disabled={localStep === 0}
-                className="hud-reticle px-2.5 py-1.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] disabled:opacity-40 border border-[rgba(0,0,0,0.08)] rounded-[6px] text-[11px] font-mono font-bold cursor-pointer transition-colors"
+                className="font-mono font-bold text-[11px]"
                 title="Step backward"
+                aria-label="Step backward"
               >
                 &lt;
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={handleStepForward}
                 disabled={localStep >= simResult.steps.length}
-                className="hud-reticle px-2.5 py-1.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] disabled:opacity-40 border border-[rgba(0,0,0,0.08)] rounded-[6px] text-[11px] font-mono font-bold cursor-pointer transition-colors"
+                className="font-mono font-bold text-[11px]"
                 title="Step forward"
+                aria-label="Step forward"
               >
                 &gt;
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
                 onClick={() => {
                   setLocalStep(0);
                   setLocalIsPlaying(false);
                 }}
-                className="hud-reticle px-2.5 py-1.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.08)] rounded-[6px] text-[12px] font-mono cursor-pointer transition-colors"
+                className="font-mono text-[12px]"
                 title="Reset simulation step"
+                aria-label="Reset simulation step"
               >
                 ⟳
-              </button>
+              </Button>
             </div>
           </div>
 
           {!hasValidInput && (
-            <p role="alert" aria-live="polite" className="text-[10px] text-red-600 font-mono">
-              Unknown symbol{invalidSymbols.length === 1 ? '' : 's'}: {invalidSymbols.join(', ')}. Allowed: {activeMachine.alphabet.join(', ')}.
-            </p>
+            <Alert variant="error" role="alert" aria-live="polite" className="p-2 text-[10px] font-mono">
+              <AlertDescription>
+                Unknown symbol{invalidSymbols.length === 1 ? '' : 's'}: {invalidSymbols.join(', ')}. Allowed: {activeMachine.alphabet.join(', ')}.
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Trace Pipeline Row (Matches Frame 10 Trace Flow) */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-secondary,#525866)] uppercase">
+            <span className="text-[10px] font-mono font-semibold tracking-wider text-[var(--ink-secondary)] uppercase">
               TRACE
             </span>
 
-            <div className="p-3 bg-[var(--bg-tray,#E2E5EC)]/40 rounded-[8px] border border-[rgba(0,0,0,0.06)] overflow-x-auto flex items-center gap-2 min-h-[64px]">
+            <div className="p-3 bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] overflow-x-auto flex items-center gap-2 min-h-[64px]">
               {/* Start State */}
               <div className="flex items-center gap-2 shrink-0">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-xs border-2 transition-colors ${
                     localStep === 0
-                      ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white ring-2 ring-[var(--signal-cobalt,#1D55F5)]/40'
-                      : 'bg-[#EBF2FE] border-[var(--signal-cobalt,#1D55F5)] text-[var(--ink-primary,#181A20)]'
+                      ? 'bg-primary border-[var(--signal-mid)] text-primary-foreground ring-2 ring-[var(--signal-surface)]'
+                      : 'bg-[var(--bg-pill-active)] border-[var(--signal-cobalt)] text-[var(--ink-primary)]'
                   }`}
                 >
                   {activeMachine.initialState}
@@ -1095,10 +1128,10 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                   <div key={idx} className="flex items-center gap-2 shrink-0">
                     {/* Arrow with symbol label above */}
                     <div className="flex flex-col items-center justify-center w-10">
-                      <span className="text-[9px] font-mono font-bold text-[var(--ink-secondary,#525866)] mb-0.5">
+                      <span className="text-[9px] font-mono font-bold text-[var(--ink-secondary)] mb-0.5">
                         {st.inputSymbol}
                       </span>
-                      <div className="w-full flex items-center justify-center text-[var(--signal-cobalt,#1D55F5)] leading-none text-xs">
+                      <div className="w-full flex items-center justify-center text-[var(--signal-mid)] leading-none text-xs">
                         ────►
                       </div>
                     </div>
@@ -1106,17 +1139,17 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
                     {/* Target State Circle */}
                     <div className="relative flex items-center justify-center">
                       {isLastAccepted && (
-                        <div className="absolute w-11 h-11 rounded-full border-2 border-[var(--signal-cobalt,#1D55F5)]" />
+                        <div className="absolute w-11 h-11 rounded-full border-2 border-[var(--signal-mid)]" />
                       )}
                       <div
                         className={`w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-xs border-2 transition-colors ${
                           isLastAccepted && isReached
-                            ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-cobalt,#1D55F5)] text-white'
+                            ? 'bg-primary border-[var(--signal-mid)] text-primary-foreground'
                             : isCurrent
-                              ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white ring-2 ring-[var(--signal-cobalt,#1D55F5)]/40'
+                              ? 'bg-primary border-[var(--signal-mid)] text-primary-foreground ring-2 ring-[var(--signal-surface)]'
                               : isReached
-                                ? 'bg-[#EBF2FE] border-[var(--signal-cobalt,#1D55F5)] text-[var(--ink-primary,#181A20)]'
-                                : 'bg-[var(--bg-card,#F5F6F8)] border-[rgba(0,0,0,0.15)] text-[var(--ink-muted,#8C93A0)]'
+                                ? 'bg-[var(--bg-pill-active)] border-[var(--signal-mid)] text-[var(--ink-primary)]'
+                                : 'bg-[var(--bg-card-subtle)] border-[var(--border-subtle)] text-[var(--ink-muted)]'
                         }`}
                       >
                         {st.nextState}
@@ -1129,14 +1162,14 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
           </div>
 
           {/* Footer Status Row: RESULT badge, FINAL STATE, STEPS */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-1 border-t border-[var(--bg-tray,#E2E5EC)] text-[11px] font-mono">
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[var(--border-subtle)] text-[11px] font-mono">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-[var(--ink-secondary,#525866)] uppercase">RESULT</span>
+              <span className="font-semibold text-[var(--ink-secondary)] uppercase">RESULT</span>
               <span
-                className={`px-3 py-1 rounded-[6px] font-bold text-[11px] tracking-wider uppercase transition-colors ${
+                className={`px-3 py-1 rounded-md font-bold text-[11px] tracking-wider uppercase transition-colors ${
                   simResult.accepted
-                    ? 'bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--signal-cobalt,#1D55F5)] border border-[var(--signal-mid,#6892F6)]/30'
-                    : 'bg-red-50 text-red-600 border border-red-200'
+                    ? 'bg-[var(--bg-pill-active)] text-[var(--signal-mid)] border border-[var(--signal-surface)]'
+                    : 'bg-rose-950/50 text-rose-300 border border-rose-500/40'
                 }`}
               >
                 {!hasValidInput ? 'INVALID INPUT' : simResult.accepted ? 'ACCEPT' : 'REJECT'}
@@ -1144,8 +1177,8 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-[var(--ink-secondary,#525866)] uppercase">FINAL STATE</span>
-              <span className="font-bold text-[var(--ink-primary,#181A20)]">
+              <span className="font-semibold text-[var(--ink-secondary)] uppercase">FINAL STATE</span>
+              <span className="font-bold text-[var(--ink-primary)]">
                 {!hasValidInput ? '—' : simResult.steps.length > 0 && localStep > 0
                   ? simResult.steps[Math.min(localStep - 1, simResult.steps.length - 1)].nextState
                   : simResult.finalState}
@@ -1153,8 +1186,8 @@ export const AutomataInstrumentPanel: React.FC<AutomataInstrumentPanelProps> = (
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-[var(--ink-secondary,#525866)] uppercase">STEPS</span>
-              <span className="font-bold text-[var(--ink-primary,#181A20)]">
+              <span className="font-semibold text-[var(--ink-secondary)] uppercase">STEPS</span>
+              <span className="font-bold text-[var(--ink-primary)]">
                 {hasValidInput ? `${localStep} / ${simResult.steps.length}` : '—'}
               </span>
             </div>

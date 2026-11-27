@@ -16,6 +16,36 @@ describe('Sky Tonight Topocentric Telemetry & Calculations (TONIGHT-01)', () => 
   const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4] as const;
   const QUANTA_MINUTES = [0, 15, 30, 45] as const;
 
+  it('precesses J2000 catalog coordinates before converting them to the horizon frame', () => {
+    const raDeg = 101.28715533;
+    const decDeg = -16.71611586;
+    const ra = (raDeg * Math.PI) / 180;
+    const dec = (decDeg * Math.PI) / 180;
+    const eqj = new Astronomy.Vector(
+      Math.cos(dec) * Math.cos(ra),
+      Math.cos(dec) * Math.sin(ra),
+      Math.sin(dec),
+      new Astronomy.AstroTime(testDate),
+    );
+    const eqd = Astronomy.SphereFromVector(
+      Astronomy.RotateVector(Astronomy.Rotation_EQJ_EQD(testDate), eqj),
+    );
+    const expected = Astronomy.Horizon(
+      testDate,
+      new Astronomy.Observer(sfObserver.latitude, sfObserver.longitude, sfObserver.elevation ?? 0),
+      ((eqd.lon / 15) % 24 + 24) % 24,
+      eqd.lat,
+      'normal',
+    );
+    const actual = getHorizontalCoordinates(raDeg, decDeg, sfObserver, testDate);
+
+    expect(actual.altitude).toBeCloseTo(expected.altitude, 3);
+    expect(actual.azimuth).toBeCloseTo(expected.azimuth, 3);
+    // Regression values from Astronomy Engine's documented EQJ→EQD→Horizon path.
+    expect(actual.altitude).toBeCloseTo(-33.313, 3);
+    expect(actual.azimuth).toBeCloseTo(85.462, 3);
+  });
+
   it('correctly derives honest sunset and moon illumination from astronomy-engine', () => {
     const obs = new Astronomy.Observer(sfObserver.latitude, sfObserver.longitude, sfObserver.elevation ?? 0);
     const noon = new Date(testDate);

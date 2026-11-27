@@ -1,6 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { MINIMIZED_DFA_MACHINE, DFA_MACHINE } from '../../data/astroData';
 import type { DFA, StateId } from '../../automata/types';
+import { Card } from '../../components/ui/space/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 
 export const TransitionTableView: React.FC = () => {
   const [machineChoice, setMachineChoice] = useState<'minimized' | 'original'>('minimized');
@@ -36,157 +42,168 @@ export const TransitionTableView: React.FC = () => {
   }, [dfa.alphabet, filterSymbol]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-hidden">
-      {/* Control Banner — Elevated Bento Module Card */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3 rounded-[12px] flex flex-wrap items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-3">
-          {/* Machine Selection Rocker Switches */}
-          <div className="flex bg-[var(--bg-tray,#E2E5EC)] rounded-[6px] p-0.5 border border-[rgba(0,0,0,0.06)]">
-            <button
-              onClick={() => setMachineChoice('minimized')}
-              aria-pressed={machineChoice === 'minimized'}
-              className={`hud-reticle ${machineChoice === 'minimized' ? 'active' : ''} px-3 py-1 rounded-[4px] text-[10px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
-                machineChoice === 'minimized'
-                  ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
-                  : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
-              }`}
+    <div className="w-full h-full flex flex-col gap-3 font-mono overflow-hidden">
+      {/* Control Banner */}
+      <Card className="atlas-surface p-3 rounded-xl flex-row flex-wrap items-center justify-between gap-3 shrink-0 shadow-none">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Machine Selection Rocker */}
+          <ToggleGroup
+            aria-label="Select DFA version"
+            size="sm"
+            value={[machineChoice]}
+            onValueChange={vals => {
+              const next = vals.find(v => v !== machineChoice) ?? vals[0];
+              if (next === 'minimized' || next === 'original') setMachineChoice(next);
+            }}
+            className="bg-[var(--bg-card-subtle)] rounded-lg p-0.5 border border-[var(--border-subtle)] gap-0.5"
+          >
+            <ToggleGroupItem
+              value="minimized"
+              className="text-[10px] font-mono font-semibold uppercase tracking-wider data-pressed:bg-primary data-pressed:text-primary-foreground"
             >
               MINIMIZED DFA ({MINIMIZED_DFA_MACHINE.states.length} STATES)
-            </button>
-            <button
-              onClick={() => setMachineChoice('original')}
-              aria-pressed={machineChoice === 'original'}
-              className={`hud-reticle ${machineChoice === 'original' ? 'active' : ''} px-3 py-1 rounded-[4px] text-[10px] font-mono font-semibold uppercase tracking-wider cursor-pointer transition-colors ${
-                machineChoice === 'original'
-                  ? 'bg-[var(--signal-cobalt,#1D55F5)] text-white shadow-none'
-                  : 'text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)]'
-              }`}
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="original"
+              className="text-[10px] font-mono font-semibold uppercase tracking-wider data-pressed:bg-primary data-pressed:text-primary-foreground"
             >
               ORIGINAL DFA ({DFA_MACHINE.states.length} STATES)
-            </button>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
 
-          <span className="text-[10px] font-mono text-[var(--ink-secondary,#525866)] uppercase tracking-wider hidden sm:inline">
+          <span className="text-[10px] font-mono text-[var(--ink-secondary)] uppercase tracking-wider hidden sm:inline">
             CELL MATRIX: {dfa.states.length} × {dfa.alphabet.length} = {dfa.states.length * dfa.alphabet.length}
           </span>
         </div>
 
         {/* Filter controls */}
         <div className="flex items-center gap-2">
-          <div className="hud-reticle">
-            <input
-              type="text"
-              aria-label="Filter states by name or accepting pattern"
-              placeholder="FILTER STATE / PATTERN..."
-              value={searchState}
-              onChange={e => setSearchState(e.target.value)}
-              className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2.5 py-1 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase tracking-wider placeholder:text-[var(--ink-muted,#8C93A0)]"
-            />
-          </div>
-          <div className="hud-reticle">
-            <select
-              aria-label="Filter transition table by input symbol"
-              value={filterSymbol}
-              onChange={e => setFilterSymbol(e.target.value)}
-              className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2 py-1 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase cursor-pointer"
-            >
-              <option value="ALL">ALL SYMBOLS Σ</option>
+          <Input
+            type="text"
+            size="sm"
+            aria-label="Filter states by name or accepting pattern"
+            placeholder="FILTER STATE / PATTERN..."
+            value={searchState}
+            onChange={e => setSearchState(e.target.value)}
+            onKeyDown={e => e.stopPropagation()}
+            className="w-48 text-[10px] font-mono uppercase tracking-wider"
+          />
+          <Select
+            value={filterSymbol}
+            onValueChange={val => {
+              if (val) setFilterSymbol(val);
+            }}
+          >
+            <SelectTrigger size="sm" aria-label="Filter transition table by input symbol" className="w-auto min-w-[140px] text-[10px] font-mono uppercase">
+              <SelectValue>
+                {val => (val === 'ALL' ? 'ALL SYMBOLS Σ' : `SYMBOL ${val}`)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end">
+              <SelectItem value="ALL" className="text-xs font-mono">ALL SYMBOLS Σ</SelectItem>
               {dfa.alphabet.map(sym => (
-                <option key={sym} value={sym}>SYMBOL {sym}</option>
+                <SelectItem key={sym} value={sym} className="text-xs font-mono">SYMBOL {sym}</SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectPopup>
+          </Select>
         </div>
-      </div>
+      </Card>
 
-      {/* Recessed Transition Matrix Table with Sticky Light Headers */}
-      <div className="flex-1 border border-[var(--bg-tray,#E2E5EC)] rounded-[12px] bg-[var(--bg-card,#F5F6F8)] overflow-auto relative shadow-none">
-        <table className="w-full text-left text-xs border-collapse font-mono">
-          <thead className="bg-[var(--bg-tray,#E2E5EC)] text-[var(--ink-secondary,#525866)] uppercase text-[10px] sticky top-0 z-10 border-b border-[rgba(0,0,0,0.1)] font-semibold tracking-wider">
-            <tr>
-              <th className="p-2.5 sticky left-0 bg-[var(--bg-tray,#E2E5EC)] z-20 border-r border-[rgba(0,0,0,0.1)] min-w-[140px]">
-                STATE q ∈ Q
-              </th>
-              {activeAlphabet.map(sym => (
-                <th key={sym} className="p-2.5 text-center border-r border-[rgba(0,0,0,0.06)] min-w-[70px]">
-                  <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold">{sym}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--bg-tray,#E2E5EC)] text-[11px]">
-            {filteredStates.map(state => {
-              const isInitial = state.isInitial;
-              const isAccepting = state.isAccepting;
-              const isDead = state.isDead;
+      {/* Recessed Transition Matrix Table */}
+      <Card className="atlas-surface flex-1 rounded-xl overflow-auto relative p-0 gap-0 shadow-none">
+        {filteredStates.length === 0 ? (
+          <Empty className="m-auto border-0 p-8">
+            <EmptyHeader>
+              <EmptyTitle className="text-xs">No matching DFA states</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                No states match filter &ldquo;{searchState}&rdquo;.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <Table className="text-xs font-mono">
+            <TableHeader className="bg-[var(--bg-card-subtle)] sticky top-0 z-10">
+              <TableRow>
+                <TableHead className="p-2.5 sticky left-0 bg-[var(--bg-card-subtle)] z-20 border-r border-[var(--border-subtle)] min-w-[140px] text-[10px] uppercase">
+                  STATE q ∈ Q
+                </TableHead>
+                {activeAlphabet.map(sym => (
+                  <TableHead key={sym} className="p-2.5 text-center border-r border-[var(--border-subtle)] min-w-[70px] text-[10px] uppercase">
+                    <span className="text-[var(--signal-mid)] font-bold">{sym}</span>
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody className="text-[11px]">
+              {filteredStates.map(state => {
+                const isInitial = state.isInitial;
+                const isAccepting = state.isAccepting;
+                const isDead = state.isDead;
 
-              return (
-                <tr key={state.id} className="hover:bg-[var(--bg-pill-neutral,#E6E9EF)] transition-colors">
-                  {/* Row Header (Sticky left) */}
-                  <td className="p-2.5 sticky left-0 bg-[var(--bg-card,#F5F6F8)] border-r border-[rgba(0,0,0,0.1)] font-bold text-[var(--ink-primary,#181A20)] z-10">
-                    <div className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1.5 truncate">
-                      {isInitial && (
-                        <span className="text-[var(--signal-cobalt,#1D55F5)] font-bold text-[10px]">
-                          ➔
-                        </span>
-                      )}
-                      {isAccepting && (
-                        <span className="hud-reticle active px-1 py-0.2 rounded bg-[var(--signal-cobalt,#1D55F5)] text-white text-[9px] font-bold">
-                          ◎
-                        </span>
-                      )}
-                      <span className={`font-['Doto',monospace] text-xs ${
-                        isAccepting ? 'text-[var(--signal-cobalt,#1D55F5)] font-bold' : isDead ? 'text-[var(--ink-muted,#8C93A0)]' : 'text-[var(--ink-primary,#181A20)]'
-                      }`}>
-                        {state.id}
-                      </span>
-                    </div>
-                    {state.acceptingLabels.length > 0 && (
-                      <span className="hud-reticle text-[9px] px-1 py-0.2 bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--signal-cobalt,#1D55F5)] font-mono font-bold uppercase rounded">
-                        {state.acceptingLabels[0]}
-                      </span>
-                    )}
-                    </div>
-                  </td>
-
-                  {/* Transition cells */}
-                  {activeAlphabet.map(sym => {
-                    const targetId = matrix.get(`${state.id}:::${sym}`);
-                    const targetState = targetId ? dfa.states.find(s => s.id === targetId) : undefined;
-                    const isTargetDead = targetState?.isDead || targetId === dfa.deadStateId;
-
-                    return (
-                      <td
-                        key={sym}
-                        className={`p-2.5 text-center border-r border-[rgba(0,0,0,0.06)] ${
-                          !targetId
-                            ? 'text-[var(--ink-muted,#8C93A0)]'
-                            : isTargetDead
-                              ? 'text-[var(--ink-muted,#8C93A0)]'
-                              : targetState?.isAccepting
-                                ? 'bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--signal-cobalt,#1D55F5)] font-bold font-["Doto",monospace]'
-                                : 'text-[var(--ink-primary,#181A20)] font-["Doto",monospace]'
-                        }`}
-                      >
-                        {targetId ? (
-                          isTargetDead ? (
-                            <span className="opacity-40 text-[10px] uppercase">trap</span>
-                          ) : (
-                            <span className="text-xs">{targetId}</span>
-                          )
-                        ) : (
-                          '—'
+                return (
+                  <TableRow key={state.id}>
+                    <TableCell className="p-2.5 sticky left-0 bg-[var(--bg-card)] border-r border-[var(--border-subtle)] font-bold text-[var(--ink-primary)] z-10">
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 truncate">
+                          {isInitial && (
+                            <span className="text-[var(--signal-mid)] font-bold text-[10px]">
+                              ➔
+                            </span>
+                          )}
+                          {isAccepting && (
+                            <span className="px-1 py-0.2 rounded bg-primary text-primary-foreground text-[9px] font-bold">
+                              ◎
+                            </span>
+                          )}
+                          <span className={`font-mono tabular-nums text-xs ${
+                            isAccepting ? 'text-[var(--signal-mid)] font-bold' : isDead ? 'text-[var(--ink-muted)]' : 'text-[var(--ink-primary)]'
+                          }`}>
+                            {state.id}
+                          </span>
+                        </div>
+                        {state.acceptingLabels.length > 0 && (
+                          <span className="text-[9px] px-1 py-0.2 bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-mono font-bold uppercase rounded">
+                            {state.acceptingLabels[0]}
+                          </span>
                         )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                      </div>
+                    </TableCell>
+
+                    {activeAlphabet.map(sym => {
+                      const targetId = matrix.get(`${state.id}:::${sym}`);
+                      const targetState = targetId ? dfa.states.find(s => s.id === targetId) : undefined;
+                      const isTargetDead = targetState?.isDead || targetId === dfa.deadStateId;
+
+                      return (
+                        <TableCell
+                          key={sym}
+                          className={`p-2.5 text-center border-r border-[var(--border-subtle)] ${
+                            !targetId || isTargetDead
+                              ? 'text-[var(--ink-muted)]'
+                              : targetState?.isAccepting
+                                ? 'bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-bold font-mono tabular-nums'
+                                : 'text-[var(--ink-primary)] font-mono tabular-nums'
+                          }`}
+                        >
+                          {targetId ? (
+                            isTargetDead ? (
+                              <span className="opacity-40 text-[10px] uppercase">trap</span>
+                            ) : (
+                              <span className="text-xs">{targetId}</span>
+                            )
+                          ) : (
+                            '—'
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
     </div>
   );
 };

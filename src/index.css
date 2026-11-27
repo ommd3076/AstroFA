@@ -1,68 +1,157 @@
 @import "tailwindcss";
 @import "./App.css";
+@custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-bg-shell: #EEEEED;
-  --color-bg-tray: #E3E3E1;
-  --color-bg-card: #F7F7F6;
-  --color-bg-card-subtle: #F0F0EF;
-  --color-bg-pill-neutral: #ECECEB;
-  --color-bg-pill-active: #E7EDFA;
-  --color-bg-viewport: #060A14;
+  /* Neutral Graphite Stepped Surfaces */
+  --color-bg-shell: #0B0B0D;
+  --color-bg-tray: #101013;
+  --color-bg-card: #151519;
+  --color-bg-card-subtle: #1B1B20;
+  --color-bg-pill-neutral: #202026;
+  --color-bg-pill-active: rgba(143, 163, 255, 0.14);
+  --color-bg-viewport: #070709;
 
-  --color-ink-primary: #181A20;
-  --color-ink-secondary: #565B64;
-  --color-ink-muted: #858991;
-  --color-ink-on-signal: #FFFFFF;
+  /* Warm-White Typography Ink Hierarchy */
+  --color-ink-primary: #F3F1EB;
+  --color-ink-secondary: #B5B2A9;
+  --color-ink-muted: #7C7A72;
+  --color-ink-on-signal: #0B0B10;
 
-  --color-signal-cobalt: #064BDC;
-  --color-signal-mid: #6F98E8;
-  --color-signal-surface: #D2DDF1;
+  /* Soft Periwinkle Accent System */
+  --color-signal-cobalt: #8FA3FF;
+  --color-signal-mid: #A8B8FF;
+  --color-signal-surface: rgba(143, 163, 255, 0.28);
 
-  --color-dot-inactive: #C8CCD4;
-  --color-dot-active: #064BDC;
-  --color-reticle-tick: #8FA4C4;
+  /* Observatory Dots & Reticle Ticks */
+  --color-dot-inactive: #2A2A32;
+  --color-dot-active: #8FA3FF;
+  --color-reticle-tick: #52515A;
 
-  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  /* Space UI semantic tokens mapped to neutral graphite & soft periwinkle */
+  --color-background: #0B0B0D;
+  --color-foreground: #F3F1EB;
+  --color-card: #151519;
+  --color-card-foreground: #F3F1EB;
+  --color-muted: #1B1B20;
+  --color-muted-foreground: #9D9A91;
+  --color-muted-foreground-foreground: #B5B2A9;
+  --color-popover: #17171C;
+  --color-popover-foreground: #F3F1EB;
+  --color-primary: #8FA3FF;
+  --color-primary-foreground: #0B0B10;
+  --color-secondary: #1B1B20;
+  --color-secondary-foreground: #F3F1EB;
+  --color-accent: rgba(143, 163, 255, 0.14);
+  --color-accent-foreground: #F3F1EB;
+  --color-border: rgba(243, 241, 235, 0.09);
+  --color-input: rgba(243, 241, 235, 0.15);
+  --color-ring: #A8B8FF;
+  --color-destructive: #E5484D;
+  --color-destructive-foreground: #FF8B8B;
+  --color-error: #E5484D;
+  --color-error-foreground: #FCA5A5;
+  --color-info: #8FA3FF;
+  --color-info-foreground: #C4D0FF;
+  --color-success: #46A758;
+  --color-success-foreground: #8ECEAA;
+  --color-warning: #E5A93B;
+  --color-warning-foreground: #F3CA7A;
+  --color-sidebar: #0B0B0D;
+  --color-sidebar-foreground: #F3F1EB;
+  --color-sidebar-primary: #8FA3FF;
+  --color-sidebar-primary-foreground: #0B0B10;
+  --color-sidebar-accent: rgba(143, 163, 255, 0.14);
+  --color-sidebar-accent-foreground: #F3F1EB;
+  --color-sidebar-border: rgba(243, 241, 235, 0.08);
+  --color-sidebar-ring: #A8B8FF;
+  --radius-2xl: 14px;
+  --radius-xl: 12px;
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
+  --radius-xs: 3px;
+
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
   --font-dot: 'Doto', monospace;
 
-  --tracking-wide: 0.06em;
-  --tracking-wider: 0.08em;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.07em;
   --tracking-widest: 0.10em;
 }
 
 @layer base {
   :root {
-    color-scheme: light;
-    --bg-shell: #EEEEED;
-    --bg-tray: #E3E3E1;
-    --bg-card: #F7F7F6;
-    --bg-card-subtle: #F0F0EF;
-    --bg-pill-neutral: #ECECEB;
-    --bg-pill-active: #E7EDFA;
-    --bg-viewport: #060A14;
-    --ink-primary: #181A20;
-    --ink-secondary: #565B64;
-    --ink-muted: #858991;
-    --ink-on-signal: #FFFFFF;
-    --signal-cobalt: #064BDC;
-    --signal-mid: #6F98E8;
-    --signal-surface: #D2DDF1;
-    --dot-inactive: #C8CCD4;
-    --dot-active: #064BDC;
-    --reticle-tick: #8FA4C4;
-    --reticle-tick-active: #064BDC;
-    --card-border: 1px solid rgba(24, 25, 27, 0.07);
-    --card-border-subtle: 1px solid rgba(24, 25, 27, 0.06);
-    --card-border-active: 1px solid #064BDC;
-    --card-radius: 14px;
-    --bento-gap: 8px;
-    --pill-radius: 8px;
-    --tag-radius: 6px;
-    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+    color-scheme: dark;
+    --bg-shell: #0B0B0D;
+    --bg-tray: #101013;
+    --bg-card: #151519;
+    --bg-card-subtle: #1B1B20;
+    --bg-pill-neutral: #202026;
+    --bg-pill-active: rgba(143, 163, 255, 0.14);
+    --bg-viewport: #070709;
+    --ink-primary: #F3F1EB;
+    --ink-secondary: #B5B2A9;
+    --ink-muted: #7C7A72;
+    --ink-on-signal: #0B0B10;
+    --signal-cobalt: #8FA3FF;
+    --signal-mid: #A8B8FF;
+    --signal-surface: rgba(143, 163, 255, 0.28);
+    --dot-inactive: #2A2A32;
+    --dot-active: #8FA3FF;
+    --reticle-tick: #52515A;
+    --reticle-tick-active: #A8B8FF;
+    --border-subtle: rgba(243, 241, 235, 0.09);
+    --border-strong: rgba(243, 241, 235, 0.16);
+    --card-border: 1px solid rgba(243, 241, 235, 0.09);
+    --card-border-subtle: 1px solid rgba(243, 241, 235, 0.06);
+    --card-border-active: 1px solid #8FA3FF;
+    --card-radius: 10px;
+
+    /* Space UI CSS custom properties referenced directly via var(--...) */
+    --background: #0B0B0D;
+    --foreground: #F3F1EB;
+    --card: #151519;
+    --card-foreground: #F3F1EB;
+    --muted: #1B1B20;
+    --muted-foreground: #9D9A91;
+    --popover: #17171C;
+    --popover-foreground: #F3F1EB;
+    --primary: #8FA3FF;
+    --primary-foreground: #0B0B10;
+    --secondary: #1B1B20;
+    --secondary-foreground: #F3F1EB;
+    --accent: rgba(143, 163, 255, 0.14);
+    --accent-foreground: #F3F1EB;
+    --border: rgba(243, 241, 235, 0.09);
+    --input: rgba(243, 241, 235, 0.15);
+    --ring: #A8B8FF;
+    --destructive: #E5484D;
+    --destructive-foreground: #FF8B8B;
+    --error: #E5484D;
+    --error-foreground: #FCA5A5;
+    --info: #8FA3FF;
+    --info-foreground: #C4D0FF;
+    --success: #46A758;
+    --success-foreground: #8ECEAA;
+    --warning: #E5A93B;
+    --warning-foreground: #F3CA7A;
+    --sidebar: #0B0B0D;
+    --sidebar-foreground: #F3F1EB;
+    --sidebar-primary: #8FA3FF;
+    --sidebar-primary-foreground: #0B0B10;
+    --sidebar-accent: rgba(143, 163, 255, 0.14);
+    --sidebar-accent-foreground: #F3F1EB;
+    --sidebar-border: rgba(243, 241, 235, 0.08);
+    --sidebar-ring: #A8B8FF;
+
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
     --font-dot: 'Doto', monospace;
-    --tracking-wide: 0.06em;
-    --tracking-wider: 0.08em;
+    --tracking-wide: 0.05em;
+    --tracking-wider: 0.07em;
     --tracking-widest: 0.10em;
   }
 
@@ -71,29 +160,29 @@
     padding: 0;
     background-color: var(--bg-shell);
     color: var(--ink-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
     user-select: auto;
   }
 
   :focus-visible {
-    outline: 2px solid var(--signal-cobalt);
+    outline: 2px solid var(--signal-mid);
     outline-offset: 2px;
   }
 }
 
-/* Tactile hardware custom scrollbars */
+/* Quiet Graphite Scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-tray);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--dot-inactive);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--reticle-tick);

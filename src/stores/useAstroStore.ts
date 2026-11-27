@@ -11,6 +11,10 @@ import {
 } from '../data/astroData';
 import { recognizePattern } from '../recognition/matcher';
 import { projectRaDecToTangentPlane } from '../geometry/projection';
+import { recognizeTraceOnServer } from '../recognition/client';
+import type { BackendRecognitionState } from '../recognition/types';
+
+let backendRequestVersion = 0;
 
 export type ActiveView =
   | 'overview'
@@ -140,6 +144,8 @@ export interface AstroState {
   tracedStarIds: number[];
   tracedPoints: Point2D[];
   recognitionReport: RecognitionReport | null;
+  backendRecognition: BackendRecognitionState | null;
+  recognizeTraceOnBackend: (points: Point2D[]) => void;
   addTracedStar: (star: Star) => void;
   addTracedCustomPoint: (pt: Point2D) => void;
   undoLastTracePoint: () => void;
@@ -232,11 +238,13 @@ export const useAstroStore = create<AstroState>((set, get) => ({
   isTraceMode: _initialParams.trace,
   setIsTraceMode: v => {
     if (!v) {
+      backendRequestVersion++;
       set({
         isTraceMode: false,
         tracedStarIds: [],
         tracedPoints: [],
         recognitionReport: null,
+        backendRecognition: null,
         showPatternAnalysisModal: false,
         showRecognitionResultsModal: false,
       });
@@ -255,6 +263,22 @@ export const useAstroStore = create<AstroState>((set, get) => ({
   tracedStarIds: _initialParams.analysis ? _initialParams.seededPattern?.orderedStarIds ?? [] : [],
   tracedPoints: _initialParams.analysis ? _initialParams.seededPattern?.referencePoints ?? [] : [],
   recognitionReport: _initialParams.sampleReport,
+  backendRecognition: null,
+  recognizeTraceOnBackend: points => {
+    const requestVersion = ++backendRequestVersion;
+    if (points.length < 3) {
+      set({ backendRecognition: { state: 'not-requested', reason: 'insufficient-points' } });
+      return;
+    }
+    set({ backendRecognition: { state: 'pending' } });
+    void recognizeTraceOnServer(points).then(result => {
+      if (requestVersion === backendRequestVersion) set({ backendRecognition: { state: 'available', result } });
+    }).catch(error => {
+      if (requestVersion === backendRequestVersion) set({
+        backendRecognition: { state: 'unavailable', error: error instanceof Error ? error.message : 'Recognition service unavailable.' },
+      });
+    });
+  },
 
   addTracedStar: star => {
     const { tracedStarIds } = get();
@@ -277,8 +301,10 @@ export const useAstroStore = create<AstroState>((set, get) => ({
       tracedStarIds: nextIds,
       tracedPoints: points2D,
       recognitionReport: report,
+      backendRecognition: { state: 'pending' },
       selectedStarId: star.id,
     });
+    get().recognizeTraceOnBackend(points2D);
   },
 
   addTracedCustomPoint: pt => {
@@ -289,10 +315,12 @@ export const useAstroStore = create<AstroState>((set, get) => ({
       tracedStarIds: [],
       tracedPoints: nextPoints,
       recognitionReport: report,
+      backendRecognition: { state: 'not-requested', reason: 'educational-demo' },
     });
   },
 
   undoLastTracePoint: () => {
+    backendRequestVersion++;
     const { tracedStarIds, tracedPoints } = get();
     if (tracedStarIds.length > 0) {
       const nextIds = tracedStarIds.slice(0, -1);
@@ -308,7 +336,9 @@ export const useAstroStore = create<AstroState>((set, get) => ({
         tracedStarIds: nextIds,
         tracedPoints: points2D,
         recognitionReport: report,
+        backendRecognition: points2D.length >= 3 ? { state: 'pending' } : { state: 'not-requested', reason: 'insufficient-points' },
       });
+      get().recognizeTraceOnBackend(points2D);
     } else if (tracedPoints.length > 0) {
       const nextPoints = tracedPoints.slice(0, -1);
       const report = nextPoints.length >= 2
@@ -317,24 +347,32 @@ export const useAstroStore = create<AstroState>((set, get) => ({
       set({
         tracedPoints: nextPoints,
         recognitionReport: report,
+        backendRecognition: nextPoints.length >= 3 ? { state: 'pending' } : { state: 'not-requested', reason: 'insufficient-points' },
       });
+      get().recognizeTraceOnBackend(nextPoints);
+    } else {
+      set({ backendRecognition: { state: 'not-requested', reason: 'insufficient-points' } });
     }
   },
 
   clearTrace: () => {
+    backendRequestVersion++;
     set({
       tracedStarIds: [],
       tracedPoints: [],
       recognitionReport: null,
+      backendRecognition: null,
     });
   },
 
   loadPresetTrace: pattern => {
+    backendRequestVersion++;
     set({
       isTraceMode: true,
       tracedStarIds: pattern.orderedStarIds,
       tracedPoints: pattern.referencePoints,
       recognitionReport: recognizePattern(pattern.referencePoints, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS),
+      backendRecognition: { state: 'not-requested', reason: 'educational-demo' },
       focusedConstellationId: pattern.constellationId,
       activeView: 'sky',
     });
@@ -358,6 +396,7 @@ export const useAstroStore = create<AstroState>((set, get) => ({
   huntHintLevel: 0,
   setHuntHintLevel: level => set({ huntHintLevel: level }),
   startNewHunt: patternId => {
+    backendRequestVersion++;
     let target: ReferencePattern;
     if (patternId) {
       target = REFERENCE_PATTERNS.find(p => p.id === patternId) || REFERENCE_PATTERNS[0];
@@ -376,6 +415,7 @@ export const useAstroStore = create<AstroState>((set, get) => ({
       tracedStarIds: [],
       tracedPoints: [],
       recognitionReport: null,
+      backendRecognition: null,
       focusedConstellationId: target.constellationId,
       targetFocusCoords: {
         ra: CONSTELLATION_BY_ID.get(target.constellationId)?.raCenter || 0,

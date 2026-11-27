@@ -4,6 +4,18 @@ import { MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS } from '../../data/astroData'
 import { recognizePattern } from '../../recognition/matcher';
 import type { Point2D } from '../../geometry/types';
 import type { RecognitionReport } from '../../recognition/types';
+import { imagePointsToMath, recognizeTraceOnServer } from '../../recognition/client';
+import type { BackendRecognitionState } from '../../recognition/types';
+import { IMAGE_HEADER_SCAN_BYTES, isRasterDimensionsAllowed, parseRasterDimensions, projectReferencePointsToImage } from './imageUpload';
+import { PageHeader } from '../../components/PageHeader';
+import { Alert, AlertDescription } from '../../components/ui/space/alert';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../../components/ui/space/empty';
+import { Input } from '../../components/ui/space/input';
+import { Slider } from '../../components/ui/space/slider';
+import { Switch } from '../../components/ui/space/switch';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 
 // Deterministic Pseudo-Random Number Generator (Mulberry32) for reproducible synthetic sky
 function createSeededRandom(seed: number) {
@@ -32,6 +44,8 @@ export const ImageLab: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageObjRef = useRef<HTMLImageElement | null>(null);
+  const decodeVersion = useRef(0);
+  const backendVersion = useRef(0);
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [detectionComplete, setDetectionComplete] = useState(false);
@@ -54,6 +68,24 @@ export const ImageLab: React.FC = () => {
   const [excludedStarKeys, setExcludedStarKeys] = useState<Set<string>>(new Set());
   const [tracedPoints, setTracedPoints] = useState<Point2D[]>([]);
   const [report, setReport] = useState<RecognitionReport | null>(null);
+  const [backendRecognition, setBackendRecognition] = useState<BackendRecognitionState | null>(null);
+
+  const analyzeTrace = (points: Point2D[]) => {
+    setReport(points.length >= 2 ? recognizePattern(points, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS) : null);
+    const version = ++backendVersion.current;
+    if (points.length < 3) {
+      setBackendRecognition({ state: 'not-requested', reason: 'insufficient-points' });
+      return;
+    }
+    const height = imageObjRef.current?.height ?? 0;
+    const mathPoints = imagePointsToMath(points, height);
+    setBackendRecognition({ state: 'pending' });
+    void recognizeTraceOnServer(mathPoints).then(result => {
+      if (version === backendVersion.current) setBackendRecognition({ state: 'available', result });
+    }).catch(error => {
+      if (version === backendVersion.current) setBackendRecognition({ state: 'unavailable', error: error instanceof Error ? error.message : 'Recognition service unavailable.' });
+    });
+  };
 
   // Active Tool for Manual Correction
   const [activeTool, setActiveTool] = useState<CorrectionTool>('select');
@@ -79,6 +111,7 @@ export const ImageLab: React.FC = () => {
 
   // Generate deterministic synthetic starry sky canvas with Cassiopeia asterism
   const loadSampleSkyImage = useCallback(() => {
+    const version = ++decodeVersion.current;
     setUploadError(null);
     const canvas = document.createElement('canvas');
     canvas.width = 800;
@@ -92,14 +125,11 @@ export const ImageLab: React.FC = () => {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 800, 600);
 
-    // Cassiopeia W asterism reference coordinates
-    const casPoints: Point2D[] = [
-      { x: 180, y: 350 }, // Caph (Beta Cas)
-      { x: 300, y: 220 }, // Schedar (Alpha Cas)
-      { x: 420, y: 320 }, // Gamma Cas
-      { x: 540, y: 200 }, // Ruchbah (Delta Cas)
-      { x: 640, y: 310 }, // Segin (Epsilon Cas)
-    ];
+    // Derive the synthetic Cassiopeia asterism from its exact reference geometry.
+    const cassiopeia = REFERENCE_PATTERNS.find(pattern => pattern.id === 'Cas_fwd');
+    const casPoints = cassiopeia
+      ? projectReferencePointsToImage(cassiopeia.referencePoints, 800, 600, 32)
+      : [];
 
     // Seeded deterministic PRNG for reproducible stars
     const rand = createSeededRandom(42);
@@ -133,6 +163,7 @@ export const ImageLab: React.FC = () => {
     const img = new Image();
     img.src = dataUrl;
     img.onload = () => {
+      if (version !== decodeVersion.current) return;
       imageObjRef.current = img;
       setImageRevision(revision => revision + 1);
       setDetectionComplete(false);
@@ -149,11 +180,18 @@ export const ImageLab: React.FC = () => {
       setExcludedStarKeys(new Set());
       setTracedPoints([]);
       setReport(null);
+      backendVersion.current++;
+      setBackendRecognition(null);
     };
   }, []);
 
   // Handle uploaded file (PNG or JPEG)
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
+    const version = ++decodeVersion.current;
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('Image is larger than the 20 MB limit. Choose a smaller PNG or JPEG.');
+      return;
+    }
     const mimeType = file.type.toLowerCase();
     const extension = file.name.split('.').pop()?.toLowerCase();
     const isSupported = mimeType === 'image/png' || mimeType === 'image/jpeg' ||
@@ -164,13 +202,36 @@ export const ImageLab: React.FC = () => {
     }
 
     setUploadError(null);
+    let dimensions: { width: number; height: number } | null;
+    try {
+      const header = new Uint8Array(await file.slice(0, IMAGE_HEADER_SCAN_BYTES).arrayBuffer());
+      if (version !== decodeVersion.current) return;
+      dimensions = parseRasterDimensions(header);
+    } catch {
+      if (version === decodeVersion.current) setUploadError('The image header could not be read safely. Your current image is unchanged.');
+      return;
+    }
+    if (!dimensions) {
+      setUploadError('PNG or JPEG dimensions were not found in the first 1 MB. Your current image is unchanged.');
+      return;
+    }
+    if (!isRasterDimensionsAllowed(dimensions.width, dimensions.height)) {
+      setUploadError('Image dimensions exceed the 8192 px side or 40 megapixel limit. Your current image is unchanged.');
+      return;
+    }
     const reader = new FileReader();
-    reader.onerror = () => setUploadError('The selected file could not be read. Please try another PNG or JPEG.');
+    reader.onerror = () => { if (version === decodeVersion.current) setUploadError('The selected file could not be read. Please try another PNG or JPEG.'); };
     reader.onload = ev => {
+      if (version !== decodeVersion.current) return;
       const dataUrl = ev.target?.result as string;
       const img = new Image();
-      img.onerror = () => setUploadError('This file could not be decoded as an image. Your current image is unchanged.');
+      img.onerror = () => { if (version === decodeVersion.current) setUploadError('This file could not be decoded as an image. Your current image is unchanged.'); };
       img.onload = () => {
+        if (version !== decodeVersion.current) return;
+        if (!isRasterDimensionsAllowed(img.width, img.height)) {
+          setUploadError('Image dimensions exceed the 8192 px side or 40 megapixel limit. Your current image is unchanged.');
+          return;
+        }
         imageObjRef.current = img;
         setImageRevision(revision => revision + 1);
         setDetectionComplete(false);
@@ -187,6 +248,8 @@ export const ImageLab: React.FC = () => {
         setExcludedStarKeys(new Set());
         setTracedPoints([]);
         setReport(null);
+        backendVersion.current++;
+        setBackendRecognition(null);
       };
       img.src = dataUrl;
     };
@@ -195,6 +258,7 @@ export const ImageLab: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.currentTarget.value = '';
     if (file) processFile(file);
   };
 
@@ -216,6 +280,9 @@ export const ImageLab: React.FC = () => {
   };
 
   const handleUnloadImage = () => {
+    decodeVersion.current++;
+    backendVersion.current++;
+    if (fileInputRef.current) fileInputRef.current.value = '';
     imageObjRef.current = null;
     setImageLoaded(false);
     setDetectionComplete(false);
@@ -227,6 +294,7 @@ export const ImageLab: React.FC = () => {
     setTracedPoints([]);
     setReport(null);
     setUploadError(null);
+    setBackendRecognition(null);
   };
 
   const handleSetThreshold = (value: number) => {
@@ -237,6 +305,8 @@ export const ImageLab: React.FC = () => {
     // Detection changes with the threshold. Clear a trace tied to the previous point set.
     setTracedPoints([]);
     setReport(null);
+    backendVersion.current++;
+    setBackendRecognition(null);
   };
 
   // Run Star Detection & Update Real Luminance Histogram
@@ -331,10 +401,10 @@ export const ImageLab: React.FC = () => {
       return;
     }
 
-    // DETECTED Mode: Render cobalt corner brackets around detected stars
+    // DETECTED Mode: Render soft periwinkle corner brackets around detected stars
     const size = 7;
     const tick = 3;
-    ctx.strokeStyle = '#1D55F5'; // electric cobalt
+    ctx.strokeStyle = '#8FA3FF';
     ctx.lineWidth = 1.5;
 
     for (const c of visibleStars) {
@@ -367,13 +437,13 @@ export const ImageLab: React.FC = () => {
       ctx.stroke();
 
       // Central core dot
-      ctx.fillStyle = '#1D55F5';
+      ctx.fillStyle = '#F3F1EB';
       ctx.fillRect(c.x - 1, c.y - 1, 2, 2);
     }
 
     // Render Traced Path Segment Lines
     if (tracedPoints.length >= 2) {
-      ctx.strokeStyle = '#1D55F5';
+      ctx.strokeStyle = '#8FA3FF';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(tracedPoints[0].x, tracedPoints[0].y);
@@ -386,17 +456,17 @@ export const ImageLab: React.FC = () => {
     // Render Traced Nodes Telemetry Badges
     tracedPoints.forEach((p, idx) => {
       // Core star marker
-      ctx.fillStyle = '#1D55F5';
+      ctx.fillStyle = '#8FA3FF';
       ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
 
       // Square telemetry number badge
-      ctx.fillStyle = '#181A20';
-      ctx.strokeStyle = '#1D55F5';
+      ctx.fillStyle = '#151519';
+      ctx.strokeStyle = '#8FA3FF';
       ctx.lineWidth = 1.5;
       ctx.fillRect(p.x + 8, p.y - 18, 18, 16);
       ctx.strokeRect(p.x + 8, p.y - 18, 18, 16);
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = '#F3F1EB';
       ctx.font = 'bold 10px "IBM Plex Mono", monospace';
       ctx.fillText(`${idx + 1}`, p.x + 12, p.y - 6);
     });
@@ -430,11 +500,7 @@ export const ImageLab: React.FC = () => {
         setManualStars(prev => prev.filter(s => s.x !== removedStar.x || s.y !== removedStar.y));
         const nextTraced = tracedPoints.filter(p => Math.hypot(p.x - removedStar.x, p.y - removedStar.y) > 5);
         setTracedPoints(nextTraced);
-        if (nextTraced.length >= 2) {
-          setReport(recognizePattern(nextTraced, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS));
-        } else {
-          setReport(null);
-        }
+        analyzeTrace(nextTraced);
       }
       return;
     }
@@ -459,35 +525,27 @@ export const ImageLab: React.FC = () => {
     const nextPoints = [...tracedPoints, selectedPoint];
     setTracedPoints(nextPoints);
 
-    if (nextPoints.length >= 2) {
-      const rep = recognizePattern(nextPoints, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS);
-      setReport(rep);
-    }
+    analyzeTrace(nextPoints);
   };
 
   const handleUndo = () => {
     const nextPoints = tracedPoints.slice(0, -1);
     setTracedPoints(nextPoints);
-    if (nextPoints.length >= 2) {
-      setReport(recognizePattern(nextPoints, MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS));
-    } else {
-      setReport(null);
-    }
+    analyzeTrace(nextPoints);
   };
 
   const handleClear = () => {
     setTracedPoints([]);
     setReport(null);
+    backendVersion.current++;
+    setBackendRecognition(null);
   };
 
   return (
-    <div className="image-lab w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-3 sm:p-4 gap-3 overflow-y-auto min-h-0">
+    <div className="image-lab w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto min-h-0 pr-0.5">
       <style>{`
-        .image-lab .bento-card { background: #f6f6f5; border-color: #dedfdf; box-shadow: 0 1px 2px #18191b08; }
-        .image-lab .tactile-pill { border-radius: 6px; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
-        .image-lab .tactile-pill:focus-visible, .image-lab [role="button"]:focus-visible { outline: 2px solid #064bdc; outline-offset: 2px; }
-        .image-lab input[type="range"] { accent-color: #064bdc; }
-        .image-lab canvas { max-width: 100%; max-height: min(62vh, 620px); width: auto; height: auto; }
+        .image-lab input[type="range"] { accent-color: var(--signal-mid); }
+        .image-lab canvas { max-width: 100%; max-height: min(64vh, 640px); width: auto; height: auto; }
         @media (max-width: 1023px) {
           .image-lab .image-workspace { display: flex; flex: none; flex-direction: column; align-items: stretch; min-height: auto; }
           .image-lab .image-workspace > div { flex: none; min-height: auto; }
@@ -499,28 +557,189 @@ export const ImageLab: React.FC = () => {
           .image-lab .image-viewport { flex: 1 0 240px; min-height: 240px; }
         }
       `}</style>
-      <header className="flex flex-wrap items-end justify-between gap-2 px-1">
-        <h1 className="text-lg font-semibold tracking-tight">Image Lab</h1>
-        <p className="text-[10px] text-[var(--ink-secondary)]">PNG / JPEG · 8-bit luminance analysis</p>
-      </header>
-      {/* =========================================================================
-          MAIN 3-COLUMN WORKSPACE (Upload/Preprocess - Preview - Detection/Settings)
-          ========================================================================= */}
-      <div className="image-workspace grid grid-cols-1 lg:grid-cols-12 gap-2 flex-1 min-h-0">
-        {/* =======================================================================
-            COLUMN 1: UPLOAD & PREPROCESSING (Left Column, lg:col-span-3)
-            ======================================================================= */}
-        <div className="lg:col-span-3 flex flex-col gap-2 min-h-0">
-          {/* Card 1: Upload Image Card */}
-          <div className="bento-card p-3 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                UPLOAD IMAGE
-              </span>
-              <span className="micro-label text-[9px] text-[var(--ink-muted)]">STEP 01 · SOURCE</span>
+
+      <PageHeader
+        eyebrow="Photometry & Recognition"
+        title="Image Lab"
+        meta="PNG / JPEG · 8-bit luminance"
+        description="Detect bright stars on local PNG/JPEG photographs and trace patterns into the DFA."
+        actions={
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            {[
+              { num: '01', label: 'Source', active: imageLoaded },
+              { num: '02', label: 'Detect', active: imageLoaded && detectionComplete },
+              { num: '03', label: 'Edit', active: tracedPoints.length > 0 || manualStars.length > 0 },
+              { num: '04', label: 'Trace', active: tracedPoints.length >= 2 },
+              { num: '05', label: 'Match', active: report !== null },
+            ].map((step, idx, arr) => (
+              <React.Fragment key={step.num}>
+                <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[10px] ${
+                  step.active
+                    ? 'border-[var(--signal-surface)] bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-semibold'
+                    : 'border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--ink-muted)]'
+                }`}>
+                  <span>{step.num}</span>
+                  <span className="font-sans">{step.label}</span>
+                </span>
+                {idx < arr.length - 1 && (
+                  <span className="text-[var(--ink-muted)] font-mono hidden sm:inline" aria-hidden="true">→</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        }
+      />
+
+      {/* Image-first asymmetric studio workspace: Dominant stage (left 8) + Ordered inspector rail (right 4) */}
+      <div className="image-workspace grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 items-start">
+        {/* DOMINANT IMAGE CANVAS STAGE (Left 8 cols) */}
+        <div className="lg:col-span-8 flex flex-col gap-3 min-h-0">
+          <Card className="image-preview-card atlas-surface p-3.5 gap-3 flex flex-col min-h-[480px] rounded-xl shadow-none">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-semibold text-[var(--ink-primary)]">
+                  Starfield preview
+                </span>
+                {imageLoaded && (
+                  <span className="font-mono tabular-nums text-[11px] text-[var(--signal-mid)] font-medium">
+                    {autoStars.length.toLocaleString()} detected · {tracedPoints.length} traced
+                  </span>
+                )}
+              </div>
+
+              <ToggleGroup
+                aria-label="Preview overlay mode"
+                size="sm"
+                value={[previewMode]}
+                onValueChange={vals => {
+                  const next = vals.find(v => v !== previewMode) ?? vals[0];
+                  if (next === 'ORIGINAL' || next === 'DETECTED') setPreviewMode(next);
+                }}
+                className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+              >
+                {(['ORIGINAL', 'DETECTED'] as const).map(mode => (
+                  <ToggleGroupItem
+                    key={mode}
+                    value={mode}
+                    className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+                  >
+                    {mode === 'ORIGINAL' ? 'Original' : 'Detected'}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
-            {/* Drag & Drop Target Area */}
+            <div className="image-viewport relative flex-1 bg-[var(--bg-viewport)] rounded-lg overflow-hidden flex items-center justify-center p-2 border border-[var(--border-subtle)] min-h-[400px]">
+              {imageLoaded ? (
+                <canvas
+                  ref={canvasRef}
+                  onClick={handleCanvasClick}
+                  className="max-w-full max-h-[580px] object-contain cursor-crosshair rounded"
+                />
+              ) : (
+                <Empty className="border-0 p-6 max-w-md">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon" className="text-[var(--signal-mid)]">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <circle cx="12" cy="12" r="2" fill="currentColor" />
+                      </svg>
+                    </EmptyMedia>
+                    <EmptyTitle className="text-sm">
+                      {uploadError ? 'Image could not be loaded' : 'No sky photograph loaded'}
+                    </EmptyTitle>
+                    <EmptyDescription className="text-xs leading-relaxed">
+                      {uploadError || 'Choose a local PNG or JPEG sky image, or load the labelled synthetic Cassiopeia sample. FITS is not supported.'}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={loadSampleSkyImage}
+                      className="text-xs font-semibold"
+                    >
+                      Load synthetic Cassiopeia
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              )}
+            </div>
+
+            {imageLoaded && (
+              <div className="pt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="text-[11px] text-[var(--ink-secondary)]">
+                  Tool: <strong className="text-[var(--signal-mid)] font-semibold capitalize">{activeTool}</strong> · click stars on canvas
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Button variant="outline" size="xs" onClick={handleUndo} disabled={tracedPoints.length === 0} className="text-[11px] font-semibold">
+                    ↩ Undo
+                  </Button>
+                  <Button variant="outline" size="xs" onClick={handleClear} disabled={tracedPoints.length === 0} className="text-[11px] font-semibold">
+                    Clear path
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Compact Shape Confirmation Bar beneath canvas */}
+          <Card className="atlas-surface p-3.5 gap-2.5 flex flex-col sm:flex-row sm:items-center justify-between rounded-xl shadow-none">
+            <div className="min-w-0 space-y-1">
+              <div className="flex items-center gap-2.5">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">Server shape</span>
+                <span className="font-sans text-sm font-semibold text-[var(--signal-mid)] truncate">
+                  {backendRecognition?.state === 'pending' ? 'Checking'
+                    : backendRecognition?.state === 'unavailable' ? 'Offline'
+                    : backendRecognition?.state === 'available' ? backendRecognition.result.bestMatch?.patternName ?? backendRecognition.result.status
+                    : report?.status === 'VALID_PREFIX' ? 'Prefix' : 'Standby'}
+                </span>
+                {backendRecognition?.state === 'available' && backendRecognition.result.bestMatch && (
+                  <span className="font-mono tabular-nums text-xs text-[var(--ink-primary)]">
+                    · Residual {backendRecognition.result.bestMatch.residual.toFixed(3)}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[var(--ink-muted)] leading-snug" aria-live="polite">
+                {backendRecognition?.state === 'pending' ? 'Sending selected points to Costellar for shape confirmation.'
+                  : backendRecognition?.state === 'unavailable' ? `Server check unavailable: ${backendRecognition.error}`
+                  : backendRecognition?.state === 'available' ? `${backendRecognition.result.status} · server geometry result`
+                  : 'DFA data is local telemetry; select at least 3 points for server shape confirmation.'}
+              </p>
+            </div>
+
+            {report?.inputSymbols && report.inputSymbols.length > 0 ? (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  setSimulatorSymbols(report.inputSymbols);
+                  setAutomataTab('simulator');
+                  setActiveView('automataLab');
+                }}
+                className="text-xs font-semibold shrink-0"
+              >
+                Open in Automata Lab ↗
+              </Button>
+            ) : (
+              <span className="text-[10px] font-mono text-[var(--ink-muted)] shrink-0">
+                {tracedPoints.length >= 2 ? 'Recognition in progress' : 'Click stars to sequence path'}
+              </span>
+            )}
+          </Card>
+        </div>
+
+        {/* ORDERED INSPECTOR RAIL (Right 4 cols) */}
+        <div className="lg:col-span-4 flex flex-col gap-3 min-h-0">
+          {/* 1. Source Upload & Sample */}
+          <Card className="atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--ink-primary)]">
+                1. Source photograph
+              </span>
+              <span className="font-mono text-[10px] text-[var(--ink-muted)]">Max 4096 px</span>
+            </div>
+
             <div
               role="button"
               tabIndex={0}
@@ -536,10 +755,10 @@ export const ImageLab: React.FC = () => {
                   fileInputRef.current?.click();
                 }
               }}
-              className={`border border-dashed rounded-[8px] p-3 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1.5 ${
+              className={`border border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-1 ${
                 isDragOver
-                  ? 'border-[var(--signal-cobalt)] bg-[var(--bg-pill-active)]'
-                  : 'border-[var(--card-border-subtle)] bg-[var(--bg-card-subtle)] hover:border-[var(--signal-cobalt)]'
+                  ? 'border-[var(--signal-mid)] bg-[var(--bg-pill-active)]'
+                  : 'border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] hover:border-[var(--signal-surface)]'
               }`}
             >
               <input
@@ -549,231 +768,82 @@ export const ImageLab: React.FC = () => {
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <svg className="w-5 h-5 text-[var(--ink-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--ink-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <div className="text-[10px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                DRAG &amp; DROP OR CLICK TO UPLOAD
+              <div className="text-[11px] font-semibold text-[var(--ink-primary)]">
+                Drop or choose PNG / JPEG
               </div>
-              <div className="text-[9px] text-[var(--ink-muted)] font-mono tracking-widest">
-                JPG &nbsp; PNG
+              <div className="text-[10px] text-[var(--ink-muted)] font-mono">
+                Local browser decode
               </div>
             </div>
-                {uploadError && (
-              <p role="alert" className="text-[10px] text-red-600 font-mono leading-relaxed">
-                {uploadError}
-              </p>
+            {uploadError && (
+              <Alert variant="error" role="alert" className="p-2 text-[11px] font-mono">
+                <AlertDescription className="leading-relaxed">
+                  {uploadError}
+                </AlertDescription>
+              </Alert>
             )}
 
-            {/* Quick Sample Sky Button */}
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={loadSampleSkyImage}
               aria-label="Load synthetic Cassiopeia sample"
               data-testid="image-lab-sample"
-              className="tactile-pill w-full bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--ink-primary)] hover:text-[var(--signal-cobalt)] border border-[var(--card-border-subtle)] text-[10px] py-1.5 px-2 font-bold uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full text-xs font-semibold"
             >
-              <span>🌌</span>
-              <span>LOAD SYNTHETIC CASSIOPEIA</span>
-            </button>
+              Load synthetic Cassiopeia
+            </Button>
 
-            {/* File Metadata Tile when Loaded */}
             {imageLoaded && fileMeta && (
-              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px] flex items-center justify-between gap-2 text-xs">
+              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-lg flex items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2 min-w-0">
                   {thumbnailUrl ? (
                     <img
                       src={thumbnailUrl}
                       alt="Thumbnail"
-                      className="w-8 h-8 rounded-[4px] object-cover border border-[var(--card-border-subtle)] shrink-0 bg-black"
+                      className="w-8 h-8 rounded object-cover border border-[var(--border-subtle)] shrink-0 bg-black"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-[4px] bg-black shrink-0" />
+                    <div className="w-8 h-8 rounded bg-black shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold truncate text-[var(--ink-primary)]">
+                    <div className="text-[11px] font-semibold truncate text-[var(--ink-primary)]">
                       {fileMeta.name}
                     </div>
-                    <div className="text-[9px] text-[var(--ink-muted)] font-mono truncate">
-                      {fileMeta.width} × {fileMeta.height} • {(fileMeta.size / 1024).toFixed(1)} KB
+                    <div className="text-[10px] text-[var(--ink-muted)] font-mono tabular-nums truncate">
+                      {fileMeta.width} × {fileMeta.height} · {(fileMeta.size / 1024).toFixed(1)} KB
                     </div>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={handleUnloadImage}
                   title="Remove asset"
-                  className="text-[var(--ink-muted)] hover:text-red-500 font-bold p-1 text-sm leading-none cursor-pointer"
+                  aria-label="Remove loaded image"
+                  className="text-[var(--ink-muted)] hover:text-rose-400 shrink-0"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             )}
-          </div>
+          </Card>
 
-          {/* Contrast is the supported preprocessing control; other imaging algorithms are not implemented. */}
-          <div className="bento-card p-3 space-y-2 flex-1">
+          {/* 2. Luminance Threshold & Detection Count */}
+          <Card className="atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
             <div className="flex items-center justify-between">
-              <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                DETECTION CONTRAST
+              <span className="text-xs font-semibold text-[var(--ink-primary)]">
+                2. Luminance threshold
               </span>
-              <button
-                onClick={() => setFilterActive(!filterActive)}
-                className={`tactile-pill text-[9px] font-bold py-0.5 px-2 uppercase ${
-                  filterActive ? 'active' : ''
-                }`}
-              >
-                {filterActive ? 'ON' : 'OFF'}
-              </button>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              {/* Contrast Slider (Directly impacts luminance calculation) */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-[var(--ink-secondary)] uppercase">CONTRAST</span>
-                  <span className="font-mono text-[var(--signal-cobalt)] font-bold">{contrast.toFixed(2)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.50"
-                  max="2.00"
-                  step="0.05"
-                  value={contrast}
-                  onChange={e => setContrast(parseFloat(e.target.value))}
-                  className="w-full accent-[var(--signal-cobalt)] h-1 cursor-pointer bg-[var(--bg-tray)] rounded"
-                />
-              </div>
-
-              <p className="text-[9px] leading-relaxed text-[var(--ink-muted)]">Contrast remaps luminance before thresholding. Denoise, debayer, background correction, sharpening, and normalization are not available for these PNG/JPEG inputs.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* =======================================================================
-            COLUMN 2: DOMINANT IMAGE PREVIEW (Center Column, lg:col-span-6)
-            ======================================================================= */}
-        <div className="lg:col-span-6 flex flex-col gap-2 min-h-0">
-          <div className="bento-card image-preview-card p-3 flex flex-col flex-1 min-h-[420px]">
-            {/* Header: Title and Original / Detected Preview Mode Toggle */}
-            <div className="flex items-center justify-between mb-2 pb-2 border-b border-[var(--card-border-subtle)]">
-              <div className="flex items-center gap-2">
-                <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                  IMAGE PREVIEW
-                </span>
-                {imageLoaded && (
-                  <span className="micro-label text-[9px] text-[var(--signal-cobalt)] font-bold">
-                    [ {tracedPoints.length} NODES TRACED ]
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="tactile-rocker">
-                  {(['ORIGINAL', 'DETECTED'] as const).map(mode => (
-                    <button
-                      key={mode}
-                      onClick={() => setPreviewMode(mode)}
-                      aria-pressed={previewMode === mode}
-                      className={`tactile-pill text-[10px] py-1 px-2.5 uppercase font-bold ${
-                        previewMode === mode ? 'active' : ''
-                      }`}
-                    >
-                      {mode}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Dominant Dark Viewport Container */}
-            <div className="image-viewport relative flex-1 bg-[#101318] rounded-[8px] overflow-hidden flex items-center justify-center p-2 border border-[var(--card-border-subtle)] min-h-[360px]">
-              {imageLoaded ? (
-                    <canvas
-                  ref={canvasRef}
-                  onClick={handleCanvasClick}
-                  className="max-w-full max-h-[520px] object-contain cursor-crosshair rounded-[4px]"
-                />
-              ) : (
-                /* Empty Viewport Prompt */
-                <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-[10px] bg-white/5 border border-white/10 flex items-center justify-center text-2xl text-[var(--signal-mid)]">
-                    🌌
-                  </div>
-                  <div className="telemetry-label text-xs text-white uppercase font-bold tracking-wider">
-                    {uploadError ? 'IMAGE COULD NOT BE LOADED' : 'NO IMAGE LOADED'}
-                  </div>
-                  <p className="text-[11px] text-[var(--ink-muted)] max-w-sm font-mono leading-relaxed">
-                    {uploadError || 'Choose a local JPG/PNG image, or load the labelled synthetic Cassiopeia sample. FITS is not supported.'}
-                  </p>
-                  <button
-                    onClick={loadSampleSkyImage}
-                    className="tactile-pill bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white text-[11px] py-1.5 px-3 font-bold uppercase tracking-wider cursor-pointer"
-                  >
-                    LOAD SYNTHETIC CASSIOPEIA
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Traced Nodes Sub-Bar */}
-            {imageLoaded && (
-              <div className="mt-2 pt-2 border-t border-[var(--card-border-subtle)] flex items-center justify-between text-xs">
-                <div className="text-[10px] text-[var(--ink-secondary)]">
-                  ACTIVE TOOL: <strong className="text-[var(--signal-cobalt)] uppercase">{activeTool}</strong> (CLICK CANVAS TO INTERACT)
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={handleUndo}
-                    disabled={tracedPoints.length === 0}
-                    className="tactile-pill text-[10px] py-1 px-2 uppercase font-bold disabled:opacity-40"
-                  >
-                    ↩ UNDO
-                  </button>
-                  <button
-                    onClick={handleClear}
-                    disabled={tracedPoints.length === 0}
-                    className="tactile-pill text-[10px] py-1 px-2 uppercase font-bold disabled:opacity-40"
-                  >
-                    CLEAR PATH
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* =======================================================================
-            COLUMN 3: DETECTION METRICS & THRESHOLD & CORRECTION (Right Column, lg:col-span-3)
-            ======================================================================= */}
-        <div className="lg:col-span-3 flex flex-col gap-2 min-h-0">
-          {/* Card 1: Ground-Truth Star-Detection Metrics (Frame 11 Target Alignment) */}
-          <div className="bento-card p-3 space-y-2">
-            <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider block">
-              STAR-DETECTION METRICS
-            </span>
-
-            {/* 2x2 Honest Metrics Grid */}
-            <div className="grid grid-cols-1 gap-2 text-xs">
-              <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[6px]">
-                <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">DETECTED STARS</div>
-                <div className="font-dot text-base font-bold text-[var(--signal-cobalt)] mt-0.5">
-                  {imageLoaded ? autoStars.length.toLocaleString() : '--'}
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Card 2: Threshold Settings with Real Luminance Histogram & Continuous Slider */}
-          <div className="bento-card p-3 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-                THRESHOLD SETTINGS
+              <span className="font-mono tabular-nums text-[11px] text-[var(--signal-mid)] font-semibold">
+                {imageLoaded ? `${autoStars.length.toLocaleString()} stars` : '8-bit · 50–240'}
               </span>
-              <span className="font-mono text-[10px] text-[var(--ink-muted)]">8-bit luminance · 50–240</span>
             </div>
 
-            {/* 24-Column Dot Matrix Luminance Histogram with Threshold Marker Line */}
-            <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] flex flex-col gap-1 relative">
+            <div className="p-2 bg-[var(--bg-viewport)] border border-[var(--border-subtle)] rounded-lg flex flex-col gap-1 relative">
               <div className="relative flex items-end justify-between h-14 gap-[2px] pt-1">
                 {histogramBins.map((binCount, binIdx) => {
                   const binVal = 50 + (binIdx / 23) * 190;
@@ -781,12 +851,14 @@ export const ImageLab: React.FC = () => {
                   const fillHeightDots = imageLoaded ? Math.max(1, Math.min(7, Math.round((binCount / maxBinVal) * 7))) : 0;
 
                   return (
-                    <button
+                    <Button
                       key={binIdx}
+                      variant="ghost"
+                      size="xs"
                       onClick={() => handleSetThreshold(binVal)}
                       aria-label={`Set luminance threshold to ${Math.round(binVal)}`}
                       title={`Luminance ${Math.round(binVal)}: ${binCount.toLocaleString()} pixels`}
-                      className="flex-1 flex flex-col-reverse items-center gap-[2px] cursor-pointer hover:opacity-80 h-full justify-start"
+                      className="flex h-full sm:h-full w-auto min-w-0 flex-1 shrink flex-col-reverse items-center justify-start gap-[2px] rounded-none border-0 p-0 hover:bg-transparent hover:opacity-80"
                     >
                       {Array.from({ length: 7 }).map((_, dIdx) => (
                         <span
@@ -800,251 +872,180 @@ export const ImageLab: React.FC = () => {
                           }`}
                         />
                       ))}
-                    </button>
+                    </Button>
                   );
                 })}
 
-                {/* Vertical Threshold Marker Indicator Line */}
                 <div
                   className="absolute top-0 bottom-0 pointer-events-none flex flex-col items-center"
                   style={{ left: `${((threshold - 50) / 190) * 100}%` }}
                 >
-                  <div className="w-2 h-2 rounded-full bg-[var(--signal-cobalt)] -mt-1 shadow-sm" />
-                  <div className="w-[1.5px] flex-1 bg-[var(--signal-cobalt)] opacity-80" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--signal-mid)] -mt-1" />
+                  <div className="w-[1.5px] flex-1 bg-[var(--signal-mid)] opacity-80" />
                 </div>
               </div>
 
-              {/* Axis labels */}
-              <div className="flex justify-between text-[8px] text-[var(--ink-muted)] font-mono border-t border-[var(--bg-tray)] pt-0.5">
+              <div className="flex justify-between text-[9px] text-[var(--ink-muted)] font-mono border-t border-[var(--border-subtle)] pt-0.5">
                 <span>50</span>
                 <span>145</span>
                 <span>240</span>
               </div>
             </div>
 
-            {/* Threshold Slider (Range 50 - 240) */}
-            <div className="space-y-1">
-              <input
-                type="range"
-                min="50"
-                max="240"
-                step="1"
+            <div className="space-y-1 py-0.5">
+              <Slider
+                min={50}
+                max={240}
+                step={1}
                 value={threshold}
-                onChange={e => handleSetThreshold(parseInt(e.target.value, 10))}
+                onValueChange={val => handleSetThreshold(typeof val === 'number' ? val : val[0])}
                 aria-label="Luminance detection threshold slider"
-                className="w-full accent-[var(--signal-cobalt)] h-1 cursor-pointer bg-[var(--bg-tray)] rounded"
               />
             </div>
 
-            {/* Numeric Readout: Detection Threshold mapped to [0, 1] normalized display */}
             <div className="flex items-center justify-between text-xs pt-0.5">
-              <span className="micro-label text-[10px] text-[var(--ink-secondary)] uppercase">
-                LUMINANCE CUTOFF (8-BIT):
-              </span>
-              <div className="flex items-center gap-1.5">
-                <label className="sr-only" htmlFor="image-lab-threshold">Luminance threshold, 50 to 240</label>
-                <input
-                  id="image-lab-threshold"
-                  type="number"
-                  min={50}
-                  max={240}
-                  step={1}
-                  value={thresholdText}
-                  onChange={e => {
-                    const raw = e.target.value;
-                    setThresholdText(raw);
-                    if (/^\d+$/.test(raw)) {
-                      const next = Number(raw);
-                      if (next >= 50 && next <= 240) handleSetThreshold(next);
-                    }
-                  }}
-                  onBlur={() => {
-                    const parsed = Number(thresholdText);
-                    if (Number.isFinite(parsed) && thresholdText !== '') {
-                      handleSetThreshold(parsed);
-                    } else {
-                      setThresholdText(String(threshold));
-                    }
-                  }}
-                  className="w-16 px-2 py-0.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded font-mono font-bold text-xs text-[var(--ink-primary)]"
-                />
-              </div>
+              <label htmlFor="image-lab-threshold" className="text-[11px] text-[var(--ink-secondary)]">
+                Luminance cutoff
+              </label>
+              <Input
+                id="image-lab-threshold"
+                type="number"
+                size="sm"
+                min={50}
+                max={240}
+                step={1}
+                value={thresholdText}
+                onKeyDown={e => e.stopPropagation()}
+                onChange={e => {
+                  const raw = e.target.value;
+                  setThresholdText(raw);
+                  if (/^\d+$/.test(raw)) {
+                    const next = Number(raw);
+                    if (next >= 50 && next <= 240) handleSetThreshold(next);
+                  }
+                }}
+                onBlur={() => {
+                  const parsed = Number(thresholdText);
+                  if (Number.isFinite(parsed) && thresholdText !== '') {
+                    handleSetThreshold(parsed);
+                  } else {
+                    setThresholdText(String(threshold));
+                  }
+                }}
+                className="w-20 font-mono tabular-nums font-semibold text-xs"
+              />
+            </div>
+          </Card>
+
+          {/* 3. Detection Contrast Preprocessing */}
+          <Card className="atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
+            <div className="flex items-center justify-between">
+              <label htmlFor="image-lab-contrast-switch" className="text-xs font-semibold text-[var(--ink-primary)] cursor-pointer">
+                3. Detection contrast
+              </label>
+              <Switch
+                id="image-lab-contrast-switch"
+                checked={filterActive}
+                onCheckedChange={checked => setFilterActive(checked)}
+                aria-label="Enable detection contrast preprocessing"
+              />
             </div>
 
-          </div>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-[var(--ink-secondary)]">Contrast scale</span>
+                <span className="font-mono tabular-nums text-[var(--signal-mid)] font-semibold">{contrast.toFixed(2)}×</span>
+              </div>
+              <Slider
+                min={0.5}
+                max={2.0}
+                step={0.05}
+                value={contrast}
+                onValueChange={val => setContrast(typeof val === 'number' ? val : val[0])}
+                aria-label="Contrast scale"
+              />
+              <p className="text-[11px] leading-relaxed text-[var(--ink-muted)]">
+                Remaps luminance before thresholding. Denoise, debayer, and platesolve calibration are not applied.
+              </p>
+            </div>
+          </Card>
 
-          {/* Card 3: Manual Correction Tools (Frame 11 Target Alignment) */}
-          <div className="bento-card p-3 space-y-2">
-            <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider block">
-              MANUAL CORRECTION
+          {/* 4. Manual Star Tools */}
+          <Card className="atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
+            <span className="text-xs font-semibold text-[var(--ink-primary)]">
+              4. Manual correction
             </span>
 
-            {/* 5 Hardware Tool Buttons */}
             <div className="grid grid-cols-5 gap-1.5">
-              {/* Tool 1: Pointer / Select */}
-              <button
+              <Button
+                variant={activeTool === 'select' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setActiveTool('select')}
                 aria-label="Select and trace centroids"
+                aria-pressed={activeTool === 'select'}
                 title="Select / Trace star centroids"
-                className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
-                  activeTool === 'select' ? 'active' : ''
-                }`}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                 </svg>
-              </button>
+              </Button>
 
-              {/* Tool 2: Add Point (+) */}
-              <button
+              <Button
+                variant={activeTool === 'add' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setActiveTool('add')}
                 aria-label="Add manual centroid"
+                aria-pressed={activeTool === 'add'}
                 title="Add manual star centroid"
-                className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
-                  activeTool === 'add' ? 'active' : ''
-                }`}
+                className="font-mono font-bold"
               >
-                <span className="text-sm font-bold leading-none">+</span>
-              </button>
+                +
+              </Button>
 
-              {/* Tool 3: Remove Point (-) */}
-              <button
+              <Button
+                variant={activeTool === 'remove' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setActiveTool('remove')}
                 aria-label="Remove centroid"
+                aria-pressed={activeTool === 'remove'}
                 title="Remove star centroid"
-                className={`tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer ${
-                  activeTool === 'remove' ? 'active' : ''
-                }`}
+                className="font-mono font-bold"
               >
-                <span className="text-sm font-bold leading-none">−</span>
-              </button>
+                −
+              </Button>
 
-              {/* Tool 4: Undo Node (↩) */}
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleUndo}
                 disabled={tracedPoints.length === 0}
+                aria-label="Undo last trace node"
                 title="Undo last trace node"
-                className="tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer disabled:opacity-40"
               >
-                <span className="text-xs font-bold leading-none">↩</span>
-              </button>
+                ↩
+              </Button>
 
-              {/* Tool 5: Clear / Trash (🗑) */}
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleClear}
                 disabled={tracedPoints.length === 0}
+                aria-label="Clear all traced points"
                 title="Clear all traced points"
-                className="tactile-pill flex items-center justify-center p-2 rounded-[6px] cursor-pointer disabled:opacity-40 text-red-500 hover:text-red-600"
+                className="text-rose-400 hover:text-rose-300"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-              </button>
+              </Button>
             </div>
 
-            {/* Tool Mode Explanatory Pill */}
-            <div className="text-[9px] text-[var(--ink-muted)] bg-[var(--bg-card-subtle)] p-1.5 rounded-[4px] font-mono">
-              {activeTool === 'select' && 'MODE: SNAP & TRACE CENTROIDS'}
-              {activeTool === 'add' && 'MODE: CLICK ANYWHERE TO ADD STAR'}
-              {activeTool === 'remove' && 'MODE: CLICK STAR TO REMOVE'}
+            <div className="text-[10px] text-[var(--ink-secondary)] bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] px-2 py-1.5 rounded font-mono">
+              {activeTool === 'select' && 'Mode: snap & trace centroids'}
+              {activeTool === 'add' && 'Mode: click canvas to add star'}
+              {activeTool === 'remove' && 'Mode: click star to remove'}
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          BOTTOM ROW: ANALYSIS PIPELINE & RECOGNITION RESULT (Frame 11 Target Alignment)
-          ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 shrink-0">
-        {/* Analysis Pipeline Stepper (Left lg:col-span-9) */}
-        <div className="lg:col-span-9 bento-card p-3 flex flex-col justify-between gap-2">
-          <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-            ANALYSIS PIPELINE
-          </span>
-
-          <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto text-[10px] py-1">
-            {[
-              { num: '01', label: 'SOURCE', active: imageLoaded, icon: '01' },
-              { num: '02', label: 'DETECT STARS', active: imageLoaded && detectionComplete, icon: '✦' },
-              { num: '03', label: 'EDIT POINTS', active: tracedPoints.length > 0 || manualStars.length > 0, icon: '✎' },
-              { num: '04', label: 'TRACE PATTERN', active: tracedPoints.length >= 2, icon: '☍' },
-              { num: '05', label: 'MATCH', active: report !== null, icon: '05' },
-            ].map((step, idx, arr) => (
-              <React.Fragment key={step.num}>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs border transition-colors ${
-                      step.active
-                        ? 'bg-[var(--signal-cobalt)] text-white border-[var(--signal-mid)]'
-                        : 'bg-[var(--bg-card-subtle)] text-[var(--ink-muted)] border-[var(--card-border-subtle)]'
-                    }`}
-                  >
-                    <span>{step.icon}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-[var(--ink-muted)] font-mono">{step.num}</span>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${
-                        step.active ? 'text-[var(--signal-cobalt)]' : 'text-[var(--ink-secondary)]'
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                </div>
-                {idx < arr.length - 1 && (
-                  <span className="text-[var(--ink-muted)] font-mono text-xs shrink-0">→</span>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-
-        {/* Recognition Result Card (Right lg:col-span-3) */}
-        <div className="lg:col-span-3 bento-card p-3 flex flex-col justify-between gap-1.5">
-          <div className="flex items-center justify-between">
-            <span className="telemetry-label text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
-              RESULT
-            </span>
-            <span className="font-dot text-[10px] text-[var(--signal-cobalt)]">DFA</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="font-dot text-lg font-bold text-[var(--signal-cobalt)] truncate max-w-[150px]">
-              {report?.bestMatch?.patternName
-                ? report.bestMatch.patternName.split(' ')[0]
-                : report?.status === 'VALID_PREFIX'
-                ? 'PREFIX'
-                : report?.status === 'SYMBOLIC_REJECT' || report?.status === 'GEOMETRIC_REJECT'
-                ? 'NO MATCH'
-                : 'STANDBY'}
-            </div>
-            <div className="text-right">
-              <span className="micro-label text-[8px] block text-[var(--ink-muted)]">RESIDUAL</span>
-              <span className="font-mono text-xs font-bold text-[var(--ink-primary)]">
-                {report?.bestMatch ? report.bestMatch.residual.toFixed(3) : '--'}
-              </span>
-            </div>
-          </div>
-
-          {/* Automata Lab Navigation Action */}
-          {report?.inputSymbols && report.inputSymbols.length > 0 ? (
-            <button
-              onClick={() => {
-                setSimulatorSymbols(report.inputSymbols);
-                setAutomataTab('simulator');
-                setActiveView('automataLab');
-              }}
-              className="tactile-pill bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white w-full py-1.5 px-2 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <span>⚡</span>
-              <span>OPEN IN AUTOMATA LAB ↗</span>
-            </button>
-          ) : (
-            <div className="micro-label text-[9px] text-[var(--ink-muted)] truncate">
-              {tracedPoints.length >= 2 ? 'RECOGNITION IN PROGRESS' : 'CLICK STARS TO SEQUENCE PATH'}
-            </div>
-          )}
+          </Card>
         </div>
       </div>
     </div>

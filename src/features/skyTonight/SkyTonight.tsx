@@ -4,6 +4,15 @@ import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATIONS, STAR_BY_ID, STARS } from '../../data/astroData';
 import { getHorizontalCoordinates, getMeridianCulmination } from '../../astronomy/coordinates';
 import type { IAUConstellation, ObserverLocation } from '../../types/astronomy';
+import { ObservingConditions } from './ObservingConditions';
+import { PageHeader } from '../../components/PageHeader';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
+import { Toolbar, ToolbarGroup } from '../../components/ui/space/toolbar';
 
 // 11 distinct night hours matching Frame 5 (18:00 to 04:00 UTC)
 const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4] as const;
@@ -42,9 +51,9 @@ const MoonPhaseDisc: React.FC<{ fraction: number; phaseDeg: number }> = memo(({ 
   }
 
   return (
-    <svg viewBox="0 0 26 26" className="w-7 h-7 shrink-0" aria-label={`Moon phase ${(fraction * 100).toFixed(0)}%`}>
-      <circle cx={cx} cy={cy} r={r} fill="#262D3D" />
-      {pathD && <path d={pathD} fill="#D4DCED" />}
+    <svg viewBox="0 0 26 26" className="w-6 h-6 shrink-0" aria-label={`Moon phase ${(fraction * 100).toFixed(0)}%`}>
+      <circle cx={cx} cy={cy} r={r} fill="#202026" />
+      {pathD && <path d={pathD} fill="#F3F1EB" />}
     </svg>
   );
 });
@@ -64,8 +73,8 @@ const MiniAsterismGlyph: React.FC<MiniAsterismGlyphProps> = memo(({
   con,
   width = 36,
   height = 26,
-  strokeColor = '#525866',
-  dotColor = '#181A20',
+  strokeColor = '#8FA3FF',
+  dotColor = '#F3F1EB',
 }) => {
   const rad = Math.PI / 180;
   const cosDec = Math.cos(con.decCenter * rad);
@@ -211,7 +220,7 @@ const SkyPreview: React.FC<SkyPreviewProps> = memo(({
   }, [topCons, observer, observationDate, width, height]);
 
   return (
-    <div className="w-full h-[140px] bg-[#060A14] rounded-[10px] border border-[#1E293B] relative overflow-hidden flex items-center justify-center">
+    <div className="w-full h-[148px] bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] relative overflow-hidden flex items-center justify-center">
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-full"
@@ -220,7 +229,7 @@ const SkyPreview: React.FC<SkyPreviewProps> = memo(({
       >
         {/* Subtle background stars */}
         {backgroundStars.map((pt, idx) => (
-          <circle key={idx} cx={pt.x} cy={pt.y} r={pt.r} fill="#A0AEC0" opacity={pt.opacity} />
+          <circle key={idx} cx={pt.x} cy={pt.y} r={pt.r} fill="#B5B2A9" opacity={pt.opacity} />
         ))}
 
         {/* Constellations */}
@@ -243,7 +252,7 @@ const SkyPreview: React.FC<SkyPreviewProps> = memo(({
                   y1={p1.y}
                   x2={p2.x}
                   y2={p2.y}
-                  stroke="#6892F6"
+                  stroke="#8FA3FF"
                   strokeWidth="1.2"
                   strokeOpacity="0.85"
                 />
@@ -255,8 +264,8 @@ const SkyPreview: React.FC<SkyPreviewProps> = memo(({
                 cx={p.x}
                 cy={p.y}
                 r="1.8"
-                fill="#FFFFFF"
-                stroke="#1D55F5"
+                fill="#F3F1EB"
+                stroke="#8FA3FF"
                 strokeWidth="0.8"
               />
             ))}
@@ -264,7 +273,7 @@ const SkyPreview: React.FC<SkyPreviewProps> = memo(({
               <text
                 x={centroid.x}
                 y={Math.min(height - 8, centroid.y + 12)}
-                fill="#FFFFFF"
+                fill="#F3F1EB"
                 fontSize="8"
                 fontFamily="'IBM Plex Mono', monospace"
                 fontWeight="bold"
@@ -558,578 +567,522 @@ export const SkyTonight: React.FC = () => {
   const activeSelectedId = selectedConId || recommendedWindows[0]?.id || 'Ori';
 
   return (
-    <section className="w-full h-full min-w-0 flex flex-col gap-2 overflow-y-auto pr-0.5 font-mono text-[var(--ink-primary)]" aria-label="Sky visibility tonight">
-      {/* 1. Top Row of 5 Metric Cards matching Frame 5 */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 shrink-0">
-        {/* Card 1: DATE */}
-        <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
-            <span>DATE</span>
-            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">UTC</span>
-          </div>
-          <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
-            {topMetrics.dateStr}
-          </div>
-        </div>
+    <section className="w-full h-full min-w-0 flex flex-col gap-4 overflow-y-auto pr-0.5 font-sans text-[var(--ink-primary)]" aria-label="Sky visibility tonight">
+      <PageHeader
+        eyebrow="Observing Planner"
+        title="Sky tonight"
+        titleId="sky-tonight-title"
+        meta={`${targetType === 'constellations' ? filteredConstellations.length : filteredBrightStars.length} ${targetType === 'constellations' ? 'constellations' : 'bright stars'} · ${currentUtcTimeStr} UTC`}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ToggleGroup
+              aria-label="Time window mode"
+              size="sm"
+              value={[timeMode]}
+              onValueChange={vals => {
+                const next = vals.find(v => v !== timeMode) ?? vals[0];
+                if (next) setTimeMode(next as typeof timeMode);
+              }}
+              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+            >
+              {(['evening', 'night', 'full'] as const).map(mode => (
+                <ToggleGroupItem
+                  key={mode}
+                  value={mode}
+                  className="text-[11px] font-semibold uppercase data-pressed:bg-primary data-pressed:text-primary-foreground"
+                >
+                  {mode}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
 
-        {/* Card 2: OBSERVER LOCATION */}
-        <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
-            <span>OBSERVER LOCATION</span>
-            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">WGS84</span>
+            <Toolbar className="bg-[var(--bg-card-subtle)] border-[var(--border-subtle)] p-0.5 gap-0.5 shadow-none font-mono tabular-nums">
+              <ToolbarGroup>
+                <Button variant="ghost" size="xs" onClick={() => stepTime(-1)} aria-label="Step observation time back one hour">-1h</Button>
+                <Button variant="default" size="xs" onClick={() => setObservationDate(new Date())} aria-label="Set observation date and time to now">Now</Button>
+                <Button variant="ghost" size="xs" onClick={() => stepTime(1)} aria-label="Step observation time forward one hour">+1h</Button>
+                <Button variant="ghost" size="xs" onClick={() => stepTime(24)} aria-label="Step observation time forward 24 hours">+24h</Button>
+                <Button variant="ghost" size="xs" onClick={() => handleStepMinutes(-15)} aria-label="Step observation time back 15 minutes">-15m</Button>
+                <Button variant="ghost" size="xs" onClick={() => handleStepMinutes(15)} aria-label="Step observation time forward 15 minutes">+15m</Button>
+              </ToolbarGroup>
+            </Toolbar>
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-[13px]">
-            <span className="text-[var(--ink-muted)]">
-              LAT <strong className="text-[var(--ink-primary)] font-bold">{topMetrics.latVal}° {topMetrics.latDir}</strong>
-            </span>
-            <span className="text-[var(--ink-muted)]">
-              LON <strong className="text-[var(--ink-primary)] font-bold">{topMetrics.lonVal}° {topMetrics.lonDir}</strong>
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3: SUNSET */}
-        <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
-            <span>SUNSET</span>
-            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">UTC</span>
-          </div>
-          <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
-            {topMetrics.sunsetTimeStr}
-          </div>
-        </div>
-
-        {/* Card 4: MOON ILLUMINATION */}
-        <div className="bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex items-center justify-between text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
-            <span>MOON ILLUMINATION</span>
-            <span aria-hidden="true" className="text-[var(--ink-muted)] text-[11px]">PHASE</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
-              {topMetrics.moonPercentStr}
+        }
+      >
+        <div className="flex flex-col gap-3">
+          {/* Inline ephemeris & site telemetry strip */}
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 border-y border-[var(--border-subtle)] py-2.5 sm:grid-cols-3 lg:grid-cols-5">
+            <div>
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">Date · UTC</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-sm font-semibold text-[var(--ink-primary)]">{topMetrics.dateStr}</dd>
             </div>
-            <MoonPhaseDisc fraction={topMetrics.moonFraction} phaseDeg={topMetrics.moonPhaseDeg} />
-          </div>
-        </div>
-
-        {/* Card 5: VISIBLE COUNT */}
-        <div className="col-span-2 md:col-span-1 bento-card bg-white p-3.5 flex flex-col justify-between border border-[#E2E5EC] rounded-[14px] min-h-[96px]">
-          <div className="flex flex-col gap-0.5 text-[10px] tracking-wider font-semibold text-[var(--ink-secondary)] uppercase">
-            <span>VISIBLE COUNT</span>
-            <span className="text-[9px] font-normal text-[var(--ink-muted)]">{visibleTargetDescription}</span>
-          </div>
-          <div className="font-dot text-xl sm:text-2xl text-[var(--ink-primary)] tracking-wide font-bold">
-            {visibleTargetCount}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Middle Bento Card: SKY TONIGHT Table matching Frame 5 */}
-      <section className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-3 sm:p-4 flex flex-col gap-3 min-h-[360px] flex-1" aria-labelledby="sky-tonight-title">
-        {/* Table Title and Frame 5 Evening/Night/Full Mode Toggles */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <h1 id="sky-tonight-title" className="font-bold text-sm tracking-wider uppercase text-[var(--ink-primary)]">Sky tonight</h1>
-            <span className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wide">
-              [{targetType === 'constellations' ? filteredConstellations.length : filteredBrightStars.length} {targetType === 'constellations' ? 'CONSTELLATIONS' : 'BRIGHT STARS'} // {currentUtcTimeStr} UTC]
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Frame 5 Segmented Mode Rockers: EVENING / NIGHT / FULL */}
-            <div className="tactile-rocker">
-              <button
-                onClick={() => setTimeMode('evening')}
-                aria-pressed={timeMode === 'evening'}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  timeMode === 'evening' ? 'active' : ''
-                }`}
-              >
-                EVENING
-              </button>
-              <button
-                onClick={() => setTimeMode('night')}
-                aria-pressed={timeMode === 'night'}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  timeMode === 'night' ? 'active' : ''
-                }`}
-              >
-                NIGHT
-              </button>
-              <button
-                onClick={() => setTimeMode('full')}
-                aria-pressed={timeMode === 'full'}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  timeMode === 'full' ? 'active' : ''
-                }`}
-              >
-                FULL
-              </button>
+            <div>
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">Observer site</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-xs font-semibold text-[var(--ink-primary)]">
+                {topMetrics.latVal}°{topMetrics.latDir} · {topMetrics.lonVal}°{topMetrics.lonDir}
+              </dd>
             </div>
-          </div>
-        </div>
-
-        {/* Keep secondary browse and time controls available without crowding the reference layout. */}
-        <details className="group shrink-0">
-          <summary className="cursor-pointer list-none border-y border-[#E2E5EC]/60 py-2 text-[10px] font-bold uppercase tracking-wider text-[var(--ink-secondary)] marker:hidden">
-            <span className="inline-flex flex-wrap items-center gap-2">
-              <span className="text-[var(--signal-cobalt)]">+</span>
-              Browse &amp; time controls
-              <span className="font-normal normal-case tracking-normal text-[var(--ink-muted)]">Search, filters, target type, and time steps</span>
-            </span>
-          </summary>
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs">
-          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-            {/* Target Category Toggle: Constellations vs Bright Stars */}
-            <div className="tactile-rocker">
-              <button
-                onClick={() => setTargetType('constellations')}
-                aria-pressed={targetType === 'constellations'}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  targetType === 'constellations' ? 'active' : ''
-                }`}
-              >
-                CONSTELLATIONS ({aboveHorizonCount})
-              </button>
-              <button
-                onClick={() => setTargetType('stars')}
-                aria-pressed={targetType === 'stars'}
-                className={`tactile-pill text-[10px] uppercase font-semibold ${
-                  targetType === 'stars' ? 'active' : ''
-                }`}
-              >
-                BRIGHT STARS ({visibleBrightStarsCount})
-              </button>
+            <div>
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">Sunset · UTC</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-sm font-semibold text-[var(--ink-primary)]">{topMetrics.sunsetTimeStr}</dd>
             </div>
+            <div>
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">Moon phase</dt>
+              <dd className="mt-0.5 flex items-center gap-2 font-mono tabular-nums text-sm font-semibold text-[var(--ink-primary)]">
+                <span>{topMetrics.moonPercentStr}</span>
+                <MoonPhaseDisc fraction={topMetrics.moonFraction} phaseDeg={topMetrics.moonPhaseDeg} />
+              </dd>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">{visibleTargetDescription}</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-sm font-semibold text-[var(--signal-mid)]">{visibleTargetCount}</dd>
+            </div>
+          </dl>
 
+          {/* Accessible catalog & visibility filters */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <ToggleGroup
+              aria-label="Target type filter"
+              size="sm"
+              value={[targetType]}
+              onValueChange={vals => {
+                const next = vals.find(v => v !== targetType) ?? vals[0];
+                if (next) setTargetType(next as typeof targetType);
+              }}
+              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+            >
+              <ToggleGroupItem
+                value="constellations"
+                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              >
+                Constellations ({aboveHorizonCount})
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="stars"
+                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+              >
+                Bright stars ({visibleBrightStarsCount})
+              </ToggleGroupItem>
+            </ToggleGroup>
 
-            {/* Search Input */}
-            <input
+            <Input
               type="text"
-              placeholder="SEARCH CONSTELLATION OR STAR..."
+              size="sm"
+              placeholder="Search constellation or star..."
               aria-label="Search constellations or bright stars"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] rounded-[8px] px-3 py-1 text-xs text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)] focus:outline-none focus:border-[var(--signal-cobalt)] uppercase tracking-wider w-52 sm:w-60"
+              onKeyDown={e => e.stopPropagation()}
+              className="w-52 sm:w-60 text-xs"
             />
 
-            {/* Horizon Filter Rockers */}
-            <div className="tactile-rocker">
-              <button
-                onClick={() => setHorizonFilter('above')}
-                aria-pressed={horizonFilter === 'above'}
-                className={`tactile-pill text-[10px] uppercase ${
-                  horizonFilter === 'above' ? 'active' : ''
-                }`}
+            <ToggleGroup
+              aria-label="Horizon visibility filter"
+              size="sm"
+              value={[horizonFilter]}
+              onValueChange={vals => {
+                const next = vals.find(v => v !== horizonFilter) ?? vals[0];
+                if (next) setHorizonFilter(next as typeof horizonFilter);
+              }}
+              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+            >
+              <ToggleGroupItem
+                value="above"
+                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
               >
-                ABOVE ({aboveHorizonCount})
-              </button>
-              <button
-                onClick={() => setHorizonFilter('all')}
-                aria-pressed={horizonFilter === 'all'}
-                className={`tactile-pill text-[10px] uppercase ${
-                  horizonFilter === 'all' ? 'active' : ''
-                }`}
+                Above ({aboveHorizonCount})
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="all"
+                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
               >
-                ALL 88
-              </button>
-              <button
-                onClick={() => setHorizonFilter('circumpolar')}
-                aria-pressed={horizonFilter === 'circumpolar'}
-                className={`tactile-pill text-[10px] uppercase ${
-                  horizonFilter === 'circumpolar' ? 'active' : ''
-                }`}
+                All 88
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="circumpolar"
+                className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
               >
-                CIRCUMPOLAR ({circumpolarCount})
-              </button>
-            </div>
+                Circumpolar ({circumpolarCount})
+              </ToggleGroupItem>
+            </ToggleGroup>
 
-            {/* Hemisphere Filter */}
-            <div className="tactile-rocker">
+            <ToggleGroup
+              aria-label="Hemisphere filter"
+              size="sm"
+              value={[hemisphereFilter]}
+              onValueChange={vals => {
+                const next = vals.find(v => v !== hemisphereFilter) ?? vals[0];
+                if (next) setHemisphereFilter(next as typeof hemisphereFilter);
+              }}
+              className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
+            >
               {(['all', 'north', 'south'] as const).map(hemi => (
-                <button
+                <ToggleGroupItem
                   key={hemi}
-                  onClick={() => setHemisphereFilter(hemi)}
-                    aria-pressed={hemisphereFilter === hemi}
-                  className={`tactile-pill text-[10px] uppercase ${
-                    hemisphereFilter === hemi ? 'active' : ''
-                  }`}
+                  value={hemi}
+                  className="text-[11px] font-semibold capitalize data-pressed:bg-primary data-pressed:text-primary-foreground"
                 >
-                  {hemi === 'all' ? 'ALL' : hemi === 'north' ? 'NORTH' : 'SOUTH'}
-                </button>
+                  {hemi === 'all' ? 'All skies' : hemi}
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
 
-            {/* Sort Dropdown */}
-            <select
+            <Select
               value={sortBy}
-              aria-label="Sort visible targets"
-              onChange={e => setSortBy(e.target.value as any)}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] rounded-[6px] px-2 py-1 text-[10px] text-[var(--ink-secondary)] uppercase tracking-wider cursor-pointer focus:outline-none focus:border-[var(--signal-cobalt)]"
+              onValueChange={val => {
+                if (val) setSortBy(val as typeof sortBy);
+              }}
             >
-              <option value="altitude">ALTITUDE</option>
-              <option value="transit">TRANSIT</option>
-              <option value="name">NAME (A-Z)</option>
-              <option value="area">AREA</option>
-            </select>
-          </div>
-
-          {/* Quick Hardware Time Stepper Buttons */}
-          <div className="flex flex-wrap items-center gap-1">
-            <button
-              onClick={() => stepTime(-1)}
-              className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              aria-label="Step observation time back one hour"
-            >
-              -1H
-            </button>
-            <button
-              onClick={() => setObservationDate(new Date())}
-              className="tactile-pill bg-[var(--signal-cobalt)] text-white text-[10px] py-1 px-2.5 font-bold"
-              aria-label="Set observation date and time to now"
-            >
-              NOW
-            </button>
-            <button
-              onClick={() => stepTime(1)}
-              className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              aria-label="Step observation time forward one hour"
-            >
-              +1H
-            </button>
-            <button
-              onClick={() => stepTime(24)}
-              className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              aria-label="Step observation time forward 24 hours"
-            >
-              +24H
-            </button>
-            <button
-              onClick={() => handleStepMinutes(-15)}
-              className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              aria-label="Step observation time back 15 minutes"
-            >
-              -15M
-            </button>
-            <button
-              onClick={() => handleStepMinutes(15)}
-              className="tactile-pill text-[10px] py-1 px-2 font-bold"
-              aria-label="Step observation time forward 15 minutes"
-            >
-              +15M
-            </button>
-          </div>
-          </div>
-        </details>
-
-        {/* 11-Hour Dot Matrix Table */}
-        <div className="min-h-0 flex-1 overflow-auto border border-[#E2E5EC] rounded-[10px]">
-          <div className="min-w-[960px]">
-            {/* Header Row */}
-            <div className="sticky top-0 bg-[#F5F6F8] border-b border-[#E2E5EC] px-3 py-2 flex items-center text-[10px] font-bold text-[var(--ink-secondary)] tracking-wider uppercase z-10">
-              <div className="w-56 shrink-0">
-                {targetType === 'constellations' ? 'CONSTELLATION' : 'STAR'}
-              </div>
-              <div className="w-36 shrink-0">
-                {targetType === 'constellations' ? 'VISIBILITY' : 'MAG // ALT'}
-              </div>
-              <div className="flex-1 grid grid-cols-11 gap-1 text-center">
-                {NIGHT_HOURS.map(hour => (
-                  <span
-                    key={hour}
-                    className={currentUtcHours === hour ? 'text-[var(--signal-cobalt)] font-bold' : ''}
-                  >
-                    {hour.toString().padStart(2, '0')}:00
-                  </span>
-                ))}
-              </div>
-              <div className="w-20 shrink-0 text-right">ACTION</div>
-            </div>
-
-            {/* Constellation Rows */}
-            {targetType === 'constellations' && (
-              <div className="divide-y divide-[#E2E5EC]/60">
-                {filteredConstellations.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-[var(--ink-muted)]">
-                    NO CONSTELLATIONS MATCH CURRENT FILTERS
-                  </div>
-                ) : (
-                  filteredConstellations.map(con => (
-                    <div
-                      key={con.id}
-                      className={`px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs group ${selectedConId === con.id ? 'bg-[#F4F7FC]' : ''}`}
-                    >
-                      {/* Constellation Vector Glyph & Name */}
-                      <div className="w-56 shrink-0 flex items-center gap-2.5">
-                        <MiniAsterismGlyph con={con} width={34} height={24} />
-                        <button
-                          type="button"
-                          onClick={() => setSelectedConId(con.id)}
-                          aria-pressed={selectedConId === con.id}
-                          aria-label={`Select ${con.name}`}
-                          className="min-w-0 text-left"
-                        >
-                          <span className="block font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
-                            {con.name}
-                          </span>
-                          <span className="block text-[10px] text-[var(--ink-muted)] uppercase">
-                            {con.englishName} ({con.id})
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Visibility Window */}
-                      <div className="w-36 shrink-0 font-mono text-[11px] text-[var(--ink-secondary)]">
-                        {con.culmination.neverRises ? 'NEVER RISES' : con.windowStr}
-                      </div>
-
-                      {/* 44 Dots across 11 Hours (4 Dots/Hour) */}
-                      <div className="flex-1 grid grid-cols-11 gap-1">
-                        {NIGHT_HOURS.map((hour, hIdx) => {
-                          const hourQuanta = [0, 1, 2, 3].map(qIdx => {
-                            const dotIdx = hIdx * 4 + qIdx;
-                            const isVisible = con.dotTrack[dotIdx];
-                            const minute = QUANTA_MINUTES[qIdx];
-                            const isCurrent =
-                              currentUtcHours === hour &&
-                              Math.floor(currentUtcMinutes / 15) === qIdx;
-
-                            return (
-                              <button
-                                key={qIdx}
-                                type="button"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleSetQuantumTime(hour, minute);
-                                }}
-                                aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
-                                  isVisible ? 'Visible Above Horizon' : 'Below Horizon'
-                                }`}
-                                aria-pressed={isCurrent}
-                                className="flex h-5 w-4 shrink-0 cursor-pointer items-center justify-center"
-                              >
-                                <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
-                                  isVisible ? 'bg-[var(--signal-cobalt)]' : 'bg-[#E2E5EC]'
-                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`} />
-                              </button>
-                            );
-                          });
-
-                          return (
-                            <div key={hour} className="flex items-center justify-center gap-[3px]">
-                              {hourQuanta}
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Action Button */}
-                      <div className="w-20 shrink-0 text-right">
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            focusOnConstellation(con.id);
-                          }}
-                          aria-label={`Focus ${con.name} in sky canvas`}
-                          className="tactile-pill text-[9px] py-1 px-2 uppercase hover:bg-[var(--bg-pill-active)] hover:text-[var(--signal-cobalt)]"
-                          title={`Focus ${con.name} in sky canvas`}
-                        >
-                          FOCUS ↗
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Bright Stars Rows */}
-            {targetType === 'stars' && (
-              <div className="divide-y divide-[#E2E5EC]/60">
-                {filteredBrightStars.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-[var(--ink-muted)]">
-                    NO BRIGHT STARS MATCH CURRENT FILTERS
-                  </div>
-                ) : (
-                  filteredBrightStars.map(star => (
-                    <div
-                      key={star.id}
-                      className="px-3 py-2 flex items-center hover:bg-[#F8FAFC] text-xs group"
-                    >
-                      <div className="w-56 shrink-0">
-                        <div>
-                          <span className="block font-bold text-xs uppercase text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)]">
-                            {star.proper || star.name}
-                          </span>
-                          <span className="block text-[10px] text-[var(--ink-muted)] uppercase">
-                            {star.con} // HIP {star.hip || '—'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="w-36 shrink-0 font-mono text-[11px] text-[var(--ink-secondary)]">
-                        <span className="font-bold text-[var(--signal-cobalt)]">{star.mag.toFixed(2)}m</span>
-                        <span className="ml-2">ALT {star.altitude.toFixed(0)}°</span>
-                      </div>
-
-                      <div className="flex-1 grid grid-cols-11 gap-1">
-                        {NIGHT_HOURS.map((hour, hIdx) => {
-                          const hourQuanta = [0, 1, 2, 3].map(qIdx => {
-                            const dotIdx = hIdx * 4 + qIdx;
-                            const isVisible = star.dotTrack[dotIdx];
-                            const minute = QUANTA_MINUTES[qIdx];
-                            const isCurrent =
-                              currentUtcHours === hour &&
-                              Math.floor(currentUtcMinutes / 15) === qIdx;
-
-                            return (
-                              <button
-                                key={qIdx}
-                                type="button"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleSetQuantumTime(hour, minute);
-                                }}
-                                aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
-                                  isVisible ? 'Visible' : 'Below Horizon'
-                                }`}
-                                aria-pressed={isCurrent}
-                                className="flex h-5 w-4 shrink-0 cursor-pointer items-center justify-center"
-                              >
-                                <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
-                                  isVisible ? 'bg-[var(--signal-cobalt)]' : 'bg-[#E2E5EC]'
-                                } ${isCurrent ? 'ring-2 ring-[var(--signal-cobalt)]/50' : ''}`} />
-                              </button>
-                            );
-                          });
-
-                          return (
-                            <div key={hour} className="flex items-center justify-center gap-[3px]">
-                              {hourQuanta}
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      <div className="w-20 shrink-0 text-right">
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            focusOnStar(star.id);
-                          }}
-                          aria-label={`Focus ${star.proper || star.name} in sky canvas`}
-                          className="tactile-pill text-[9px] py-1 px-2 uppercase hover:bg-[var(--bg-pill-active)] hover:text-[var(--signal-cobalt)]"
-                        >
-                          FOCUS ↗
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
+              <SelectTrigger size="sm" aria-label="Sort visible targets" className="w-auto min-w-[140px] text-xs">
+                <SelectValue>
+                  {val =>
+                    val === 'altitude'
+                      ? 'Sort: Altitude'
+                      : val === 'transit'
+                        ? 'Sort: Transit'
+                        : val === 'name'
+                          ? 'Sort: Name (A–Z)'
+                          : 'Sort: Area'
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                <SelectItem value="altitude" className="text-xs">Sort: Altitude</SelectItem>
+                <SelectItem value="transit" className="text-xs">Sort: Transit</SelectItem>
+                <SelectItem value="name" className="text-xs">Sort: Name (A–Z)</SelectItem>
+                <SelectItem value="area" className="text-xs">Sort: Area</SelectItem>
+              </SelectPopup>
+            </Select>
           </div>
         </div>
-      </section>
+      </PageHeader>
 
-      {/* 3. Bottom Row: 3 Lower Modules matching Frame 5 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 shrink-0">
-        {/* Module 1: RECOMMENDED OBSERVATION WINDOWS */}
-        <div className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-3.5 flex flex-col justify-between min-h-[190px]">
-          <div className="text-[11px] font-bold text-[var(--ink-primary)] tracking-wider uppercase">
-            RECOMMENDED OBSERVATION WINDOWS
-          </div>
-
-          <div className="space-y-2 mt-2">
-            {recommendedWindows.map(item => {
-              const isSelected = item.id === activeSelectedId;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedConId(item.id);
-                    focusOnConstellation(item.id);
-                  }}
-                  aria-pressed={isSelected}
-                  className={`w-full p-2 rounded-[10px] flex items-center justify-between text-left border ${
-                    isSelected
-                      ? 'bg-[#EAF0FC] border-[#C7D5EC]'
-                      : 'bg-[#F8FAFC] border-transparent hover:border-[#E2E5EC]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <MiniAsterismGlyph con={item} width={32} height={22} />
-                    <div>
-                      <div className="font-bold text-xs uppercase text-[var(--ink-primary)]">
-                        {item.name}
-                      </div>
-                      <div className="text-[9px] text-[var(--ink-secondary)] font-mono">
-                        <span className="text-[var(--ink-muted)]">ALTITUDE WINDOW · </span>{item.windowStr} UTC
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 text-right font-mono">
-                    <div className="text-[9px] font-normal text-[var(--ink-muted)]">SAMPLE COVERAGE</div>
-                    <div className="text-[10px] font-bold text-[var(--ink-secondary)]">{item.durationStr}</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Module 2: TONIGHT'S HIGHLIGHTS */}
-        <div className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-3.5 flex flex-col justify-between min-h-[190px]">
-          <div className="text-[11px] font-bold text-[var(--ink-primary)] tracking-wider uppercase">
-            TONIGHT'S HIGHLIGHTS
-          </div>
-
-          <div className="space-y-2 mt-2">
-            {tonightHighlights.map(item => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  setSelectedConId(item.id);
-                  focusOnConstellation(item.id);
-                }}
-                className="p-2 rounded-[10px] bg-[#F8FAFC] border border-transparent hover:border-[#E2E5EC] flex items-center gap-3 cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-[6px] bg-white border border-[#E2E5EC] flex items-center justify-center shrink-0">
-                  <MiniAsterismGlyph con={item} width={26} height={18} />
-                </div>
-                <div>
-                  <div className="font-bold text-xs uppercase text-[var(--ink-primary)]">
-                    {item.name}
-                  </div>
-                  <div className="text-[10px] text-[var(--ink-secondary)] font-mono">
-                    BEST: {item.transitTimeStr} (PEAK {item.culmination.maxAltitude}°)
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Module 3: SKY PREVIEW */}
-        <div className="bento-card bg-white border border-[#E2E5EC] rounded-[14px] p-3.5 flex flex-col justify-between min-h-[190px]">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--ink-primary)] tracking-wider uppercase">
-            <span>SKY PREVIEW</span>
-            <span className="font-mono text-[10px] text-[var(--ink-secondary)]">
-              {currentUtcTimeStr} UTC
+      {/* Main 2-column planning workspace: Quantum Matrix left, Companion Stack right */}
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-4 items-start min-h-0 flex-1">
+        {/* Left: 11-Hour Visibility Quantum Matrix */}
+        <Card className="atlas-surface rounded-xl p-0 gap-0 overflow-hidden min-h-[380px] max-h-[680px] flex flex-col">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-3.5 py-2.5">
+            <h2 className="text-xs font-semibold text-[var(--ink-primary)]">
+              11-hour visibility matrix · <span className="font-mono text-[var(--ink-muted)] font-normal">18:00–04:45 UTC</span>
+            </h2>
+            <span className="font-mono text-[10px] text-[var(--ink-muted)]">
+              Click any 15m dot to scrub time
             </span>
           </div>
 
-          <div className="mt-2">
+          <div className="min-h-0 flex-1 overflow-auto">
+            <div className="min-w-[820px]">
+              <div className="sticky top-0 bg-[var(--bg-card-subtle)] border-b border-[var(--border-subtle)] px-3 py-2 flex items-center text-[10px] font-semibold text-[var(--ink-muted)] tracking-[0.08em] uppercase z-10">
+                <div className="w-48 shrink-0">
+                  {targetType === 'constellations' ? 'Constellation' : 'Star'}
+                </div>
+                <div className="w-28 shrink-0 font-mono">
+                  {targetType === 'constellations' ? 'Window' : 'Mag / Alt'}
+                </div>
+                <div className="flex-1 grid grid-cols-11 gap-1 text-center font-mono">
+                  {NIGHT_HOURS.map(hour => (
+                    <span
+                      key={hour}
+                      className={currentUtcHours === hour ? 'text-[var(--signal-mid)] font-bold' : ''}
+                    >
+                      {hour.toString().padStart(2, '0')}:00
+                    </span>
+                  ))}
+                </div>
+                <div className="w-20 shrink-0 text-right">Action</div>
+              </div>
+
+              {targetType === 'constellations' && (
+                <div className="divide-y divide-[var(--border-subtle)]">
+                  {filteredConstellations.length === 0 ? (
+                    <Empty className="p-8 border-0">
+                      <EmptyHeader>
+                        <EmptyTitle className="text-xs">No matching constellations</EmptyTitle>
+                        <EmptyDescription className="text-xs">
+                          No constellations match current filters.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  ) : (
+                    filteredConstellations.map(con => (
+                      <div
+                        key={con.id}
+                        className={`px-3 py-2 flex items-center hover:bg-[var(--bg-card-subtle)] text-xs group transition-colors ${selectedConId === con.id ? 'bg-[var(--bg-pill-active)]' : ''}`}
+                      >
+                        <div className="w-48 shrink-0 flex items-center gap-2.5">
+                          <MiniAsterismGlyph con={con} width={32} height={22} />
+                          <Button
+                            variant="ghost"
+                            onClick={() => setSelectedConId(con.id)}
+                            aria-pressed={selectedConId === con.id}
+                            aria-label={`Select ${con.name}`}
+                            className="h-auto p-0 min-w-0 flex-col items-start text-left font-normal hover:bg-transparent"
+                          >
+                            <span className="block font-sans font-semibold text-xs text-[var(--ink-primary)] group-hover:text-[var(--signal-mid)]">
+                              {con.name}
+                            </span>
+                            <span className="block text-[10px] font-mono text-[var(--ink-muted)] truncate max-w-[140px]">
+                              {con.englishName} ({con.id})
+                            </span>
+                          </Button>
+                        </div>
+
+                        <div className="w-28 shrink-0 font-mono tabular-nums text-[11px] text-[var(--ink-secondary)]">
+                          {con.culmination.neverRises ? 'Never rises' : con.windowStr}
+                        </div>
+
+                        <div className="flex-1 grid grid-cols-11 gap-1">
+                          {NIGHT_HOURS.map((hour, hIdx) => {
+                            const hourQuanta = [0, 1, 2, 3].map(qIdx => {
+                              const dotIdx = hIdx * 4 + qIdx;
+                              const isVisible = con.dotTrack[dotIdx];
+                              const minute = QUANTA_MINUTES[qIdx];
+                              const isCurrent =
+                                currentUtcHours === hour &&
+                                Math.floor(currentUtcMinutes / 15) === qIdx;
+
+                              return (
+                                <Button
+                                  key={qIdx}
+                                  variant="ghost"
+                                  size="xs"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSetQuantumTime(hour, minute);
+                                  }}
+                                  aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
+                                    isVisible ? 'Visible Above Horizon' : 'Below Horizon'
+                                  }`}
+                                  aria-pressed={isCurrent}
+                                  className="h-5 sm:h-5 w-3.5 min-w-0 shrink-0 gap-0 rounded-sm border-0 p-0 hover:bg-[var(--bg-pill-active)]"
+                                >
+                                  <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
+                                    isVisible ? 'bg-[var(--signal-mid)]' : 'bg-[var(--dot-inactive)]'
+                                  } ${isCurrent ? 'ring-2 ring-[var(--signal-mid)]/70' : ''}`} />
+                                </Button>
+                              );
+                            });
+
+                            return (
+                              <div key={hour} className="flex items-center justify-center gap-[2px]">
+                                {hourQuanta}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="w-20 shrink-0 text-right">
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            onClick={e => {
+                              e.stopPropagation();
+                              focusOnConstellation(con.id);
+                            }}
+                            aria-label={`Focus ${con.name} in sky canvas`}
+                            className="text-[11px] font-semibold hover:text-[var(--signal-mid)]"
+                            title={`Focus ${con.name} in sky canvas`}
+                          >
+                            Focus ↗
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {targetType === 'stars' && (
+                <div className="divide-y divide-[var(--border-subtle)]">
+                  {filteredBrightStars.length === 0 ? (
+                    <Empty className="p-8 border-0">
+                      <EmptyHeader>
+                        <EmptyTitle className="text-xs">No matching bright stars</EmptyTitle>
+                        <EmptyDescription className="text-xs">
+                          No bright stars match current filters.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  ) : (
+                    filteredBrightStars.map(star => (
+                      <div
+                        key={star.id}
+                        className="px-3 py-2 flex items-center hover:bg-[var(--bg-card-subtle)] text-xs group transition-colors"
+                      >
+                        <div className="w-48 shrink-0">
+                          <div>
+                            <span className="block font-sans font-semibold text-xs text-[var(--ink-primary)] group-hover:text-[var(--signal-mid)]">
+                              {star.proper || star.name}
+                            </span>
+                            <span className="block text-[10px] font-mono text-[var(--ink-muted)]">
+                              {star.con} · HIP {star.hip || '—'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="w-28 shrink-0 font-mono tabular-nums text-[11px] text-[var(--ink-secondary)]">
+                          <span className="font-semibold text-[var(--signal-mid)]">{star.mag.toFixed(2)}m</span>
+                          <span className="ml-2">Alt {star.altitude.toFixed(0)}°</span>
+                        </div>
+
+                        <div className="flex-1 grid grid-cols-11 gap-1">
+                          {NIGHT_HOURS.map((hour, hIdx) => {
+                            const hourQuanta = [0, 1, 2, 3].map(qIdx => {
+                              const dotIdx = hIdx * 4 + qIdx;
+                              const isVisible = star.dotTrack[dotIdx];
+                              const minute = QUANTA_MINUTES[qIdx];
+                              const isCurrent =
+                                currentUtcHours === hour &&
+                                Math.floor(currentUtcMinutes / 15) === qIdx;
+
+                              return (
+                                <Button
+                                  key={qIdx}
+                                  variant="ghost"
+                                  size="xs"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSetQuantumTime(hour, minute);
+                                  }}
+                                  aria-label={`Set observation time to ${getNightSampleDate(observationDate, hour, minute).toISOString().slice(0, 10)} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} UTC; ${
+                                    isVisible ? 'Visible' : 'Below Horizon'
+                                  }`}
+                                  aria-pressed={isCurrent}
+                                  className="h-5 sm:h-5 w-3.5 min-w-0 shrink-0 gap-0 rounded-sm border-0 p-0 hover:bg-[var(--bg-pill-active)]"
+                                >
+                                  <span aria-hidden="true" className={`h-[6px] w-[6px] rounded-full ${
+                                    isVisible ? 'bg-[var(--signal-mid)]' : 'bg-[var(--dot-inactive)]'
+                                  } ${isCurrent ? 'ring-2 ring-[var(--signal-mid)]/70' : ''}`} />
+                                </Button>
+                              );
+                            });
+
+                            return (
+                              <div key={hour} className="flex items-center justify-center gap-[2px]">
+                                {hourQuanta}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="w-20 shrink-0 text-right">
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            onClick={e => {
+                              e.stopPropagation();
+                              focusOnStar(star.id);
+                            }}
+                            aria-label={`Focus ${star.proper || star.name} in sky canvas`}
+                            className="text-[11px] font-semibold hover:text-[var(--signal-mid)]"
+                          >
+                            Focus ↗
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Right: Sticky Companion Stack (Sky preview, Windows & Highlights, Weather Forecast) */}
+        <div className="flex flex-col gap-3 xl:sticky xl:top-0">
+          <Card className="atlas-surface rounded-xl p-3.5 gap-2.5 flex flex-col">
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--ink-primary)]">
+              <span>Sky preview</span>
+              <span className="font-mono tabular-nums text-[10px] font-normal text-[var(--ink-muted)]">
+                {currentUtcTimeStr} UTC
+              </span>
+            </div>
             <SkyPreview
               topCons={filteredConstellations.length > 0 ? filteredConstellations : constellationsData}
               observationDate={observationDate}
               observer={observer}
               onSelectConstellation={conId => focusOnConstellation(conId)}
             />
-          </div>
+          </Card>
+
+          <Card className="atlas-surface rounded-xl p-3.5 gap-3 flex flex-col">
+            <div>
+              <h2 className="text-xs font-semibold text-[var(--ink-primary)] mb-2">
+                Recommended windows
+              </h2>
+              <div className="space-y-1.5">
+                {recommendedWindows.map(item => {
+                  const isSelected = item.id === activeSelectedId;
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={isSelected ? 'secondary' : 'ghost'}
+                      onClick={() => {
+                        setSelectedConId(item.id);
+                        focusOnConstellation(item.id);
+                      }}
+                      aria-pressed={isSelected}
+                      className={`h-auto w-full px-2.5 py-2 rounded-lg flex items-center justify-between text-left border font-normal ${
+                        isSelected
+                          ? 'bg-[var(--bg-pill-active)] border-[var(--signal-surface)]'
+                          : 'bg-[var(--bg-card-subtle)] border-transparent hover:border-[var(--border-subtle)]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <MiniAsterismGlyph con={item} width={30} height={20} />
+                        <div>
+                          <div className="font-sans font-semibold text-xs text-[var(--ink-primary)]">
+                            {item.name}
+                          </div>
+                          <div className="text-[10px] text-[var(--ink-secondary)] font-mono tabular-nums">
+                            {item.windowStr} UTC
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 text-right font-mono tabular-nums">
+                        <div className="text-[9px] text-[var(--ink-muted)] uppercase">Coverage</div>
+                        <div className="text-[11px] font-semibold text-[var(--ink-secondary)]">{item.durationStr}</div>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--border-subtle)] pt-3">
+              <h2 className="text-xs font-semibold text-[var(--ink-primary)] mb-2">
+                Tonight's highlights
+              </h2>
+              <div className="space-y-1.5">
+                {tonightHighlights.map(item => (
+                  <Button
+                    key={item.id}
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedConId(item.id);
+                      focusOnConstellation(item.id);
+                    }}
+                    className="h-auto w-full justify-start text-left px-2.5 py-2 rounded-lg bg-[var(--bg-card-subtle)] border border-transparent hover:border-[var(--border-subtle)] flex items-center gap-2.5 font-normal"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-[var(--bg-viewport)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
+                      <MiniAsterismGlyph con={item} width={22} height={16} />
+                    </div>
+                    <div>
+                      <div className="font-sans font-semibold text-xs text-[var(--ink-primary)]">
+                        {item.name}
+                      </div>
+                      <div className="text-[10px] text-[var(--ink-secondary)] font-mono tabular-nums">
+                        Transit {item.transitTimeStr} · Peak {item.culmination.maxAltitude}°
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          <ObservingConditions />
         </div>
       </div>
     </section>

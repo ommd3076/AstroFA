@@ -14,29 +14,13 @@ import {
   getEquatorialToThreeJsHorizontalMatrix,
 } from '../astronomy/coordinates';
 import type { Star } from '../types/astronomy';
+import { escapeSvgText } from './svgText';
 
-// Helper to generate a soft circular stellar point texture
-function createStarTexture(): THREE.Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
-  const ctx = canvas.getContext('2d')!;
-
-  const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.2, 'rgba(230, 245, 255, 0.9)');
-  gradient.addColorStop(0.5, 'rgba(160, 210, 255, 0.35)');
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 64, 64);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.premultiplyAlpha = true;
-  return texture;
+interface SkyCanvasProps {
+  showDeepSky?: boolean;
 }
 
-export const SkyCanvas: React.FC = () => {
+export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgOverlayRef = useRef<SVGSVGElement>(null);
 
@@ -70,6 +54,8 @@ export const SkyCanvas: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const celestialGroupRef = useRef<THREE.Group | null>(null);
+  const skyDomeMeshRef = useRef<THREE.Mesh | null>(null);
+  const skyDomeTexRef = useRef<THREE.Texture | null>(null);
   const starPointsRef = useRef<THREE.Points | null>(null);
   const normalLinesMeshRef = useRef<THREE.LineSegments | null>(null);
   const focusedLinesMeshRef = useRef<THREE.LineSegments | null>(null);
@@ -96,19 +82,30 @@ export const SkyCanvas: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    let lastWidth = Math.max(0, Math.round(container.clientWidth));
+    let lastHeight = Math.max(0, Math.round(container.clientHeight));
+    let lastPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x060A14); // Deep space viewport background (--bg-viewport: #060A14)
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 2000);
+    const camera = new THREE.PerspectiveCamera(
+      60,
+      lastWidth > 0 && lastHeight > 0 ? lastWidth / lastHeight : 1,
+      0.1,
+      2000
+    );
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(lastPixelRatio);
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    if (lastWidth > 0 && lastHeight > 0) {
+      renderer.setSize(lastWidth, lastHeight, false);
+    }
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -117,11 +114,77 @@ export const SkyCanvas: React.FC = () => {
     scene.add(celestialGroup);
     celestialGroupRef.current = celestialGroup;
 
-    // --- Build Starfield ---
+    // --- NASA SVS Deep Star Maps 2020 Equatorial Milky Way Dome ---
+    let isDisposed = false;
+    const skyDomeGeom = new THREE.SphereGeometry(515, 64, 32);
+    const skyDomeMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uMap: { value: null },
+        uHasMap: { value: 0.0 },
+        uOpacity: { value: 0.22 },
+        uBaseColor: { value: new THREE.Color(0x060a14) },
+      },
+      vertexShader: `
+        varying vec3 vLocalDir;
+        void main() {
+          vLocalDir = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uMap;
+        uniform float uHasMap;
+        uniform float uOpacity;
+        uniform vec3 uBaseColor;
+        varying vec3 vLocalDir;
+        void main() {
+          vec3 col = uBaseColor;
+          if (uHasMap > 0.5) {
+            vec3 d = normalize(vLocalDir);
+            float u = fract(0.5 - atan(d.y, d.x) / 6.283185307179586);
+            float v = 0.5 + asin(clamp(d.z, -1.0, 1.0)) / 3.141592653589793;
+            vec3 texCol = texture2D(uMap, vec2(u, v)).rgb;
+            float texPeak = max(texCol.r, max(texCol.g, texCol.b));
+            vec3 calibratedTex = texCol / (1.0 + texPeak * 0.75);
+            float polarTaper = 1.0 - smoothstep(0.88, 0.995, abs(d.z));
+            col = mix(uBaseColor, max(uBaseColor, calibratedTex), uOpacity * polarTaper);
+          }
+          gl_FragColor = vec4(col, 1.0);
+          #include <colorspace_fragment>
+        }
+      `,
+      side: THREE.BackSide,
+      depthWrite: false,
+    });
+    const skyDomeMesh = new THREE.Mesh(skyDomeGeom, skyDomeMat);
+    skyDomeMesh.renderOrder = -10;
+    celestialGroup.add(skyDomeMesh);
+    skyDomeMeshRef.current = skyDomeMesh;
+
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load('/assets/milkyway_2020.jpg', (tex) => {
+      if (isDisposed) {
+        tex.dispose();
+        return;
+      }
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      skyDomeTexRef.current = tex;
+      skyDomeMat.uniforms.uMap.value = tex;
+      skyDomeMat.uniforms.uHasMap.value = 1.0;
+      requestRenderRef.current();
+    });
+
+    // --- Build Starfield (magnitude-scaled size & luminance + soft sprite halo + real B-V palette) ---
     const starCount = STARS.length;
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
+    const alphas = new Float32Array(starCount);
 
     const tempColor = new THREE.Color();
     for (let i = 0; i < starCount; i++) {
@@ -136,24 +199,54 @@ export const SkyCanvas: React.FC = () => {
       colors[i * 3 + 1] = tempColor.g;
       colors[i * 3 + 2] = tempColor.b;
 
-      // Magnitude scaling: Sirius (-1.44) -> ~9px, mag 6.5 -> ~1.8px
-      const size = Math.max(1.8, 8.5 - 1.05 * star.mag);
-      sizes[i] = size;
+      // Magnitude scaling: Sirius (-1.44) ~ 11.9px, mag 6.5 ~ 1.8px
+      sizes[i] = Math.max(1.8, 10.0 - 1.3 * star.mag);
+      alphas[i] = Math.max(0.28, Math.min(1.0, 1.04 - 0.115 * star.mag));
     }
 
     const starGeometry = new THREE.BufferGeometry();
     starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    starGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+    starGeometry.setAttribute('aAlpha', new THREE.BufferAttribute(alphas, 1));
 
-    const starMaterial = new THREE.PointsMaterial({
-      size: 4,
+    const pixelRatio = Math.min(window.devicePixelRatio, 2);
+    const starMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uPixelRatio: { value: pixelRatio },
+      },
+      vertexShader: `
+        attribute float aSize;
+        attribute float aAlpha;
+        uniform float uPixelRatio;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vColor = color;
+          vAlpha = aAlpha;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = clamp(aSize * uPixelRatio, 1.5, 28.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec2 p = 2.0 * gl_PointCoord - 1.0;
+          float r2 = dot(p, p);
+          if (r2 > 1.0) discard;
+          float core = exp(-r2 * 10.5);
+          float halo = exp(-r2 * 2.6) * 0.34;
+          float intensity = (core + halo) * vAlpha;
+          vec3 starCol = mix(vColor, vec3(1.0), core * 0.45);
+          gl_FragColor = vec4(starCol, clamp(intensity, 0.0, 1.0));
+          #include <colorspace_fragment>
+        }
+      `,
       vertexColors: true,
-      map: createStarTexture(),
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      sizeAttenuation: false,
     });
 
     const starPoints = new THREE.Points(starGeometry, starMaterial);
@@ -214,8 +307,8 @@ export const SkyCanvas: React.FC = () => {
     // --- Trace Line Mesh ---
     const traceGeom = new THREE.BufferGeometry();
     const traceMat = new THREE.LineBasicMaterial({
-      color: 0x38ef7d,
-      linewidth: 3,
+      color: 0x3b82f6,
+      linewidth: 2,
       transparent: true,
       opacity: 0.95,
       depthWrite: false,
@@ -273,10 +366,15 @@ export const SkyCanvas: React.FC = () => {
 
     // Demand-driven Render Frame (MOTION-01: 0 idle RAFs, 0 idle renders)
     const renderFrame = () => {
+      if (animFrameId.current !== null) {
+        cancelAnimationFrame(animFrameId.current);
+        animFrameId.current = null;
+      }
       isRenderScheduled.current = false;
-      animFrameId.current = null;
 
-      if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
+      if (isDisposed || !rendererRef.current || !sceneRef.current || !cameraRef.current) return;
+      const canvas = rendererRef.current.domElement;
+      if (canvas.width === 0 || canvas.height === 0) return;
 
       // Camera orientation from lookAngles
       const cam = cameraRef.current;
@@ -296,6 +394,7 @@ export const SkyCanvas: React.FC = () => {
     };
 
     const requestRender = () => {
+      if (isDisposed) return;
       if (!isRenderScheduled.current) {
         isRenderScheduled.current = true;
         animFrameId.current = requestAnimationFrame(renderFrame);
@@ -303,32 +402,69 @@ export const SkyCanvas: React.FC = () => {
     };
     requestRenderRef.current = requestRender;
 
-    // Attach ResizeObserver to canvas container for reliable responsive sizing (MOTION-01)
+    // Attach ResizeObserver to canvas container; skip same-size duplicates to preserve the buffer
     const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width > 0 && height > 0 && cameraRef.current && rendererRef.current) {
-          cameraRef.current.aspect = width / height;
-          cameraRef.current.updateProjectionMatrix();
-          rendererRef.current.setSize(width, height);
-          requestRender();
-        }
+      const entry = entries[entries.length - 1];
+      if (!entry || !cameraRef.current || !rendererRef.current) return;
+      const nextWidth = Math.max(0, Math.round(entry.contentRect.width));
+      const nextHeight = Math.max(0, Math.round(entry.contentRect.height));
+      const nextPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      if (nextWidth <= 0 || nextHeight <= 0) return;
+      if (
+        nextWidth === lastWidth &&
+        nextHeight === lastHeight &&
+        nextPixelRatio === lastPixelRatio
+      ) {
+        return;
       }
+      lastWidth = nextWidth;
+      lastHeight = nextHeight;
+      lastPixelRatio = nextPixelRatio;
+      cameraRef.current.aspect = nextWidth / nextHeight;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setPixelRatio(nextPixelRatio);
+      rendererRef.current.setSize(nextWidth, nextHeight, false);
+      renderFrame();
     });
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestRender();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Initial render
-    requestRender();
+    if (lastWidth > 0 && lastHeight > 0) {
+      renderFrame();
+    } else {
+      requestRender();
+    }
 
     return () => {
+      isDisposed = true;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (animFrameId.current !== null) {
         cancelAnimationFrame(animFrameId.current);
       }
       isRenderScheduled.current = false;
       animFrameId.current = null;
       resizeObserver.disconnect();
+      skyDomeTexRef.current?.dispose();
+      skyDomeTexRef.current = null;
+      scene.traverse(obj => {
+        if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.Points) {
+          obj.geometry?.dispose();
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(mat => mat.dispose());
+          } else {
+            obj.material?.dispose();
+          }
+        }
+      });
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -383,7 +519,7 @@ export const SkyCanvas: React.FC = () => {
             const fill = isFocused ? '#1D55F5' : '#8FA4C4';
             const size = isFocused ? '10' : '9';
             const weight = isFocused ? '700' : '500';
-            const conNameUpper = con.name.toUpperCase();
+            const conNameUpper = escapeSvgText(con.name.toUpperCase());
             svgContent += `<text x="${sx}" y="${sy}" font-family="'IBM Plex Mono', monospace" font-size="${size}" font-weight="${weight}" letter-spacing="0.08em" fill="${fill}" text-anchor="middle" dominant-baseline="middle" opacity="0.9">${conNameUpper}</text>`;
           }
         }
@@ -401,7 +537,7 @@ export const SkyCanvas: React.FC = () => {
         if (p.z < 1) {
           const sx = (p.x * 0.5 + 0.5) * w;
           const sy = (-p.y * 0.5 + 0.5) * h;
-          const starLabel = (star.proper || star.name).toUpperCase();
+          const starLabel = escapeSvgText((star.proper || star.name).toUpperCase());
           const labelWidth = Math.max(48, starLabel.length * 6.5 + 12);
           svgContent += `
             <g transform="translate(${sx}, ${sy})">
@@ -489,13 +625,14 @@ export const SkyCanvas: React.FC = () => {
     return () => clearInterval(interval);
   }, [isTimePlaying, timeSpeedMultiplier, stepTime]);
 
-  // 4. Update Toggles (Lines, Horizon, Grid)
+  // 4. Update Toggles (Deep Sky, Lines, Horizon, Grid)
   useEffect(() => {
+    if (skyDomeMeshRef.current) skyDomeMeshRef.current.visible = showDeepSky;
     if (normalLinesMeshRef.current) normalLinesMeshRef.current.visible = showConstellationLines;
     if (horizonGroupRef.current) horizonGroupRef.current.visible = showHorizon;
     if (gridGroupRef.current) gridGroupRef.current.visible = showEquatorialGrid;
     requestRenderRef.current();
-  }, [showConstellationLines, showHorizon, showEquatorialGrid]);
+  }, [showDeepSky, showConstellationLines, showHorizon, showEquatorialGrid]);
 
   // 5. Update Focused Constellation Lines
   useEffect(() => {

@@ -7,6 +7,24 @@ export interface HorizontalCoords {
   isAboveHorizon: boolean;
 }
 
+/** Convert fixed catalog coordinates from J2000 into the equator of the requested date. */
+function equatorOfDate(raDeg: number, decDeg: number, date: Date): { raHours: number; decDeg: number } {
+  const ra = (raDeg * Math.PI) / 180;
+  const dec = (decDeg * Math.PI) / 180;
+  const vector = new Astronomy.Vector(
+    Math.cos(dec) * Math.cos(ra),
+    Math.cos(dec) * Math.sin(ra),
+    Math.sin(dec),
+    new Astronomy.AstroTime(date),
+  );
+  const rotated = Astronomy.RotateVector(Astronomy.Rotation_EQJ_EQD(date), vector);
+  const sphere = Astronomy.SphereFromVector(rotated);
+  return {
+    raHours: ((sphere.lon / 15) % 24 + 24) % 24,
+    decDeg: sphere.lat,
+  };
+}
+
 /**
  * Computes topocentric Horizontal coordinates (Altitude, Azimuth) for an object at J2000 RA/Dec (degrees)
  * for a specific observer location and UTC date/time.
@@ -18,8 +36,10 @@ export function getHorizontalCoordinates(
   date: Date
 ): HorizontalCoords {
   const obs = new Astronomy.Observer(observer.latitude, observer.longitude, observer.elevation ?? 0);
-  const raHours = (raDeg / 15.0) % 24.0;
-  const horizon = Astronomy.Horizon(date, obs, raHours, decDeg, 'normal');
+  // Astronomy.Horizon expects equator-of-date coordinates, while the bundled
+  // catalog stores J2000 values. Precess before asking for local coordinates.
+  const equatorial = equatorOfDate(raDeg, decDeg, date);
+  const horizon = Astronomy.Horizon(date, obs, equatorial.raHours, equatorial.decDeg, 'normal');
 
   return {
     altitude: Number(horizon.altitude.toFixed(3)),
@@ -48,7 +68,8 @@ export function getMeridianCulmination(
   observer: ObserverLocation,
   date: Date
 ): MeridianCulmination {
-  const raHours = (raDeg / 15.0) % 24.0;
+  const equatorial = equatorOfDate(raDeg, decDeg, date);
+  const raHours = equatorial.raHours;
   const gast = Astronomy.SiderealTime(date);
   const lst = ((gast + observer.longitude / 15.0) % 24.0 + 24.0) % 24.0;
 
@@ -58,10 +79,10 @@ export function getMeridianCulmination(
   const solarHours = deltaHours * 0.9972696;
   const transitDate = new Date(date.getTime() + solarHours * 3600 * 1000);
 
-  const maxAltitude = 90 - Math.abs(observer.latitude - decDeg);
+  const maxAltitude = 90 - Math.abs(observer.latitude - equatorial.decDeg);
   const minAltitude = observer.latitude >= 0
-    ? observer.latitude + decDeg - 90
-    : -observer.latitude - decDeg - 90;
+    ? observer.latitude + equatorial.decDeg - 90
+    : -observer.latitude - equatorial.decDeg - 90;
 
   const isCircumpolar = minAltitude > 0;
   const neverRises = maxAltitude <= 0;

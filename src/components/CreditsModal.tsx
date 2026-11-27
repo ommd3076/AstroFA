@@ -1,128 +1,153 @@
 import React from 'react';
 import { useAstroStore } from '../stores/useAstroStore';
+import { Button } from './ui/space/button';
+import { PageHeader } from './PageHeader';
+
+interface SourceRow {
+  name: string;
+  license: string;
+  description: string;
+  href: string;
+  linkLabel: string;
+  spec: string;
+  frame: string;
+}
+
+const DATA_SOURCES: SourceRow[] = [
+  {
+    name: 'HYG Star Database (v3.8)',
+    license: 'CC BY-SA 4.0',
+    description:
+      'Combined Hipparcos, Yale Bright Star Catalogue (BSC5), and Henry Draper catalogs curated by David Nash / Astronexus.',
+    href: 'https://codeberg.org/astronexus/hyg',
+    linkLabel: 'Astronexus HYG ↗',
+    spec: '8,921 stars (mag ≤ 6.5)',
+    frame: 'J2000 equatorial RA / Dec',
+  },
+  {
+    name: 'Constellation Lines',
+    license: 'CC BY 4.0',
+    description:
+      'Connecting-line asterism figures across all 88 official constellations, keyed to Yale Bright Star (HR) identifiers.',
+    href: 'https://github.com/MarcvdSluys/ConstellationLines',
+    linkLabel: 'ConstellationLines ↗',
+    spec: '88 IAU constellations',
+    frame: 'Yale HR keying',
+  },
+  {
+    name: 'Astronomy Engine',
+    license: 'MIT',
+    description:
+      'Ephemerides, precession, sidereal time, lunar illumination, and horizon rise/set calculations by Don Cross.',
+    href: 'https://github.com/cosinekitty/astronomy',
+    linkLabel: 'cosinekitty/astronomy ↗',
+    spec: 'EQJ → EQD → Horizontal',
+    frame: 'Real-time topocentric',
+  },
+  {
+    name: 'Deep Star Maps 2020',
+    license: 'Public Domain',
+    description:
+      'Equatorial Milky Way sky sphere rendered beneath the starfield. Credits: NASA/GSFC Scientific Visualization Studio and ESA/Gaia/DPAC.',
+    href: 'https://svs.gsfc.nasa.gov/4851/',
+    linkLabel: 'NASA SVS #4851 ↗',
+    spec: 'Local asset · milkyway_2020.jpg',
+    frame: 'J2000 equatorial plate',
+  },
+  {
+    name: 'Open-Meteo Weather API',
+    license: 'CC BY 4.0',
+    description:
+      'Model forecast output for sunrise/sunset, hourly cloud cover, wind, and precipitation in Sky Tonight observing conditions.',
+    href: 'https://open-meteo.com/',
+    linkLabel: 'Open-Meteo.com ↗',
+    spec: 'Hourly & solar ephemeris',
+    frame: 'Rounded 0.01° lookup',
+  },
+];
 
 export const CreditsModal: React.FC = () => {
-  const { setActiveView } = useAstroStore();
+  const setActiveView = useAstroStore(state => state.setActiveView);
 
   return (
-    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-2 sm:p-3 gap-2 overflow-y-auto" aria-label="Credits and data sources">
-      {/* Top Header Bento Card */}
-      <div className="bento-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-            <span className="telemetry-label text-xs">CREDITS · DATA SOURCES &amp; LICENSES</span>
+    <section
+      className="mx-auto flex w-full max-w-5xl flex-col gap-6 font-sans text-[var(--ink-primary)]"
+      aria-label="Credits and data sources"
+    >
+      <PageHeader
+        eyebrow="Attribution & Provenance"
+        title="Credits, data sources & licenses"
+        description="Costellar runs on open astronomical catalogs, deterministic finite automata, and transparent geometry verification."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveView('sky')}
+            className="text-xs font-semibold"
+          >
+            Return to Sky Planetarium ↗
+          </Button>
+        }
+      />
+
+      {/* Grouped Source Rows */}
+      <div className="atlas-surface divide-y divide-[var(--border-subtle)]">
+        {DATA_SOURCES.map(source => (
+          <div
+            key={source.name}
+            className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] sm:items-center sm:gap-6"
+          >
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-semibold text-[var(--ink-primary)]">
+                  {source.name}
+                </h2>
+                <span className="rounded-[4px] border border-[var(--signal-surface)] bg-[var(--bg-pill-active)] px-2 py-0.5 font-mono text-[10px] font-semibold text-[var(--signal-mid)]">
+                  {source.license}
+                </span>
+              </div>
+              <p className="text-xs leading-relaxed text-[var(--ink-secondary)]">
+                {source.description}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1 border-t border-[var(--border-subtle)] pt-2.5 font-mono text-[11px] text-[var(--ink-muted)] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+              <div>
+                <a
+                  href={source.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-[var(--signal-mid)] underline underline-offset-2 hover:text-[var(--ink-primary)]"
+                >
+                  {source.linkLabel}
+                </a>
+              </div>
+              <div className="tabular-nums text-[var(--ink-primary)]">{source.spec}</div>
+              <div>{source.frame}</div>
+            </div>
           </div>
-          <p className="text-[11px] text-[var(--ink-secondary)] mt-1">
-            Costellar is built strictly on open scientific datasets and verifiable astronomical computations.
+        ))}
+      </div>
+
+      {/* Methodological & Privacy Notes */}
+      <div className="grid grid-cols-1 gap-6 border-t border-[var(--border-subtle)] pt-5 md:grid-cols-2">
+        <div className="space-y-1.5">
+          <h2 className="text-sm font-semibold text-[var(--ink-primary)]">
+            IAU constellations vs. traditional asterisms
+          </h2>
+          <p className="text-xs leading-relaxed text-[var(--ink-secondary)]">
+            The <strong className="font-semibold text-[var(--ink-primary)]">International Astronomical Union (IAU)</strong> defines constellations as 88 contiguous celestial regions adopted in 1928. Familiar stick figures (such as the Big Dipper or Orion&apos;s hourglass) are cultural <em>asterisms</em>. Costellar indexes IAU catalog metadata alongside formal asterism chains.
           </p>
         </div>
-        <button
-          onClick={() => setActiveView('sky')}
-          className="tactile-pill hud-reticle bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--ink-primary)] hover:text-[var(--signal-cobalt)] border border-[var(--bg-tray)] text-xs font-bold uppercase tracking-wider cursor-pointer"
-        >
-          RETURN TO SKY CANVAS ↗
-        </button>
-      </div>
 
-      {/* 3-Column Bento Citations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
-        {/* HYG Star Database */}
-        <div className="bento-card p-4 flex flex-col justify-between gap-3 group">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="telemetry-label text-xs text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)] transition-colors">
-                HYG STAR DATABASE (v3.8)
-              </h3>
-              <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral)] text-[var(--signal-cobalt)] text-[10px] font-bold font-mono">
-                CC BY-SA 4.0
-              </span>
-            </div>
-            <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-              Primary astronomical catalog combining Hipparcos, Yale Bright Star Catalogue (BSC5), and Henry Draper catalogs. Curated by David Nash / Astronexus.
-            </p>
-          </div>
-          <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <a href="https://codeberg.org/astronexus/hyg" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Astronexus HYG catalog ↗</a></div>
-            <div>INGESTION: <strong className="text-[var(--ink-primary)] font-dot">8,921 STARS</strong> (mag &le; 6.5)</div>
-            <div>COORDINATES: J2000 RIGHT ASCENSION &amp; DECLINATION</div>
-          </div>
+        <div className="space-y-1.5">
+          <h2 className="text-sm font-semibold text-[var(--ink-primary)]">
+            Data handling &amp; privacy
+          </h2>
+          <p className="text-xs leading-relaxed text-[var(--ink-secondary)]">
+            Sky photographs in Image Lab are decoded locally in your browser and never uploaded. Pattern recognition submits only extracted coordinate sequences to Costellar, while Observing Conditions forward your UTC date and coordinates rounded to 0.01° to Open-Meteo for model forecasts.
+          </p>
         </div>
-
-        {/* Constellation Lines Dataset */}
-        <div className="bento-card p-4 flex flex-col justify-between gap-3 group">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="telemetry-label text-xs text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)] transition-colors">
-                CONSTELLATION LINES DATASET
-              </h3>
-              <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral)] text-[var(--signal-cobalt)] text-[10px] font-bold font-mono">
-                CC BY 4.0
-              </span>
-            </div>
-            <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-              Standard traditional connecting-line figures for all 88 official constellations. Curated by Marc van der Sluys. Identifies star vertices by Yale Bright Star (HR) identifiers.
-            </p>
-          </div>
-          <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <a href="https://github.com/MarcvdSluys/ConstellationLines" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Constellation Lines ↗</a></div>
-            <div>RELATION: <strong className="text-[var(--ink-primary)]">YALE BRIGHT STAR (HR) IDS</strong></div>
-            <div>RESOLVED: <span className="font-dot text-[var(--signal-cobalt)] font-bold">88 IAU CONSTELLATIONS</span></div>
-          </div>
-        </div>
-
-        {/* Astronomy Engine */}
-        <div className="bento-card p-4 flex flex-col justify-between gap-3 group">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="telemetry-label text-xs text-[var(--ink-primary)] group-hover:text-[var(--signal-cobalt)] transition-colors">
-                ASTRONOMY ENGINE
-              </h3>
-              <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral)] text-[var(--signal-cobalt)] text-[10px] font-bold font-mono">
-                MIT LICENSE
-              </span>
-            </div>
-            <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-              High-precision astronomical ephemerides, topocentric coordinate transformations, precession, sidereal time, and horizon calculations. Created by Don Cross.
-            </p>
-          </div>
-          <div className="p-2.5 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] text-[11px] font-mono space-y-1 text-[var(--ink-muted)]">
-            <div>SOURCE: <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noreferrer" className="text-[var(--signal-cobalt)] font-semibold underline underline-offset-2">Astronomy Engine ↗</a></div>
-            <div>TRANSFORMS: <strong className="text-[var(--ink-primary)]">EQJ TO HORIZONTAL (ALT/AZ)</strong></div>
-            <div>COPYRIGHT: MIT LICENSE (c) 2019-2024 DON CROSS</div>
-          </div>
-        </div>
-      </div>
-
-      {/* IAU Distinction Section Bento Card */}
-      <div className="bento-card p-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-[2px] bg-[var(--signal-cobalt)]" />
-          <h3 className="telemetry-label text-xs text-[var(--ink-primary)]">
-            SCIENTIFIC DISTINCTION: IAU CONSTELLATIONS VS. ILLUSTRATIVE ASTERISMS
-          </h3>
-        </div>
-        <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-          The <strong>International Astronomical Union (IAU)</strong> officially defines constellations as 88 contiguous regions dividing the entire celestial sphere,
-          bounded by lines of right ascension and declination adopted in 1928 by Eugène Delporte.
-          The familiar connecting lines (such as the Big Dipper or Orion's hourglass) are historical and cultural <em>asterisms</em>.
-          Costellar respects this distinction by modeling IAU boundary metadata alongside traditional asterism figure graphs.
-        </p>
-      </div>
-
-      {/* Privacy Statement Bento Card */}
-      <div className="bento-card p-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-[2px] bg-[var(--signal-cobalt)]" />
-          <h3 className="telemetry-label text-xs text-[var(--ink-primary)]">
-            LOCAL COMPUTATION GUARANTEE &amp; PRIVACY INTEGRITY
-          </h3>
-        </div>
-        <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-          Costellar runs <strong>100% locally in your client web browser</strong>. No star trace coordinates, uploaded sky photographs,
-          or simulation traces are ever sent to remote servers or third-party tracking APIs.
-          Zero accounts, zero trackers, zero secret keys.
-        </p>
       </div>
     </section>
   );

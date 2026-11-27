@@ -45,37 +45,38 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
   // =========================================================================
   describe('Tier 1: Visual System, Design Tokens & Micro-Architecture Invariants', () => {
     describe('F1: Design Token Matrix Invariants', () => {
-      it('declares all 7 physical surface & container chassis tokens in :root and @theme', () => {
-        expect(indexCss).toMatch(/--bg-shell:\s*#EEEEED/i);
-        expect(indexCss).toMatch(/--bg-tray:\s*#E3E3E1/i);
-        expect(indexCss).toMatch(/--bg-card:\s*#F7F7F6/i);
-        expect(indexCss).toMatch(/--bg-card-subtle:\s*#F0F0EF/i);
-        expect(indexCss).toMatch(/--bg-pill-neutral:\s*#ECECEB/i);
-        expect(indexCss).toMatch(/--bg-pill-active:\s*#E7EDFA/i);
-        expect(indexCss).toMatch(/--bg-viewport:\s*#060A14/i);
+      it('declares all 7 neutral graphite surface & container tokens in :root and @theme', () => {
+        expect(indexCss).toMatch(/--bg-shell:\s*#0B0B0D/i);
+        expect(indexCss).toMatch(/--bg-tray:\s*#101013/i);
+        expect(indexCss).toMatch(/--bg-card:\s*#151519/i);
+        expect(indexCss).toMatch(/--bg-card-subtle:\s*#1B1B20/i);
+        expect(indexCss).toMatch(/--bg-pill-neutral:\s*#202026/i);
+        expect(indexCss).toMatch(/--bg-pill-active:\s*rgba\(143,\s*163,\s*255,\s*0\.14\)/i);
+        expect(indexCss).toMatch(/--bg-viewport:\s*#070709/i);
       });
 
-      it('declares all 4 ink typography color tokens in :root with calibrated greys', () => {
-        expect(indexCss).toMatch(/--ink-primary:\s*#181A20/i);
-        expect(indexCss).toMatch(/--ink-secondary:\s*#565B64/i);
-        expect(indexCss).toMatch(/--ink-muted:\s*#858991/i);
-        expect(indexCss).toMatch(/--ink-on-signal:\s*#FFFFFF/i);
+      it('declares all 4 warm-white ink typography color tokens in :root and @theme', () => {
+        expect(indexCss).toMatch(/--ink-primary:\s*#F3F1EB/i);
+        expect(indexCss).toMatch(/--ink-secondary:\s*#B5B2A9/i);
+        expect(indexCss).toMatch(/--ink-muted:\s*#7C7A72/i);
+        expect(indexCss).toMatch(/--ink-on-signal:\s*#0B0B10/i);
       });
 
-      it('declares the single-signal electric cobalt color architecture tokens', () => {
-        expect(indexCss).toMatch(/--signal-cobalt:\s*#064BDC/i);
-        expect(indexCss).toMatch(/--signal-mid:\s*#6F98E8/i);
-        expect(indexCss).toMatch(/--signal-surface:\s*#D2DDF1/i);
+      it('declares the single soft periwinkle optical accent architecture tokens', () => {
+        expect(indexCss).toMatch(/--signal-cobalt:\s*#8FA3FF/i);
+        expect(indexCss).toMatch(/--signal-mid:\s*#A8B8FF/i);
+        expect(indexCss).toMatch(/--signal-surface:\s*rgba\(143,\s*163,\s*255,\s*0\.28\)/i);
       });
 
-      it('declares tactile dot matrix and corner reticle tick tokens', () => {
-        expect(indexCss).toMatch(/--dot-inactive:\s*#C8CCD4/i);
-        expect(indexCss).toMatch(/--dot-active:\s*#064BDC/i);
-        expect(indexCss).toMatch(/--reticle-tick:\s*#8FA4C4/i);
-        expect(indexCss).toMatch(/--reticle-tick-active:\s*#064BDC/i);
+      it('declares observatory dot matrix and corner reticle tick tokens', () => {
+        expect(indexCss).toMatch(/--dot-inactive:\s*#2A2A32/i);
+        expect(indexCss).toMatch(/--dot-active:\s*#8FA3FF/i);
+        expect(indexCss).toMatch(/--reticle-tick:\s*#52515A/i);
+        expect(indexCss).toMatch(/--reticle-tick-active:\s*#A8B8FF/i);
       });
 
-      it('declares strict monospace and dot-matrix font family tokens', () => {
+      it('declares Instrument Sans, IBM Plex Mono, and Doto font family tokens', () => {
+        expect(indexCss).toMatch(/--font-sans:\s*['"]Instrument Sans['"]/i);
         expect(indexCss).toMatch(/--font-mono:\s*['"]IBM Plex Mono['"]/i);
         expect(indexCss).toMatch(/--font-dot:\s*['"]Doto['"]/i);
       });
@@ -102,42 +103,43 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
       });
     });
 
-    describe('F1: Universal Monospace Typography & Proportional Font Exclusion', () => {
-      it('enforces var(--font-mono) as the root body font family in src/index.css', () => {
-        expect(indexCss).toMatch(/body\s*\{[^}]*font-family:\s*var\(--font-mono\)[^}]*\}/s);
+    describe('F1: Observatory Sans & Monospace Typography Roles', () => {
+      it('enforces var(--font-sans) as the root body font family in src/index.css', () => {
+        expect(indexCss).toMatch(/body\s*\{[^}]*font-family:\s*var\(--font-sans\)[^}]*\}/s);
       });
 
-      it('excludes proportional sans-serif fallbacks (Inter, Roboto, Arial, sans-serif) from body styling', () => {
-        const bodyMatch = indexCss.match(/body\s*\{([^}]*)\}/s);
-        expect(bodyMatch).not.toBeNull();
-        const bodyRules = bodyMatch![1];
-        expect(bodyRules).not.toMatch(/font-family:[^;]*\b(?:Arial|Helvetica|Roboto|Segoe UI|sans-serif)\b/i);
+      it('imports Instrument Sans in index.html and declares dark color-scheme on :root', () => {
+        expect(indexHtml).toMatch(/Instrument\+Sans/);
+        expect(indexCss).toMatch(/:root\s*\{[^}]*color-scheme:\s*dark/s);
       });
     });
 
-    describe('F2: Recessed Cavity Bento Tray Grid & Layout Architecture', () => {
-      it('defines .bento-shell class adhering to chassis shell color and monospace font', () => {
-        expect(appCss).toContain('.bento-shell');
-        expect(appCss).toMatch(/\.bento-shell\s*\{[^}]*background-color:\s*var\(--bg-shell\)/s);
-        expect(appCss).toMatch(/\.bento-shell\s*\{[^}]*font-family:\s*var\(--font-mono\)/s);
+    describe('F2: Atlas Workspace Surfaces & Space UI Shell Architecture', () => {
+      it('mounts Space UI SidebarProvider and SidebarInset shell over graphite surface tokens', () => {
+        const appTsx = fs.readFileSync(path.resolve('src/App.tsx'), 'utf-8');
+        expect(appTsx).toContain('SidebarProvider');
+        expect(appTsx).toContain('SidebarInset');
+        expect(appTsx).toContain('atlas-workspace');
+        expect(indexCss).toMatch(/body\s*\{[^}]*background-color:\s*var\(--bg-shell\)/s);
+        expect(indexCss).toMatch(/body\s*\{[^}]*font-family:\s*var\(--font-sans\)/s);
       });
 
-      it('defines .bento-tray class with recessed cavity color and strict 6px gap and padding', () => {
-        expect(appCss).toContain('.bento-tray');
-        expect(appCss).toMatch(/\.bento-tray\s*\{[^}]*background-color:\s*var\(--bg-tray\)/s);
-        expect(appCss).toMatch(/\.bento-tray\s*\{[^}]*padding:\s*6px/s);
-        expect(appCss).toMatch(/\.bento-tray\s*\{[^}]*gap:\s*6px/s);
+      it('defines .atlas-workspace class with stepped tray background and bounded scroll behavior', () => {
+        expect(appCss).toContain('.atlas-workspace');
+        expect(appCss).toMatch(/\.atlas-workspace\s*\{[^}]*background-color:\s*var\(--bg-tray\)/s);
+        expect(appCss).toMatch(/\.atlas-workspace\s*\{[^}]*overflow-y:\s*auto/s);
       });
 
-      it('defines .bento-card class with 14px radius, card surface, and zero drop shadows', () => {
-        expect(appCss).toContain('.bento-card');
-        expect(appCss).toMatch(/\.bento-card\s*\{[^}]*background-color:\s*var\(--bg-card\)/s);
-        expect(appCss).toMatch(/\.bento-card\s*\{[^}]*border-radius:\s*14px/s);
-        expect(appCss).toMatch(/\.bento-card\s*\{[^}]*box-shadow:\s*none/s);
+      it('defines .atlas-surface and .atlas-stage classes with shared card radius, hairline border, and zero drop shadows', () => {
+        expect(appCss).toContain('.atlas-surface');
+        expect(appCss).toContain('.atlas-stage');
+        expect(appCss).toMatch(/\.atlas-surface\s*\{[^}]*background-color:\s*var\(--bg-card\)/s);
+        expect(appCss).toMatch(/\.atlas-surface\s*\{[^}]*border-radius:\s*var\(--card-radius\)/s);
+        expect(appCss).toMatch(/\.atlas-surface\s*\{[^}]*box-shadow:\s*none/s);
       });
     });
 
-    describe('F3: Tactile Hardware HUD Reticles & Control Utilities', () => {
+    describe('F3: HUD Reticles, Reduced-Motion & Space UI Control Primitives', () => {
       it('defines .hud-reticle with 4px corner tick pseudo-elements using --reticle-tick', () => {
         expect(appCss).toContain('.hud-reticle');
         expect(appCss).toMatch(/\.hud-reticle::before,\s*\.hud-reticle::after\s*\{[^}]*width:\s*4px/s);
@@ -145,18 +147,23 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
         expect(appCss).toMatch(/\.hud-reticle::before,\s*\.hud-reticle::after\s*\{[^}]*border-color:\s*var\(--reticle-tick\)/s);
       });
 
-      it('styles .hud-reticle.active with electric cobalt highlight ticks', () => {
-        expect(appCss).toMatch(/\.hud-reticle\.active::before,\s*\.hud-reticle\.active::after\s*\{[^}]*border-color:\s*var\(--signal-cobalt\)/s);
+      it('styles .hud-reticle.active with cold-blue mid highlight ticks', () => {
+        expect(appCss).toMatch(/\.hud-reticle\.active::before,\s*\.hud-reticle\.active::after\s*\{[^}]*border-color:\s*var\(--signal-mid\)/s);
       });
 
-      it('provides .hud-reticle-4corner for panels, inputs, and search omnibars', () => {
+      it('provides .hud-reticle-4corner for panels and overlays', () => {
         expect(appCss).toContain('.hud-reticle-4corner');
       });
 
-      it('provides tactile button, rocker, and pill utilities in App.css', () => {
-        expect(appCss).toContain('.tactile-button');
-        expect(appCss).toContain('.tactile-pill');
-        expect(appCss).toContain('.tactile-rocker');
+      it('provides reduced-motion overrides and vendored Space UI primitives under src/components/ui/space/', () => {
+        expect(appCss).toContain('prefers-reduced-motion: reduce');
+        expect(fs.existsSync(path.resolve('src/components/ui/space/button.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/sidebar.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/command.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/select.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/slider.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/switch.tsx'))).toBe(true);
+        expect(fs.existsSync(path.resolve('src/components/ui/space/toggle-group.tsx'))).toBe(true);
       });
     });
 
@@ -166,19 +173,22 @@ describe('Costellar Tactile Hardware Telemetry E2E Verification Suite', () => {
         expect(appCss).toMatch(/\.font-dot\s*\{[^}]*font-family:\s*var\(--font-dot\)/s);
       });
 
-      it('defines .telemetry-kpi class implementing Tier 2 high-scale monospace numerals with superscript unit', () => {
+      it('defines .telemetry-kpi class implementing Tier 2 tabular monospace numerals with superscript unit', () => {
         expect(appCss).toContain('.telemetry-kpi');
         expect(appCss).toMatch(/\.telemetry-kpi\s*\{[^}]*font-family:\s*var\(--font-mono\)/s);
-        expect(appCss).toMatch(/\.telemetry-kpi\s*\{[^}]*font-size:\s*36px/s);
+        expect(appCss).toMatch(/\.telemetry-kpi\s*\{[^}]*font-variant-numeric:\s*tabular-nums/s);
+        expect(appCss).toMatch(/\.telemetry-kpi\s*\{[^}]*font-size:\s*28px/s);
         expect(appCss).toMatch(/\.telemetry-kpi sup\s*\{[^}]*text-transform:\s*uppercase/s);
       });
 
-      it('defines .telemetry-label and .micro-label implementing Tier 3 uppercase micro-labels with wide tracking', () => {
+      it('defines .telemetry-label and .micro-label implementing Tier 3 sans labels with tracked spacing', () => {
         expect(appCss).toContain('.telemetry-label');
+        expect(appCss).toMatch(/\.telemetry-label\s*\{[^}]*font-family:\s*var\(--font-sans\)/s);
         expect(appCss).toMatch(/\.telemetry-label\s*\{[^}]*text-transform:\s*uppercase/s);
-        expect(appCss).toMatch(/\.telemetry-label\s*\{[^}]*letter-spacing:\s*0\.08em/s);
+        expect(appCss).toMatch(/\.telemetry-label\s*\{[^}]*letter-spacing:\s*0\.06em/s);
         expect(appCss).toContain('.micro-label');
-        expect(appCss).toMatch(/\.micro-label\s*\{[^}]*text-transform:\s*uppercase/s);
+        expect(appCss).toMatch(/\.micro-label\s*\{[^}]*font-family:\s*var\(--font-sans\)/s);
+        expect(appCss).toMatch(/\.micro-label\s*\{[^}]*letter-spacing:\s*0\.03em/s);
       });
     });
   });

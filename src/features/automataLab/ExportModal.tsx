@@ -1,21 +1,35 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MINIMIZED_DFA_MACHINE, NFA_MACHINE } from '../../data/astroData';
 import { useAstroStore } from '../../stores/useAstroStore';
+import { handlePopupTabKeyDown } from '../../utils/dialogFocus';
+import { Button } from '../../components/ui/space/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogCreateHandle,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogPopup,
+  DialogTitle,
+} from '../../components/ui/space/dialog';
 
 interface ExportModalProps {
-  onClose: () => void;
+  handle: ReturnType<typeof DialogCreateHandle>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  finalFocus?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
-  const { recognitionReport, simulatorSymbols } = useAstroStore();
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+export const ExportModal: React.FC<ExportModalProps> = ({
+  handle,
+  open,
+  onOpenChange,
+  finalFocus,
+}) => {
+  const recognitionReport = useAstroStore(state => state.recognitionReport);
+  const simulatorSymbols = useAstroStore(state => state.simulatorSymbols);
 
   const handleDownload = (filename: string, content: string, mimeType: string) => {
     const blob = new Blob([content], { type: mimeType });
@@ -136,132 +150,120 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-3 sm:p-4">
-      <div role="dialog" aria-modal="true" aria-labelledby="automata-export-title" className="bg-[var(--bg-card,#f6f6f5)] border border-[rgba(0,0,0,0.12)] rounded-[12px] max-w-lg w-full max-h-[92vh] overflow-y-auto p-4 sm:p-5 space-y-4 shadow-none font-mono text-[var(--ink-primary,#181A20)]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--bg-tray,#E2E5EC)] pb-2.5">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)]" />
-            <h3 id="automata-export-title" className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-              Export Telemetry &amp; Automata Suite
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close export dialog"
-            className="hud-reticle text-[var(--ink-secondary,#525866)] hover:text-[var(--ink-primary,#181A20)] text-xs px-2 py-0.5 rounded-[4px] bg-[var(--bg-pill-neutral,#E6E9EF)] cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
+    <Dialog handle={handle} open={open} onOpenChange={onOpenChange}>
+      {open && (
+        <DialogPopup
+          finalFocus={finalFocus}
+          onKeyDown={handlePopupTabKeyDown}
+          className="max-w-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
+        >
+          <DialogHeader className="border-b border-[var(--border-subtle)]">
+            <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-[var(--ink-primary)]">
+              <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />
+              <span>Export telemetry &amp; automata suite</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[var(--ink-secondary)]">
+              Download computed transition matrices, formal definitions, SVG diagrams, and active simulation traces.
+            </DialogDescription>
+          </DialogHeader>
 
-        <p className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider leading-relaxed">
-          Download genuine computed scientific artifacts, transition matrices, and state models for verification, academic documentation, or viva defense.
-        </p>
+          <DialogPanel className="space-y-2">
+            <Button
+              variant="outline"
+              onClick={exportCsv}
+              className="h-auto w-full p-2.5 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border-[var(--border-subtle)] hover:border-[var(--signal-surface)] rounded-[8px] text-left flex items-center justify-between font-normal"
+            >
+              <div>
+                <div className="font-semibold text-[var(--ink-primary)] text-xs">
+                  Transition matrix (.csv)
+                </div>
+                <div className="text-[11px] text-[var(--ink-secondary)] mt-0.5">
+                  Full state × alphabet transition table
+                </div>
+              </div>
+              <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--signal-mid)] rounded-[4px] font-mono text-[10px] font-semibold">
+                .CSV
+              </span>
+            </Button>
 
-        {/* Bento Sub-Cards for Export Actions */}
-        <div className="space-y-2">
-          {/* CSV Transition Table */}
-          <button
-            onClick={exportCsv}
-            className="w-full p-2.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.06)] rounded-[8px] text-left transition-colors flex items-center justify-between cursor-pointer"
-          >
-            <div>
-              <div className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-                Transition Matrix (.CSV)
+            <Button
+              variant="outline"
+              onClick={exportDfaJson}
+              className="h-auto w-full p-2.5 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border-[var(--border-subtle)] hover:border-[var(--signal-surface)] rounded-[8px] text-left flex items-center justify-between font-normal"
+            >
+              <div>
+                <div className="font-semibold text-[var(--ink-primary)] text-xs">
+                  Minimized DFA machine (.json)
+                </div>
+                <div className="text-[11px] text-[var(--ink-secondary)] mt-0.5">
+                  States, alphabet, transitions, and accepting labels
+                </div>
               </div>
-              <div className="text-[9px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider mt-0.5">
-                Full State × Alphabet transition matrix
-              </div>
-            </div>
-            <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-card,#F5F6F8)] text-[var(--signal-cobalt,#1D55F5)] rounded-[4px] text-[10px] font-bold">
-              .CSV
-            </span>
-          </button>
+              <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--signal-mid)] rounded-[4px] font-mono text-[10px] font-semibold">
+                .JSON
+              </span>
+            </Button>
 
-          {/* Minimized DFA JSON */}
-          <button
-            onClick={exportDfaJson}
-            className="w-full p-2.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.06)] rounded-[8px] text-left transition-colors flex items-center justify-between cursor-pointer"
-          >
-            <div>
-              <div className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-                Minimized DFA Machine (.JSON)
+            <Button
+              variant="outline"
+              onClick={exportNfaJson}
+              className="h-auto w-full p-2.5 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border-[var(--border-subtle)] hover:border-[var(--signal-surface)] rounded-[8px] text-left flex items-center justify-between font-normal"
+            >
+              <div>
+                <div className="font-semibold text-[var(--ink-primary)] text-xs">
+                  ε-NFA specification (.json)
+                </div>
+                <div className="text-[11px] text-[var(--ink-secondary)] mt-0.5">
+                  Non-deterministic branching automaton model
+                </div>
               </div>
-              <div className="text-[9px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider mt-0.5">
-                States, alphabet, transitions &amp; accepting labels
-              </div>
-            </div>
-            <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-card,#F5F6F8)] text-[var(--signal-cobalt,#1D55F5)] rounded-[4px] text-[10px] font-bold">
-              .JSON
-            </span>
-          </button>
+              <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--signal-mid)] rounded-[4px] font-mono text-[10px] font-semibold">
+                .JSON
+              </span>
+            </Button>
 
-          {/* ε-NFA JSON */}
-          <button
-            onClick={exportNfaJson}
-            className="w-full p-2.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.06)] rounded-[8px] text-left transition-colors flex items-center justify-between cursor-pointer"
-          >
-            <div>
-              <div className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-                ε-NFA Specification (.JSON)
+            <Button
+              variant="outline"
+              onClick={exportSvgDiagram}
+              className="h-auto w-full p-2.5 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border-[var(--border-subtle)] hover:border-[var(--signal-surface)] rounded-[8px] text-left flex items-center justify-between font-normal"
+            >
+              <div>
+                <div className="font-semibold text-[var(--ink-primary)] text-xs">
+                  Vector state diagram (.svg)
+                </div>
+                <div className="text-[11px] text-[var(--ink-secondary)] mt-0.5">
+                  Clean print-ready diagram for reports
+                </div>
               </div>
-              <div className="text-[9px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider mt-0.5">
-                Non-deterministic branching automaton
-              </div>
-            </div>
-            <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-card,#F5F6F8)] text-[var(--signal-cobalt,#1D55F5)] rounded-[4px] text-[10px] font-bold">
-              .JSON
-            </span>
-          </button>
+              <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--signal-mid)] rounded-[4px] font-mono text-[10px] font-semibold">
+                .SVG
+              </span>
+            </Button>
 
-          {/* SVG Vector Diagram */}
-          <button
-            onClick={exportSvgDiagram}
-            className="w-full p-2.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.06)] rounded-[8px] text-left transition-colors flex items-center justify-between cursor-pointer"
-          >
-            <div>
-              <div className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-                Vector State Diagram (.SVG)
+            <Button
+              variant="outline"
+              onClick={exportTraceJson}
+              className="h-auto w-full p-2.5 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border-[var(--border-subtle)] hover:border-[var(--signal-surface)] rounded-[8px] text-left flex items-center justify-between font-normal"
+            >
+              <div>
+                <div className="font-semibold text-[var(--ink-primary)] text-xs">
+                  Active recognition trace (.json)
+                </div>
+                <div className="text-[11px] text-[var(--ink-secondary)] mt-0.5">
+                  Simulation input symbols and alignment telemetry
+                </div>
               </div>
-              <div className="text-[9px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider mt-0.5">
-                Tactile hardware diagram for academic publications
-              </div>
-            </div>
-            <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-card,#F5F6F8)] text-[var(--signal-cobalt,#1D55F5)] rounded-[4px] text-[10px] font-bold">
-              .SVG
-            </span>
-          </button>
+              <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--signal-mid)] rounded-[4px] font-mono text-[10px] font-semibold">
+                .JSON
+              </span>
+            </Button>
+          </DialogPanel>
 
-          {/* Recognition Trace JSON */}
-          <button
-            onClick={exportTraceJson}
-            className="w-full p-2.5 bg-[var(--bg-tray,#E2E5EC)] hover:bg-[#D9DDE6] border border-[rgba(0,0,0,0.06)] rounded-[8px] text-left transition-colors flex items-center justify-between cursor-pointer"
-          >
-            <div>
-              <div className="font-bold text-[var(--ink-primary,#181A20)] text-xs uppercase tracking-wider">
-                Active Recognition Trace (.JSON)
-              </div>
-              <div className="text-[9px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider mt-0.5">
-                Simulation input tape &amp; geometric alignment stats
-              </div>
-            </div>
-            <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-card,#F5F6F8)] text-[var(--signal-cobalt,#1D55F5)] rounded-[4px] text-[10px] font-bold">
-              .JSON
-            </span>
-          </button>
-        </div>
-
-        {/* Footer */}
-        <div className="pt-2 flex justify-end">
-          <button
-            onClick={onClose}
-            className="hud-reticle px-4 py-1.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] text-[var(--ink-primary,#181A20)] rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider cursor-pointer"
-          >
-            CLOSE
-          </button>
-        </div>
-      </div>
-    </div>
+          <DialogFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]">
+            <DialogClose render={<Button variant="outline" size="sm" />}>Close</DialogClose>
+          </DialogFooter>
+        </DialogPopup>
+      )}
+    </Dialog>
   );
 };

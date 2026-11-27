@@ -1,80 +1,335 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { SearchIcon } from 'lucide-react';
 import { useAstroStore } from '../stores/useAstroStore';
 import { PRESET_OBSERVERS } from '../astronomy/coordinates';
 import { STARS, CONSTELLATIONS, REFERENCE_PATTERNS } from '../data/astroData';
 import type { ObserverLocation } from '../types/astronomy';
 import { formatObserverCoordinates } from '../utils/format';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { handlePopupTabKeyDown } from '../utils/dialogFocus';
+import { Alert, AlertDescription, AlertTitle } from './ui/space/alert';
+import { Button } from './ui/space/button';
+import { Input } from './ui/space/input';
+import { Kbd, KbdGroup } from './ui/space/kbd';
+import {
+  Dialog,
+  DialogClose,
+  DialogCreateHandle,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogPopup,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/space/dialog';
+import {
+  Command,
+  CommandCreateHandle,
+  CommandDialog,
+  CommandDialogPopup,
+  CommandDialogTrigger,
+  CommandFooter,
+  CommandGroup,
+  CommandGroupLabel,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandPanel,
+  CommandSeparator,
+  CommandShortcut,
+} from './ui/space/command';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarSeparator,
+  useSidebar,
+} from './ui/space/sidebar';
 
 export const HeaderNav: React.FC = () => {
-  const {
-    activeView,
-    setActiveView,
-    observer,
-    setObserver,
-    isTraceMode,
-    setIsTraceMode,
-    focusOnStar,
-    focusOnConstellation,
-  } = useAstroStore();
+  const activeView = useAstroStore(state => state.activeView);
+  const setActiveView = useAstroStore(state => state.setActiveView);
+  const observer = useAstroStore(state => state.observer);
+  const setObserver = useAstroStore(state => state.setObserver);
+  const isTraceMode = useAstroStore(state => state.isTraceMode);
+  const setIsTraceMode = useAstroStore(state => state.setIsTraceMode);
+  const focusOnStar = useAstroStore(state => state.focusOnStar);
+  const focusOnConstellation = useAstroStore(state => state.focusOnConstellation);
+  const { isMobile, setOpenMobile } = useSidebar();
 
+  const observerDialogHandle = useMemo(() => DialogCreateHandle(), []);
+  const commandDialogHandle = useMemo(() => CommandCreateHandle(), []);
   const [isObserverOpen, setIsObserverOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeSearchIndex, setActiveSearchIndex] = useState(-1);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const searchOptionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const observerTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // The search shortcut is available from every view; Escape dismisses its results.
+  // Catalog command palette shortcut (Ctrl/Cmd+K) & shell button events
   useEffect(() => {
     const handleKeys = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        if (document.querySelector('[role="dialog"]') && !isCommandOpen) return;
         event.preventDefault();
-        setIsSearchOpen(true);
-        searchContainerRef.current?.querySelector('input')?.focus();
-      } else if (event.key === 'Escape') {
-        setIsSearchOpen(false);
+        setIsCommandOpen(prev => !prev);
       }
     };
+    const handleOpenCommand = () => setIsCommandOpen(true);
+    const handleOpenObserver = () => setIsObserverOpen(true);
+
     document.addEventListener('keydown', handleKeys);
-    return () => document.removeEventListener('keydown', handleKeys);
-  }, []);
-
-  useEffect(() => {
-    if (!isObserverOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsObserverOpen(false);
-        requestAnimationFrame(() => observerTriggerRef.current?.focus());
-      }
+    window.addEventListener('costellar:open-command', handleOpenCommand);
+    window.addEventListener('costellar:open-observer', handleOpenObserver);
+    return () => {
+      document.removeEventListener('keydown', handleKeys);
+      window.removeEventListener('costellar:open-command', handleOpenCommand);
+      window.removeEventListener('costellar:open-observer', handleOpenObserver);
     };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isObserverOpen]);
+  }, [isCommandOpen]);
 
-  // Close search dropdown on outside click
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
-        setIsSearchOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
-  // Search Results Filtering
-  const searchResults = useMemo(() => {
+  const navGroups = useMemo(
+    () => [
+      {
+        label: 'Observe',
+        items: [
+          {
+            id: 'overview',
+            label: 'Overview',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" />
+                <rect x="9" y="1.5" width="5.5" height="5.5" rx="1" />
+                <rect x="1.5" y="9" width="5.5" height="5.5" rx="1" />
+                <rect x="9" y="9" width="5.5" height="5.5" rx="1" />
+              </svg>
+            ),
+            onClick: () => {
+              useAstroStore.setState({ isTraceMode: false });
+              setActiveView('overview');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'overview',
+          },
+          {
+            id: 'sky',
+            label: 'Sky Planetarium',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="8" cy="8" r="6" />
+                <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                <line x1="8" y1="0" x2="8" y2="3" />
+                <line x1="8" y1="13" x2="8" y2="16" />
+                <line x1="0" y1="8" x2="3" y2="8" />
+                <line x1="13" y1="8" x2="16" y2="8" />
+              </svg>
+            ),
+            onClick: () => {
+              useAstroStore.setState({ isTraceMode: false });
+              setActiveView('sky');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'sky' && !isTraceMode,
+          },
+          {
+            id: 'tonight',
+            label: 'Sky Tonight',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M6.5 1A7.5 7.5 0 1 0 15 9.5 6.5 6.5 0 0 1 6.5 1z" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('tonight');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'tonight',
+          },
+          {
+            id: 'constellations',
+            label: 'Catalog (88)',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="4" cy="4" r="2" fill="currentColor" />
+                <circle cx="12" cy="5" r="2" fill="currentColor" />
+                <circle cx="9" cy="12" r="2" fill="currentColor" />
+                <line x1="4" y1="4" x2="12" y2="5" />
+                <line x1="12" y1="5" x2="9" y2="12" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('constellations');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'constellations',
+          },
+        ],
+      },
+      {
+        label: 'Workbench',
+        items: [
+          {
+            id: 'trace',
+            label: 'Trace Mode',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M2 14L8 8M8 8L14 2M8 8L5 11" strokeLinecap="round" />
+                <circle cx="14" cy="2" r="1.5" fill="currentColor" />
+                <circle cx="2" cy="14" r="1.5" fill="currentColor" />
+              </svg>
+            ),
+            onClick: () => {
+              setIsTraceMode(true);
+              setActiveView('sky');
+              closeMobileSidebar();
+            },
+            isActive: (activeView === 'sky' && isTraceMode) || activeView === 'patterns',
+          },
+          {
+            id: 'results',
+            label: 'Results',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <line x1="3" y1="13" x2="3" y2="9" />
+                <line x1="7" y1="13" x2="7" y2="5" />
+                <line x1="11" y1="13" x2="11" y2="2" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('results');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'results',
+          },
+          {
+            id: 'imageLab',
+            label: 'Image Lab',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <rect x="2" y="2" width="12" height="12" rx="2" />
+                <circle cx="8" cy="8" r="2.5" />
+                <circle cx="11.5" cy="4.5" r="0.75" fill="currentColor" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('imageLab');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'imageLab',
+          },
+          {
+            id: 'automataLab',
+            label: 'Automata Lab',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="4" cy="8" r="3" />
+                <circle cx="12" cy="8" r="3" />
+                <circle cx="12" cy="8" r="1.5" fill="currentColor" />
+                <path d="M7 8h2" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('automataLab');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'automataLab',
+          },
+        ],
+      },
+      {
+        label: 'Learn & Reference',
+        items: [
+          {
+            id: 'hunt',
+            label: 'Hunt Mode',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="8" cy="8" r="6" />
+                <circle cx="8" cy="8" r="2" />
+                <line x1="8" y1="1" x2="8" y2="4" />
+                <line x1="8" y1="12" x2="8" y2="15" />
+                <line x1="1" y1="8" x2="4" y2="8" />
+                <line x1="12" y1="8" x2="15" y2="8" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('hunt');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'hunt',
+          },
+          {
+            id: 'academic',
+            label: 'Walkthrough',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M2 4l6-2 6 2v7l-6 3-6-3V4z" />
+                <line x1="8" y1="2" x2="8" y2="14" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('academic');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'academic',
+          },
+          {
+            id: 'credits',
+            label: 'Sources & Credits',
+            icon: (
+              <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="8" cy="8" r="6" />
+                <line x1="8" y1="7" x2="8" y2="11" />
+                <circle cx="8" cy="4.5" r="0.75" fill="currentColor" />
+              </svg>
+            ),
+            onClick: () => {
+              setActiveView('credits');
+              closeMobileSidebar();
+            },
+            isActive: activeView === 'credits',
+          },
+        ],
+      },
+    ],
+    [activeView, isTraceMode, isMobile, setActiveView, setIsTraceMode]
+  );
+
+  // Command search results filtering (Constellations, Stars, Views)
+  const commandResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return { constellations: [], stars: [] };
+    const flatViews = navGroups.flatMap(g =>
+      g.items.map(item => ({ ...item, group: g.label }))
+    );
+
+    if (!q) {
+      return {
+        constellations: CONSTELLATIONS.filter(c =>
+          REFERENCE_PATTERNS.some(p => p.constellationId === c.id)
+        ).slice(0, 4),
+        stars: STARS.slice()
+          .sort((a, b) => a.mag - b.mag)
+          .slice(0, 4),
+        views: flatViews.slice(0, 6),
+      };
+    }
 
     const matchedCons = CONSTELLATIONS.filter(
       c =>
         c.name.toLowerCase().includes(q) ||
         c.id.toLowerCase().includes(q) ||
         c.englishName.toLowerCase().includes(q)
-    ).slice(0, 4);
+    ).slice(0, 6);
 
     const matchedStars = STARS.filter(s => {
       const proper = s.proper?.toLowerCase() || '';
@@ -85,33 +340,27 @@ export const HeaderNav: React.FC = () => {
       .sort((a, b) => a.mag - b.mag)
       .slice(0, 6);
 
-    return { constellations: matchedCons, stars: matchedStars };
-  }, [searchQuery]);
+    const matchedViews = flatViews.filter(
+      v => v.label.toLowerCase().includes(q) || v.id.toLowerCase().includes(q)
+    );
 
-  const hasResults =
-    searchResults.constellations.length > 0 || searchResults.stars.length > 0;
-  const searchTargetCount = searchResults.constellations.length + searchResults.stars.length;
+    return {
+      constellations: matchedCons,
+      stars: matchedStars,
+      views: matchedViews,
+    };
+  }, [searchQuery, navGroups]);
 
-  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!searchQuery.trim() || !searchTargetCount) return;
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setIsSearchOpen(true);
-      setActiveSearchIndex(index => Math.min(index + 1, searchTargetCount - 1));
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setIsSearchOpen(true);
-      setActiveSearchIndex(index => index < 0 ? searchTargetCount - 1 : Math.max(index - 1, 0));
-    } else if (event.key === 'Enter' && activeSearchIndex >= 0) {
-      event.preventDefault();
-      searchOptionRefs.current[activeSearchIndex]?.click();
-    }
-  };
+  const hasCommandMatches =
+    commandResults.constellations.length > 0 ||
+    commandResults.stars.length > 0 ||
+    commandResults.views.length > 0;
 
   const handleSelectConstellation = (conId: string) => {
     focusOnConstellation(conId);
     setSearchQuery('');
-    setIsSearchOpen(false);
+    setIsCommandOpen(false);
+    closeMobileSidebar();
     if (activeView !== 'sky') {
       setActiveView('sky');
     }
@@ -120,454 +369,360 @@ export const HeaderNav: React.FC = () => {
   const handleSelectStar = (starId: number) => {
     focusOnStar(starId);
     setSearchQuery('');
-    setIsSearchOpen(false);
+    setIsCommandOpen(false);
+    closeMobileSidebar();
     if (activeView !== 'sky') {
       setActiveView('sky');
     }
   };
 
-  const navItems = [
-    {
-      id: 'overview',
-      label: 'OVERVIEW',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-          <rect x="1" y="1" width="6" height="6" rx="1" />
-          <rect x="9" y="1" width="6" height="6" rx="1" />
-          <rect x="1" y="9" width="6" height="6" rx="1" />
-          <rect x="9" y="9" width="6" height="6" rx="1" />
-        </svg>
-      ),
-      onClick: () => {
-        useAstroStore.setState({ isTraceMode: false });
-        setActiveView('overview');
-      },
-      isActive: activeView === 'overview',
-    },
-    {
-      id: 'sky',
-      label: 'SKY EXPLORER',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="8" cy="8" r="6" />
-          <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-          <line x1="8" y1="0" x2="8" y2="3" />
-          <line x1="8" y1="13" x2="8" y2="16" />
-          <line x1="0" y1="8" x2="3" y2="8" />
-          <line x1="13" y1="8" x2="16" y2="8" />
-        </svg>
-      ),
-      onClick: () => {
-        useAstroStore.setState({ isTraceMode: false });
-        setActiveView('sky');
-      },
-      isActive: activeView === 'sky' && !isTraceMode,
-    },
-    {
-      id: 'trace',
-      label: 'TRACE',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M2 14L8 8M8 8L14 2M8 8L5 11" strokeLinecap="round" />
-          <circle cx="14" cy="2" r="1.5" fill="currentColor" />
-          <circle cx="2" cy="14" r="1.5" fill="currentColor" />
-        </svg>
-      ),
-      onClick: () => {
-        setIsTraceMode(true);
-        setActiveView('sky');
-      },
-      isActive: (activeView === 'sky' && isTraceMode) || activeView === 'patterns',
-    },
-    {
-      id: 'constellations',
-      label: 'LIBRARY',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="4" cy="4" r="2" fill="currentColor" />
-          <circle cx="12" cy="5" r="2" fill="currentColor" />
-          <circle cx="9" cy="12" r="2" fill="currentColor" />
-          <line x1="4" y1="4" x2="12" y2="5" />
-          <line x1="12" y1="5" x2="9" y2="12" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('constellations');
-      },
-      isActive: activeView === 'constellations',
-    },
-    {
-      id: 'automataLab',
-      label: 'AUTOMATA',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="4" cy="8" r="3" />
-          <circle cx="12" cy="8" r="3" />
-          <circle cx="12" cy="8" r="1.5" fill="currentColor" />
-          <path d="M7 8h2" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('automataLab');
-      },
-      isActive: activeView === 'automataLab',
-    },
-    {
-      id: 'imageLab',
-      label: 'IMAGE LAB',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="2" y="2" width="12" height="12" rx="2" />
-          <circle cx="8" cy="8" r="2.5" />
-          <circle cx="11.5" cy="4.5" r="0.75" fill="currentColor" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('imageLab');
-      },
-      isActive: activeView === 'imageLab',
-    },
-    {
-      id: 'results',
-      label: 'RESULTS',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <line x1="3" y1="13" x2="3" y2="9" />
-          <line x1="7" y1="13" x2="7" y2="5" />
-          <line x1="11" y1="13" x2="11" y2="2" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('results');
-      },
-      isActive: activeView === 'results',
-    },
-    {
-      id: 'tonight',
-      label: 'SKY TONIGHT',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M6.5 1A7.5 7.5 0 1 0 15 9.5 6.5 6.5 0 0 1 6.5 1z" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('tonight');
-      },
-      isActive: activeView === 'tonight',
-    },
-    {
-      id: 'hunt',
-      label: 'HUNT MODE',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="8" cy="8" r="6" />
-          <circle cx="8" cy="8" r="2" />
-          <line x1="8" y1="1" x2="8" y2="4" />
-          <line x1="8" y1="12" x2="8" y2="15" />
-          <line x1="1" y1="8" x2="4" y2="8" />
-          <line x1="12" y1="8" x2="15" y2="8" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('hunt');
-      },
-      isActive: activeView === 'hunt',
-    },
-    {
-      id: 'academic',
-      label: 'VIVA MODE',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M2 4l6-2 6 2v7l-6 3-6-3V4z" />
-          <line x1="8" y1="2" x2="8" y2="14" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('academic');
-      },
-      isActive: activeView === 'academic',
-    },
-    {
-      id: 'credits',
-      label: 'CREDITS',
-      icon: (
-        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="8" cy="8" r="6" />
-          <line x1="8" y1="7" x2="8" y2="11" />
-          <circle cx="8" cy="4.5" r="0.75" fill="currentColor" />
-        </svg>
-      ),
-      onClick: () => {
-        setActiveView('credits');
-      },
-      isActive: activeView === 'credits',
-    },
-  ];
-
   return (
     <>
-      <aside
-        className="left-rail font-mono flex flex-col justify-between shrink-0 p-3 bg-[var(--bg-shell)] border-r border-[var(--bg-tray)] text-[var(--ink-primary)]"
-        aria-label="Application Navigation Rail"
+      <Sidebar
+        variant="inset"
+        collapsible="icon"
+        aria-label="Application Navigation Sidebar"
       >
-        {/* Top Segment: Brand & Omnibar Search */}
-        <div className="space-y-3">
-          {/* Brand Logo & Name */}
-          <button
-            onClick={() => setActiveView('sky')}
-            className="flex items-center gap-2.5 w-full group text-left cursor-pointer p-1 rounded-[6px] hover:bg-[var(--bg-pill-neutral)] transition-colors"
-            title="Costellar Sky Explorer Home"
-          >
-            {/* 4-Point Cobalt Star / Diamond Icon */}
-            <div className="w-7 h-7 rounded-[6px] bg-[var(--signal-cobalt)] flex items-center justify-center border border-[var(--signal-mid)] shadow-none shrink-0 transition-opacity group-hover:opacity-90">
-              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
-              </svg>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-bold tracking-tight text-[var(--ink-primary)] text-xs uppercase flex items-center gap-1.5 truncate">
-                <span className="tracking-wider">COSTELLAR</span>
-                <span className="hud-reticle text-[8px] font-mono uppercase px-1 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-mid)] rounded-[3px] font-semibold shrink-0">
-                  DFA
-                </span>
-              </div>
-            </div>
-          </button>
-
-          {/* Search Omnibar */}
-          <div ref={searchContainerRef} className="relative w-full">
-            <div className="relative hud-reticle-4corner w-full">
-              <input
-                type="text"
-                placeholder="SEARCH SKY..."
-                aria-label="Search stars and constellations"
-                aria-keyshortcuts="Control+K Meta+K"
-                aria-expanded={isSearchOpen && !!searchQuery}
-                aria-controls="sky-search-results"
-                aria-activedescendant={activeSearchIndex >= 0 ? `sky-search-option-${activeSearchIndex}` : undefined}
-                value={searchQuery}
-                onChange={e => {
-                  setSearchQuery(e.target.value);
-                  setIsSearchOpen(true);
-                  setActiveSearchIndex(-1);
+        <SidebarHeader className="gap-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                tooltip="Costellar Atlas Home"
+                onClick={() => {
+                  useAstroStore.setState({ isTraceMode: false });
+                  setActiveView('overview');
+                  closeMobileSidebar();
                 }}
-                onFocus={() => setIsSearchOpen(true)}
-                onKeyDown={handleSearchKeyDown}
-                className="w-full bg-[var(--bg-card)] border border-[var(--bg-tray)] focus:border-[var(--signal-cobalt)] rounded-[6px] pl-7 pr-6 py-1.5 text-[10px] text-[var(--ink-primary)] placeholder:text-[var(--ink-muted)] focus:outline-none font-mono uppercase tracking-wide transition-colors"
-              />
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] text-[10px] pointer-events-none">
-                ⌕
-              </span>
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setIsSearchOpen(false);
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] hover:text-[var(--ink-primary)] text-xs cursor-pointer font-mono"
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+                className="data-[active=true]:bg-sidebar-accent"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--signal-surface)] bg-[var(--bg-pill-active)] text-[var(--signal-mid)]">
+                  <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+                  </svg>
+                </div>
+                <div className="grid flex-1 text-left leading-tight">
+                  <span className="truncate font-semibold tracking-wider text-xs text-[var(--ink-primary)] uppercase">
+                    COSTELLAR
+                  </span>
+                  <span className="truncate text-[10px] font-mono text-[var(--ink-muted)] uppercase">
+                    Observing Atlas
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
 
-            {/* Autocomplete Dropdown floating over content */}
-            {isSearchOpen && searchQuery && (
-              <div id="sky-search-results" role="listbox" aria-label="Search results" className="absolute top-full left-0 right-[-100px] mt-1 bg-[var(--bg-card)] border border-[var(--signal-surface)] rounded-[8px] shadow-lg overflow-hidden z-50 text-xs max-h-72 overflow-y-auto divide-y divide-[var(--bg-tray)] font-mono">
-                {hasResults ? (
+            <SidebarMenuItem>
+              <CommandDialogTrigger
+                handle={commandDialogHandle}
+                render={
+                  <SidebarMenuButton
+                    tooltip="Search stars, constellations & views (Ctrl+K)"
+                    className="border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+                    aria-label="Search stars and constellations"
+                    aria-keyshortcuts="Control+K Meta+K"
+                  />
+                }
+              >
+                <SearchIcon className="size-4 shrink-0 text-[var(--ink-muted)]" aria-hidden="true" />
+                <span className="truncate text-xs">Search catalog...</span>
+                <CommandShortcut className="ml-auto group-data-[collapsible=icon]:hidden">
+                  Ctrl K
+                </CommandShortcut>
+              </CommandDialogTrigger>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+
+        <SidebarSeparator />
+
+        <SidebarContent>
+          {navGroups.map(group => (
+            <SidebarGroup key={group.label}>
+              <SidebarGroupLabel className="text-[10px] font-mono font-medium uppercase tracking-[0.08em] text-[var(--ink-muted)]">
+                {group.label}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map(item => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton
+                        isActive={item.isActive}
+                        tooltip={item.label}
+                        onClick={item.onClick}
+                        aria-current={item.isActive ? 'page' : undefined}
+                        className="text-[12px] font-medium data-[active=true]:bg-[var(--bg-pill-active)] data-[active=true]:text-[var(--ink-primary)] data-[active=true]:border data-[active=true]:border-[var(--signal-surface)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+                      >
+                        <span className={item.isActive ? 'text-[var(--signal-mid)]' : 'text-[var(--ink-muted)]'}>
+                          {item.icon}
+                        </span>
+                        <span className="truncate">{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </SidebarContent>
+
+        <SidebarSeparator />
+
+        {/* Observer location shortcut bound via Space UI DialogTrigger handle */}
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DialogTrigger
+                handle={observerDialogHandle}
+                render={
+                  <SidebarMenuButton
+                    ref={observerTriggerRef}
+                    size="lg"
+                    tooltip={`Observer: ${observer.name} (${formatObserverCoordinates(observer.latitude, observer.longitude)})`}
+                    className="border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-subtle)] hover:border-[var(--signal-surface)] text-left"
+                    title="Change observer location"
+                  />
+                }
+              >
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[var(--bg-pill-active)] text-[var(--signal-mid)] text-xs font-mono" aria-hidden="true">
+                  ⌖
+                </span>
+                <div className="grid flex-1 text-left leading-tight min-w-0">
+                  <span className="truncate text-[11px] font-semibold text-[var(--ink-primary)]">
+                    {observer.name.split(',')[0]}
+                  </span>
+                  <span className="truncate text-[10px] font-mono tabular-nums text-[var(--ink-muted)]">
+                    {formatObserverCoordinates(observer.latitude, observer.longitude)}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-[var(--ink-muted)] group-data-[collapsible=icon]:hidden">
+                  SITE
+                </span>
+              </DialogTrigger>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+
+        <SidebarRail />
+      </Sidebar>
+
+      {/* Space UI Command Palette Dialog for Sky Search & Quick Navigation */}
+      <CommandDialog
+        handle={commandDialogHandle}
+        open={isCommandOpen}
+        onOpenChange={open => {
+          setIsCommandOpen(open);
+          if (!open) setSearchQuery('');
+        }}
+      >
+        <CommandDialogPopup
+          onKeyDown={e => {
+            if (e.key !== 'Escape' && e.key !== 'Tab') {
+              e.stopPropagation();
+            }
+          }}
+          className="border-[var(--border-strong)] bg-[var(--bg-card)]"
+        >
+          <Command
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            filter={null}
+          >
+            <CommandInput
+              placeholder="Search stars, IAU constellations, HR numbers, or views..."
+              aria-label="Search catalog targets and views"
+              onKeyDown={e => e.stopPropagation()}
+            />
+            <CommandPanel className="bg-[var(--bg-tray)]">
+              <CommandList className="max-h-80">
+                {!hasCommandMatches ? (
+                  <div className="py-10 text-center text-xs text-[var(--ink-muted)] font-mono">
+                    No matching catalog targets or views found for &ldquo;{searchQuery}&rdquo;.
+                  </div>
+                ) : (
                   <>
-                    {/* Constellation matches */}
-                    {searchResults.constellations.length > 0 && (
-                      <div className="p-1">
-                        <div className="text-[9px] uppercase font-bold text-[var(--ink-muted)] px-2 py-1 tracking-wider">
-                          CONSTELLATIONS
-                        </div>
-                        {searchResults.constellations.map((c, index) => {
+                    {commandResults.constellations.length > 0 && (
+                      <CommandGroup>
+                        <CommandGroupLabel>Constellations</CommandGroupLabel>
+                        {commandResults.constellations.map(c => {
                           const hasDfa = REFERENCE_PATTERNS.some(p => p.constellationId === c.id);
                           return (
-                            <button
+                            <CommandItem
                               key={c.id}
-                              id={`sky-search-option-${index}`}
-                              ref={element => { searchOptionRefs.current[index] = element; }}
-                              role="option"
-                              aria-selected={activeSearchIndex === index}
-                              onMouseMove={() => setActiveSearchIndex(index)}
+                              value={`con-${c.id}-${c.name}`}
                               onClick={() => handleSelectConstellation(c.id)}
-                              className="w-full p-1.5 hover:bg-[var(--bg-card-subtle)] rounded-[4px] text-left flex items-center justify-between transition-colors cursor-pointer"
+                              className="justify-between"
                             >
                               <div className="truncate">
-                                <span className="font-semibold text-[var(--ink-primary)] text-[11px]">{c.name}</span>
-                                <span className="text-[10px] text-[var(--ink-secondary)] ml-1 uppercase">"{c.englishName}"</span>
+                                <span className="font-semibold text-[var(--ink-primary)] text-xs">
+                                  {c.name}
+                                </span>
+                                <span className="text-[11px] text-[var(--ink-secondary)] ml-2">
+                                  {c.englishName}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-1 shrink-0 ml-1">
-                                <span className="px-1 py-0.2 bg-[var(--bg-pill-neutral)] text-[9px] text-[var(--ink-secondary)] font-mono rounded uppercase">
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="px-1.5 py-0.5 bg-[var(--bg-pill-neutral)] text-[10px] text-[var(--ink-secondary)] font-mono rounded uppercase">
                                   {c.id}
                                 </span>
                                 {hasDfa && (
-                                  <span className="px-1 py-0.2 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] text-[8px] font-bold rounded uppercase">
+                                  <span className="px-1.5 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-mid)] text-[9px] font-mono font-semibold rounded uppercase">
                                     DFA
                                   </span>
                                 )}
                               </div>
-                            </button>
+                            </CommandItem>
                           );
                         })}
-                      </div>
+                      </CommandGroup>
                     )}
 
-                    {/* Star matches */}
-                    {searchResults.stars.length > 0 && (
-                      <div className="p-1">
-                        <div className="text-[9px] uppercase font-bold text-[var(--ink-muted)] px-2 py-1 tracking-wider">
-                          CATALOG STARS
-                        </div>
-                        {searchResults.stars.map((s, starIndex) => {
-                          const index = searchResults.constellations.length + starIndex;
-                          return (
-                          <button
+                    {commandResults.constellations.length > 0 && commandResults.stars.length > 0 && (
+                      <CommandSeparator />
+                    )}
+
+                    {commandResults.stars.length > 0 && (
+                      <CommandGroup>
+                        <CommandGroupLabel>Catalog Stars</CommandGroupLabel>
+                        {commandResults.stars.map(s => (
+                          <CommandItem
                             key={s.id}
-                            id={`sky-search-option-${index}`}
-                            ref={element => { searchOptionRefs.current[index] = element; }}
-                            role="option"
-                            aria-selected={activeSearchIndex === index}
-                            onMouseMove={() => setActiveSearchIndex(index)}
+                            value={`star-${s.id}-${s.proper || s.name}`}
                             onClick={() => handleSelectStar(s.id)}
-                            className="w-full p-1.5 hover:bg-[var(--bg-card-subtle)] rounded-[4px] text-left flex items-center justify-between transition-colors cursor-pointer"
+                            className="justify-between"
                           >
                             <div className="truncate">
-                              <span className="font-semibold text-[var(--signal-cobalt)] text-[11px]">{s.proper || s.name}</span>
+                              <span className="font-semibold text-[var(--signal-mid)] text-xs">
+                                {s.proper || s.name}
+                              </span>
                               {s.con && (
-                                <span className="text-[10px] text-[var(--ink-secondary)] ml-1 font-mono uppercase">
+                                <span className="text-[10px] text-[var(--ink-secondary)] ml-1.5 font-mono uppercase">
                                   ({s.con})
                                 </span>
                               )}
                             </div>
-                            <span className="text-[9px] text-[var(--ink-muted)] font-mono uppercase shrink-0 ml-1">
-                              MAG {s.mag.toFixed(1)}
+                            <span className="text-[10px] text-[var(--ink-muted)] font-mono tabular-nums uppercase shrink-0">
+                              mag {s.mag.toFixed(1)}
                             </span>
-                          </button>
-                          );
-                        })}
-                      </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+
+                    {(commandResults.constellations.length > 0 || commandResults.stars.length > 0) &&
+                      commandResults.views.length > 0 && <CommandSeparator />}
+
+                    {commandResults.views.length > 0 && (
+                      <CommandGroup>
+                        <CommandGroupLabel>Navigation Views</CommandGroupLabel>
+                        {commandResults.views.map(v => (
+                          <CommandItem
+                            key={v.id}
+                            value={`view-${v.id}-${v.label}`}
+                            onClick={() => {
+                              v.onClick();
+                              setSearchQuery('');
+                              setIsCommandOpen(false);
+                            }}
+                            className="justify-between"
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="text-[var(--ink-muted)]">{v.icon}</span>
+                              <span className="text-xs font-medium text-[var(--ink-primary)]">
+                                {v.label}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-[var(--ink-muted)] uppercase">
+                              {v.group}
+                            </span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
                     )}
                   </>
-                ) : (
-                  <div className="p-3 text-center text-[var(--ink-muted)] text-[10px] uppercase tracking-wider">
-                    NO TARGETS FOUND
-                  </div>
                 )}
+              </CommandList>
+            </CommandPanel>
+            <CommandFooter>
+              <div className="flex items-center gap-2">
+                <KbdGroup>
+                  <Kbd>↑</Kbd>
+                  <Kbd>↓</Kbd>
+                </KbdGroup>
+                <span>Navigate</span>
+                <Kbd>↵</Kbd>
+                <span>Focus / Open</span>
               </div>
-            )}
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="rail-nav flex flex-col gap-1" aria-label="Main Navigation">
-            {navItems.map(item => {
-              const isActive = item.isActive;
-              return (
-                <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  type="button"
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`w-full h-8.5 px-2.5 rounded-[6px] text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-2.5 cursor-pointer text-left ${
-                    isActive
-                      ? 'bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-cobalt)] hud-reticle-4corner active'
-                      : 'bg-transparent text-[#525866] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-pill-neutral)] hover:hud-reticle border border-transparent'
-                  }`}
-                >
-                  <span className={`${isActive ? 'text-[var(--signal-cobalt)]' : 'text-[var(--ink-muted)]'}`}>
-                    {item.icon}
-                  </span>
-                  <span className="truncate">{item.label}</span>
-                  {isActive && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Observer location shortcut */}
-        <div className="pt-2 border-t border-[var(--bg-tray)] space-y-2 shrink-0">
-          {/* Observer Location Pill */}
-          <button
-            ref={observerTriggerRef}
-            onClick={() => setIsObserverOpen(true)}
-            type="button"
-            aria-haspopup="dialog"
-            aria-expanded={isObserverOpen}
-            className="w-full p-2 bg-[var(--bg-card)] hover:bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] hover:border-[var(--signal-mid)] rounded-[6px] text-left transition-colors cursor-pointer font-mono"
-            title="Change observer location telemetry"
-          >
-            <div className="flex items-center justify-between text-[10px]">
-              <div className="flex items-center gap-1.5 text-[var(--ink-primary)] font-semibold truncate">
-                <span className="text-[var(--signal-cobalt)] text-xs">⌖</span>
-                <span className="truncate uppercase">{observer.name.split(',')[0]}</span>
+              <div className="flex items-center gap-1.5">
+                <Kbd>Esc</Kbd>
+                <span>Close</span>
               </div>
-              <span className="text-[9px] text-[var(--ink-muted)]">EDIT</span>
-            </div>
-            <div className="text-[9px] text-[var(--ink-muted)] mt-0.5 truncate pl-4">
-              {formatObserverCoordinates(observer.latitude, observer.longitude)}
-            </div>
-          </button>
+            </CommandFooter>
+          </Command>
+        </CommandDialogPopup>
+      </CommandDialog>
 
-        </div>
-      </aside>
-
-      {/* Observer Location Modal */}
-      {isObserverOpen && (
-        <ObserverModal
-          currentObserver={observer}
-          onSelect={obs => {
-            setObserver(obs);
-            setIsObserverOpen(false);
-            requestAnimationFrame(() => observerTriggerRef.current?.focus());
-          }}
-          onClose={() => {
-            setIsObserverOpen(false);
-            requestAnimationFrame(() => observerTriggerRef.current?.focus());
-          }}
-        />
-      )}
+      {/* Space UI Dialog for Observation Location Settings */}
+      <ObserverDialog
+        handle={observerDialogHandle}
+        open={isObserverOpen}
+        onOpenChange={setIsObserverOpen}
+        finalFocus={observerTriggerRef}
+        currentObserver={observer}
+        onSelect={obs => {
+          setObserver(obs);
+          setIsObserverOpen(false);
+        }}
+      />
     </>
   );
 };
 
-interface ObserverModalProps {
+interface ObserverDialogProps {
+  handle: ReturnType<typeof DialogCreateHandle>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  finalFocus: React.RefObject<HTMLButtonElement | null>;
   currentObserver: ObserverLocation;
   onSelect: (obs: ObserverLocation) => void;
-  onClose: () => void;
 }
 
-const ObserverModal: React.FC<ObserverModalProps> = ({ currentObserver, onSelect, onClose }) => {
+const ObserverDialog: React.FC<ObserverDialogProps> = ({
+  handle,
+  open,
+  onOpenChange,
+  finalFocus,
+  currentObserver,
+  onSelect,
+}) => {
+  return (
+    <Dialog handle={handle} open={open} onOpenChange={onOpenChange}>
+      {open && (
+        <ObserverDialogContent
+          finalFocus={finalFocus}
+          currentObserver={currentObserver}
+          onSelect={onSelect}
+        />
+      )}
+    </Dialog>
+  );
+};
+
+interface ObserverDialogContentProps {
+  finalFocus: React.RefObject<HTMLButtonElement | null>;
+  currentObserver: ObserverLocation;
+  onSelect: (obs: ObserverLocation) => void;
+}
+
+const ObserverDialogContent: React.FC<ObserverDialogContentProps> = ({
+  finalFocus,
+  currentObserver,
+  onSelect,
+}) => {
   const [customLat, setCustomLat] = useState(currentObserver.latitude.toString());
   const [customLon, setCustomLon] = useState(currentObserver.longitude.toString());
-  const [customName, setCustomName] = useState('CUSTOM COORDINATES');
+  const [customName, setCustomName] = useState('Custom Site');
   const [validationError, setValidationError] = useState('');
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => { closeButtonRef.current?.focus(); }, []);
-
-  const trapDialogTab = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== 'Tab' || !dialogRef.current) return;
-    const controls = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
-    ));
-    if (!controls.length) return;
-    const first = controls[0];
-    const last = controls[controls.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
 
   const handleApplyCustom = (e: React.FormEvent) => {
     e.preventDefault();
@@ -576,7 +731,7 @@ const ObserverModal: React.FC<ObserverModalProps> = ({ currentObserver, onSelect
     if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
       setValidationError('');
       onSelect({
-        name: customName || `LAT ${lat.toFixed(2)}°, LON ${lon.toFixed(2)}°`,
+        name: customName.trim() || `LAT ${lat.toFixed(2)}°, LON ${lon.toFixed(2)}°`,
         latitude: lat,
         longitude: lon,
       });
@@ -589,6 +744,7 @@ const ObserverModal: React.FC<ObserverModalProps> = ({ currentObserver, onSelect
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => {
+          setValidationError('');
           onSelect({
             name: `GPS (${pos.coords.latitude.toFixed(2)}°, ${pos.coords.longitude.toFixed(2)}°)`,
             latitude: pos.coords.latitude,
@@ -597,134 +753,135 @@ const ObserverModal: React.FC<ObserverModalProps> = ({ currentObserver, onSelect
           });
         },
         err => {
-          alert(`Geolocation unavailable: ${err.message}`);
+          setValidationError(`Geolocation unavailable: ${err.message}`);
         }
       );
     } else {
-      alert('Geolocation is not supported by your browser.');
+      setValidationError('Geolocation is not supported by this browser.');
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/35 flex items-center justify-center p-4" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
-      <div ref={dialogRef} onKeyDown={trapDialogTab} role="dialog" aria-modal="true" aria-labelledby="observer-dialog-title" className="hud-reticle-4corner bg-[var(--bg-card)] border border-[var(--card-border)] rounded-[14px] max-w-lg w-full p-6 shadow-none space-y-4 font-mono text-[var(--ink-primary)]">
-        <div className="flex items-center justify-between border-b border-[var(--bg-tray)] pb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--signal-cobalt)] text-sm">⌖</span>
-            <h3 id="observer-dialog-title" className="font-bold text-xs uppercase tracking-wider text-[var(--ink-primary)]">
-              OBSERVATION LOCATION // TELEMETRY
-            </h3>
-          </div>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            className="text-[var(--ink-muted)] hover:text-[var(--ink-primary)] text-xs px-2 py-1 rounded-[4px] cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
+    <DialogPopup
+      finalFocus={finalFocus}
+      onKeyDown={handlePopupTabKeyDown}
+      className="max-w-lg border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
+    >
+      <DialogHeader className="border-b border-[var(--border-subtle)]">
+        <DialogTitle className="flex items-center gap-2 text-sm font-semibold text-[var(--ink-primary)]">
+          <span className="text-[var(--signal-mid)]" aria-hidden="true">⌖</span>
+          <span>Observation location settings</span>
+        </DialogTitle>
+        <DialogDescription className="text-xs text-[var(--ink-secondary)]">
+          Select a preset observatory, read browser GPS, or enter custom coordinates.
+        </DialogDescription>
+      </DialogHeader>
 
-        {/* Global Preset Observatories */}
+      <DialogPanel className="space-y-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-semibold text-[var(--ink-muted)] uppercase tracking-wider block">
-            MAJOR GLOBAL OBSERVATORIES & CITIES
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+          <div className="text-[11px] font-semibold text-[var(--ink-secondary)] uppercase tracking-wider">
+            Global observatories &amp; sites
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {PRESET_OBSERVERS.map((preset, idx) => {
               const isSelected = preset.name === currentObserver.name;
               return (
-                <button
+                <Button
                   key={idx}
+                  variant={isSelected ? 'secondary' : 'outline'}
                   onClick={() => onSelect(preset)}
-                  className={`text-left p-2.5 rounded-[8px] border text-xs transition-colors cursor-pointer font-mono ${
+                  className={`h-auto w-full flex-col items-start justify-start gap-0.5 p-2.5 text-left font-normal ${
                     isSelected
-                      ? 'bg-[var(--bg-pill-active)] border-[var(--signal-cobalt)] text-[var(--signal-cobalt)]'
-                      : 'bg-[var(--bg-card-subtle)] border-[var(--bg-tray)] text-[var(--ink-secondary)] hover:border-[var(--signal-surface)] hover:text-[var(--ink-primary)]'
+                      ? 'bg-[var(--bg-pill-active)] border-[var(--signal-cobalt)] text-[var(--ink-primary)]'
+                      : 'bg-[var(--bg-card-subtle)] border-[var(--border-subtle)] text-[var(--ink-secondary)] hover:border-[var(--signal-surface)] hover:text-[var(--ink-primary)]'
                   }`}
                 >
-                  <div className="font-semibold truncate uppercase">{preset.name}</div>
-                  <div className="text-[10px] text-[var(--ink-muted)] mt-0.5">
+                  <div className="font-semibold text-xs truncate w-full">{preset.name}</div>
+                  <div className="text-[10px] font-mono tabular-nums text-[var(--ink-muted)]">
                     {formatObserverCoordinates(preset.latitude, preset.longitude, 2)}
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
         </div>
 
-        {/* Browser Geolocation */}
         <div>
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={handleGeolocation}
-            className="w-full py-2 px-3 bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border border-[var(--bg-tray)] hover:border-[var(--signal-mid)] rounded-[8px] text-[11px] font-mono uppercase tracking-wider text-[var(--signal-cobalt)] font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="w-full text-xs font-semibold text-[var(--signal-mid)]"
           >
-            <span>⌖</span>
-            <span>USE BROWSER GPS GEOLOCATION</span>
-          </button>
+            <span aria-hidden="true">⌖</span>
+            <span>Use browser GPS geolocation</span>
+          </Button>
         </div>
 
-        {/* Custom Coordinates */}
-        <form onSubmit={handleApplyCustom} className="space-y-3 pt-2 border-t border-[var(--bg-tray)]">
-          <label className="text-[10px] font-semibold text-[var(--ink-muted)] uppercase tracking-wider block">
-            CUSTOM COORDINATES
-          </label>
-          <div className="grid grid-cols-3 gap-2">
+        <form id="observer-custom-form" onSubmit={handleApplyCustom} className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
+          <div className="text-[11px] font-semibold text-[var(--ink-secondary)] uppercase tracking-wider">
+            Custom coordinates
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <label className="text-[9px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">NAME</label>
-              <input
+              <label htmlFor="observer-custom-name" className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">
+                Name
+              </label>
+              <Input
+                id="observer-custom-name"
                 type="text"
+                size="sm"
                 value={customName}
                 onChange={e => setCustomName(e.target.value)}
-                className="w-full bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] focus:border-[var(--signal-cobalt)] rounded-[6px] px-2.5 py-1.5 text-xs text-[var(--ink-primary)] font-mono uppercase focus:outline-none"
-                placeholder="MY LOCATION"
+                onKeyDown={e => e.stopPropagation()}
+                placeholder="My location"
               />
             </div>
             <div>
-              <label className="text-[9px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">LAT (-90..90)</label>
-              <input
+              <label htmlFor="observer-custom-lat" className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">
+                Lat (−90..90)
+              </label>
+              <Input
+                id="observer-custom-lat"
                 type="number"
                 step="0.001"
+                size="sm"
+                className="font-mono tabular-nums"
                 value={customLat}
                 onChange={e => setCustomLat(e.target.value)}
-                className="w-full bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] focus:border-[var(--signal-cobalt)] rounded-[6px] px-2.5 py-1.5 text-xs text-[var(--ink-primary)] font-mono focus:outline-none"
+                onKeyDown={e => e.stopPropagation()}
               />
             </div>
             <div>
-              <label className="text-[9px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">LON (-180..180)</label>
-              <input
+              <label htmlFor="observer-custom-lon" className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wider block mb-1">
+                Lon (−180..180)
+              </label>
+              <Input
+                id="observer-custom-lon"
                 type="number"
                 step="0.001"
+                size="sm"
+                className="font-mono tabular-nums"
                 value={customLon}
                 onChange={e => setCustomLon(e.target.value)}
-                className="w-full bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] focus:border-[var(--signal-cobalt)] rounded-[6px] px-2.5 py-1.5 text-xs text-[var(--ink-primary)] font-mono focus:outline-none"
+                onKeyDown={e => e.stopPropagation()}
               />
             </div>
           </div>
           {validationError && (
-            <Alert variant="destructive" className="text-[var(--ink-primary)]">
-              <AlertTitle>Coordinates out of range</AlertTitle>
+            <Alert variant="error">
+              <AlertTitle>Location notice</AlertTitle>
               <AlertDescription>{validationError}</AlertDescription>
             </Alert>
           )}
-          <div className="flex justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-[var(--ink-muted)] hover:text-[var(--ink-primary)] cursor-pointer"
-            >
-              CANCEL
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-1.5 bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white rounded-[6px] text-xs font-mono uppercase tracking-wider font-semibold shadow-none cursor-pointer"
-            >
-              APPLY COORDINATES
-            </button>
-          </div>
         </form>
-      </div>
-    </div>
+      </DialogPanel>
+
+      <DialogFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]">
+        <DialogClose render={<Button variant="ghost" size="sm" />}>Cancel</DialogClose>
+        <Button type="submit" form="observer-custom-form" variant="default" size="sm">
+          Apply coordinates
+        </Button>
+      </DialogFooter>
+    </DialogPopup>
   );
 };

@@ -5,13 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build-native.mjs && tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
-    "preview": "vite preview"
+    "test:server": "node --test server/api.node-test.js",
+    "verify:native": "node scripts/build-native.mjs && node native/verify.mjs",
+    "preview": "vite preview",
+    "start": "node server/start.js"
   },
   "dependencies": {
+    "@base-ui/react": "1.9.0",
     "astronomy-engine": "^2.1.19",
+    "class-variance-authority": "0.7.1",
+    "cn": "0.5.2",
     "lucide-react": "^1.72.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

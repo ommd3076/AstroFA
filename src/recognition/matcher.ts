@@ -128,7 +128,7 @@ export function recognizePattern(
         explanation: `DFA accepted symbolic pattern for ${simResult.acceptingLabels.join('/')}, but geometric residual (${bestMatch.residual}) exceeds tolerance (0.32). Shape does not match.`,
       };
     } else {
-      // Accepted by DFA, no exact length match reference
+      // Symbolic acceptance alone cannot confirm a constellation shape.
       return {
         inputSymbols,
         quantizedSteps: encoded.steps,
@@ -139,8 +139,8 @@ export function recognizePattern(
         prefixMatch: prefixResult,
         geometricScores: candidateScores,
         bestMatch: null,
-        status: 'FULL_MATCH',
-        explanation: `DFA accepted string [${inputSymbols.join(', ')}] matching constellation ${simResult.acceptingLabels.join(', ')}.`,
+        status: 'GEOMETRIC_REJECT',
+        explanation: `DFA accepted string [${inputSymbols.join(', ')}], but no same-length reference geometry was available to verify the shape.`,
       };
     }
   }

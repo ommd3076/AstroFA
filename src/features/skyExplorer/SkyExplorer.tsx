@@ -1,13 +1,27 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATIONS } from '../../data/astroData';
-import { getHorizontalCoordinates } from '../../astronomy/coordinates';
+import { getHorizontalCoordinates, PRESET_OBSERVERS } from '../../astronomy/coordinates';
 import { formatObserverCoordinates } from '../../utils/format';
 import { SkyCanvas } from '../../sky/SkyCanvas';
 import { StarInspector } from '../../components/StarInspector';
 import { TraceHud } from '../traceMode/TraceHud';
 import { TimelineBar } from '../../components/TimelineBar';
-import { PRESET_OBSERVERS } from '../../astronomy/coordinates';
+import { Button } from '../../components/ui/space/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogCreateHandle,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogPopup,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/space/dialog';
+import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarSeparator } from '../../components/ui/space/toolbar';
+import { handlePopupTabKeyDown } from '../../utils/dialogFocus';
 import type { ObserverLocation } from '../../types/astronomy';
 import * as Astronomy from 'astronomy-engine';
 
@@ -23,15 +37,15 @@ function getMoonData(date: Date) {
     const illum = Astronomy.Illumination(Astronomy.Body.Moon, date);
     const phaseDeg = Astronomy.MoonPhase(date);
 
-    let phaseName = 'WAXING GIBBOUS';
-    if (phaseDeg < 22.5 || phaseDeg >= 337.5) phaseName = 'NEW MOON';
-    else if (phaseDeg < 67.5) phaseName = 'WAXING CRESCENT';
-    else if (phaseDeg < 112.5) phaseName = 'FIRST QUARTER';
-    else if (phaseDeg < 157.5) phaseName = 'WAXING GIBBOUS';
-    else if (phaseDeg < 202.5) phaseName = 'FULL MOON';
-    else if (phaseDeg < 247.5) phaseName = 'WANING GIBBOUS';
-    else if (phaseDeg < 292.5) phaseName = 'THIRD QUARTER';
-    else phaseName = 'WANING CRESCENT';
+    let phaseName = 'Waxing Gibbous';
+    if (phaseDeg < 22.5 || phaseDeg >= 337.5) phaseName = 'New Moon';
+    else if (phaseDeg < 67.5) phaseName = 'Waxing Crescent';
+    else if (phaseDeg < 112.5) phaseName = 'First Quarter';
+    else if (phaseDeg < 157.5) phaseName = 'Waxing Gibbous';
+    else if (phaseDeg < 202.5) phaseName = 'Full Moon';
+    else if (phaseDeg < 247.5) phaseName = 'Waning Gibbous';
+    else if (phaseDeg < 292.5) phaseName = 'Third Quarter';
+    else phaseName = 'Waning Crescent';
 
     return {
       fraction: illum.phase_fraction,
@@ -43,74 +57,57 @@ function getMoonData(date: Date) {
     return {
       fraction: 0.784,
       percentStr: '78.4%',
-      phaseName: 'WAXING GIBBOUS',
+      phaseName: 'Waxing Gibbous',
       phaseDeg: 135,
     };
   }
 }
 
 /**
- * Mini SVG Moon Disk Component depicting illumination phase
+ * Compact Moon Phase Disk SVG depicting illumination phase
  */
 const MoonDiskSvg: React.FC<{ phaseDeg: number; fraction: number }> = ({ phaseDeg, fraction }) => {
   const isWaxing = phaseDeg <= 180;
-  // Sweep flag determines crescent vs gibbous arc
   const sweep = isWaxing ? 1 : 0;
-  const r = 16;
-  const cx = 18;
-  const cy = 18;
-  // Ellipse x-radius based on fraction
-  const rx = Math.max(0.5, Math.abs(2 * fraction - 1) * r);
+  const r = 8;
+  const cx = 10;
+  const cy = 10;
+  const rx = Math.max(0.4, Math.abs(2 * fraction - 1) * r);
   const largeArc = fraction > 0.5 ? 1 : 0;
 
   return (
-    <svg width="36" height="36" viewBox="0 0 36 36" className="shrink-0 drop-shadow-xs">
-      <defs>
-        <radialGradient id="moon-surface" cx="40%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="70%" stopColor="#E2E8F0" />
-          <stop offset="100%" stopColor="#94A3B8" />
-        </radialGradient>
-      </defs>
-      {/* Dark lunar disc */}
-      <circle cx={cx} cy={cy} r={r} fill="#1E293B" stroke="#334155" strokeWidth="1" />
-      {/* Illuminated portion */}
+    <svg width="20" height="20" viewBox="0 0 20 20" className="shrink-0" aria-hidden="true">
+      <circle cx={cx} cy={cy} r={r} fill="#1E1E24" stroke="#3A3A44" strokeWidth="1" />
       {fraction >= 0.98 ? (
-        <circle cx={cx} cy={cy} r={r} fill="url(#moon-surface)" />
+        <circle cx={cx} cy={cy} r={r} fill="#F3F1EB" />
       ) : fraction <= 0.02 ? null : (
         <path
           d={`M ${cx} ${cy - r}
              A ${r} ${r} 0 0 ${sweep} ${cx} ${cy + r}
              A ${rx} ${r} 0 0 ${largeArc ? (1 - sweep) : sweep} ${cx} ${cy - r}`}
-          fill="url(#moon-surface)"
+          fill="#E5E3DC"
         />
       )}
     </svg>
   );
 };
 
-export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
-  const {
-    observer,
-    setObserver,
-    observationDate,
-    showConstellationLines,
-    setShowConstellationLines,
-    showConstellationLabels,
-    setShowConstellationLabels,
-    showEquatorialGrid,
-    setShowEquatorialGrid,
-    showHorizon,
-    setShowHorizon,
-    isTraceMode,
-    setActiveView,
-  } = useAstroStore();
+interface SkyTelemetryStripProps {
+  siteDialogHandle: ReturnType<typeof DialogCreateHandle>;
+  locationTriggerRef: React.RefObject<HTMLButtonElement | null>;
+}
 
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [showMobileInspector, setShowMobileInspector] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
+/**
+ * Isolated compact telemetry readout so 100ms time playback ticks do not rerender the SkyExplorer shell/toolbar.
+ */
+const SkyTelemetryStrip: React.FC<SkyTelemetryStripProps> = React.memo(({
+  siteDialogHandle,
+  locationTriggerRef,
+}) => {
+  const observer = useAstroStore(state => state.observer);
+  const observationDate = useAstroStore(state => state.observationDate);
+  const setActiveView = useAstroStore(state => state.setActiveView);
 
-  // Live Visible Constellations (Alt > 0°)
   const visibleConstellationsCount = useMemo(() => {
     return CONSTELLATIONS.filter(con => {
       const hor = getHorizontalCoordinates(con.raCenter, con.decCenter, observer, observationDate);
@@ -118,10 +115,8 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
     }).length;
   }, [observer, observationDate]);
 
-  // Moon telemetry
   const moonData = useMemo(() => getMoonData(observationDate), [observationDate]);
 
-  // Formatted date and time
   const timeStr = useMemo(() => {
     return observationDate.toLocaleTimeString(undefined, {
       hour: '2-digit',
@@ -134,13 +129,84 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
     return observationDate.toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
-    }).toUpperCase();
+    });
   }, [observationDate]);
 
-  const weekdayStr = useMemo(() => {
-    return observationDate.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
-  }, [observationDate]);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 min-w-0 text-[11px]">
+      <DialogTrigger
+        handle={siteDialogHandle}
+        render={
+          <Button
+            ref={locationTriggerRef}
+            variant="ghost"
+            size="xs"
+            title="Change Observer Location"
+            className="h-7 gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-normal hover:border-[var(--signal-surface)]"
+          />
+        }
+      >
+        <span className="font-mono text-[var(--signal-mid)]" aria-hidden="true">⌖</span>
+        <span className="font-medium text-[var(--ink-primary)] truncate max-w-[110px]">
+          {observer.name.split(',')[0]}
+        </span>
+        <span className="hidden lg:inline font-mono tabular-nums text-[10px] text-[var(--ink-muted)]">
+          {formatObserverCoordinates(observer.latitude, observer.longitude, 1)}
+        </span>
+      </DialogTrigger>
+
+      <Button
+        variant="ghost"
+        size="xs"
+        onClick={() => setActiveView('tonight')}
+        title="Open Sky Tonight Visibility Planner"
+        className="h-7 gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-mono tabular-nums text-[var(--ink-secondary)] hover:border-[var(--signal-surface)] hover:text-[var(--ink-primary)]"
+      >
+        <strong className="text-[var(--ink-primary)]">{visibleConstellationsCount}</strong>
+        <span className="text-[var(--ink-muted)]">/ {CONSTELLATIONS.length} up</span>
+      </Button>
+
+      <div
+        className="hidden sm:inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 text-[var(--ink-secondary)]"
+        title={`Moon: ${moonData.phaseName} (${moonData.percentStr})`}
+      >
+        <MoonDiskSvg phaseDeg={moonData.phaseDeg} fraction={moonData.fraction} />
+        <span className="font-mono tabular-nums text-[10px] text-[var(--signal-mid)]">{moonData.percentStr}</span>
+        <span className="hidden xl:inline text-[11px] text-[var(--ink-muted)]">{moonData.phaseName}</span>
+      </div>
+
+      <div className="inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] px-2 font-mono tabular-nums text-[11px]">
+        <span className="font-semibold text-[var(--ink-primary)]">{timeStr}</span>
+        <span className="text-[10px] text-[var(--ink-muted)]">{dateStr}</span>
+      </div>
+    </div>
+  );
+});
+
+export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
+  const observer = useAstroStore(state => state.observer);
+  const setObserver = useAstroStore(state => state.setObserver);
+  const showConstellationLines = useAstroStore(state => state.showConstellationLines);
+  const setShowConstellationLines = useAstroStore(state => state.setShowConstellationLines);
+  const showConstellationLabels = useAstroStore(state => state.showConstellationLabels);
+  const setShowConstellationLabels = useAstroStore(state => state.setShowConstellationLabels);
+  const showEquatorialGrid = useAstroStore(state => state.showEquatorialGrid);
+  const setShowEquatorialGrid = useAstroStore(state => state.setShowEquatorialGrid);
+  const showHorizon = useAstroStore(state => state.showHorizon);
+  const setShowHorizon = useAstroStore(state => state.setShowHorizon);
+  const isTraceMode = useAstroStore(state => state.isTraceMode);
+  const setIsTraceMode = useAstroStore(state => state.setIsTraceMode);
+
+  const siteDialogHandle = useMemo(() => DialogCreateHandle(), []);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [showMobileInspector, setShowMobileInspector] = useState(false);
+  const [showDeepSky, setShowDeepSky] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const locationTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeLocationPicker = () => {
+    setShowLocationPicker(false);
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -162,289 +228,264 @@ export const SkyExplorer: React.FC<SkyExplorerProps> = () => {
 
   if (isTraceMode) {
     return (
-      <div className="w-full h-full relative select-none rounded-[12px] overflow-hidden bento-card p-0 border border-white/60 bg-[var(--bg-viewport)]">
-        <SkyCanvas />
+      <div className="atlas-stage w-full h-full min-h-0 relative select-none">
+        <SkyCanvas showDeepSky={showDeepSky} />
         <TraceHud />
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 min-h-0 select-none">
-      {/* =========================================================================
-          ROW 1: Top Telemetry 4-Card Band (Matching Frame 2)
-          ========================================================================= */}
-      <div className="grid min-w-0 grid-cols-2 xl:grid-cols-4 gap-2 shrink-0">
-        {/* Card 1: Current Location */}
-        <button
-          type="button"
-          onClick={() => setShowLocationPicker(true)}
-          className="bento-card min-w-0 p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer hover:border-[var(--signal-mid)] transition-colors text-left group relative min-h-[76px]"
-          title="Change Observer Location"
-        >
-          <div className="flex items-center justify-between">
-            <span className="telemetry-label text-[10px]">CURRENT LOCATION</span>
-            <span className="text-[var(--ink-muted)] group-hover:text-[var(--signal-cobalt)] transition-colors text-xs font-mono">
-              ◎
-            </span>
-          </div>
-          <div className="my-1.5 flex items-baseline">
-            <span className="font-mono tabular-nums text-base lg:text-lg font-bold text-[var(--ink-primary)] tracking-wide truncate">
-              {formatObserverCoordinates(observer.latitude, observer.longitude, 2)}
-            </span>
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] truncate uppercase">
-            {observer.name.split(',')[0]}
-          </div>
-        </button>
+    <div className="w-full h-full flex flex-col gap-1.5 min-h-0 select-none">
+      {/* Unified Compact Stage Header + Layer & Zoom Dock (leaves maximum height for SkyCanvas) */}
+      <Toolbar
+        aria-label="Sky display controls and ephemeris"
+        onKeyDown={e => e.stopPropagation()}
+        className="px-2.5 py-1.5 flex-wrap items-center justify-between gap-2 shrink-0 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px]"
+      >
+        <SkyTelemetryStrip
+          siteDialogHandle={siteDialogHandle}
+          locationTriggerRef={locationTriggerRef}
+        />
 
-        {/* Card 2: Visible Constellations */}
-        <button
-          type="button"
-          onClick={() => setActiveView('tonight')}
-          className="bento-card min-w-0 p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer hover:border-[var(--signal-mid)] transition-colors text-left group relative min-h-[76px]"
-          title="Open Sky Tonight Visibility Matrix"
-        >
-          <div className="flex items-center justify-between">
-            <span className="telemetry-label text-[10px]">VISIBLE CONSTELLATIONS</span>
-            <span className="text-[var(--ink-muted)] group-hover:text-[var(--signal-cobalt)] transition-colors text-xs font-mono">
-              ↗
-            </span>
-          </div>
-          <div className="my-1.5 flex items-baseline">
-            <span className="font-mono tabular-nums text-2xl font-bold text-[var(--ink-primary)]">
-              {visibleConstellationsCount}
-            </span>
-            <span className="text-xs font-mono text-[var(--ink-muted)] ml-1.5">
-              / {CONSTELLATIONS.length}
-            </span>
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">
-            ABOVE HORIZON (ALT &gt; 0°)
-          </div>
-        </button>
-
-        {/* Card 3: Moon Phase */}
-        <div className="bento-card min-w-0 p-2.5 sm:p-3 flex flex-col justify-between relative min-h-[76px]">
-          <div className="flex items-center justify-between">
-            <span className="telemetry-label text-[10px]">MOON PHASE</span>
-            <span className="text-[9px] text-[var(--ink-muted)] font-mono uppercase">
-              {moonData.percentStr}
-            </span>
-          </div>
-          <div className="my-1 flex items-center justify-between gap-2">
-            <div>
-              <div className="font-dot text-sm font-bold text-[var(--ink-primary)] tracking-wide">
-                {moonData.phaseName}
-              </div>
-              <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase mt-0.5">
-                ILLUM. {moonData.percentStr}
-              </div>
-            </div>
-            <MoonDiskSvg phaseDeg={moonData.phaseDeg} fraction={moonData.fraction} />
-          </div>
-          <div className="micro-label text-[9px] text-[var(--signal-cobalt)] font-semibold uppercase">
-            LUNAR CYCLE // DAY {Math.round((moonData.phaseDeg / 360) * 29.53)}
-          </div>
-        </div>
-
-        {/* Card 4: Local Time */}
-        <div className="bento-card min-w-0 p-2.5 sm:p-3 flex flex-col justify-between relative min-h-[76px]">
-          <div className="flex items-center justify-between">
-            <span className="telemetry-label text-[10px]">TIME (LOCAL)</span>
-            <span className="text-[9px] text-[var(--signal-cobalt)] font-semibold font-mono">
-              {weekdayStr}
-            </span>
-          </div>
-          <div className="my-1.5 flex items-baseline justify-between">
-            <span className="font-mono tabular-nums text-2xl font-bold text-[var(--ink-primary)] tracking-wider">
-              {timeStr}
-            </span>
-            <span className="text-[10px] font-mono font-semibold text-[var(--ink-secondary)]">
-              {dateStr}
-            </span>
-          </div>
-          <div className="micro-label text-[9px] text-[var(--ink-muted)] uppercase">
-            LOCAL OBSERVATION TIMELINE
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          ROW 2: Control Toolbar (Matching Frame 2)
-          ========================================================================= */}
-      <div className="bento-card px-3 py-2 sm:px-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 shrink-0 border border-[#E2E5EC]">
-        <div className="flex min-w-0 items-center gap-2 text-[10px] font-mono font-semibold uppercase tracking-[0.12em] text-[var(--ink-muted)]">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--signal-cobalt)]" aria-hidden="true" />
-          <span>Sky display</span>
-          <span className="hidden sm:inline text-[#C0C6D1]">/</span>
-          <span className="hidden sm:inline">Layers &amp; zoom</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {/* Zoom controls */}
-          <div className="flex h-9 items-center gap-1 px-2 bg-[var(--bg-shell)] border border-[#D0D5DD] rounded-[8px] text-xs font-mono">
-            <button
-              type="button"
+          <ToolbarGroup
+            aria-label="Zoom controls"
+            className="h-7 px-1 bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-md text-xs font-mono tabular-nums"
+          >
+            <ToolbarButton
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-[var(--ink-primary)] font-bold"
+                  title="Zoom Out"
+                  aria-label="Zoom out"
+                />
+              }
               onClick={handleZoomOut}
-              className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[var(--bg-tray)] text-[var(--ink-primary)] font-bold transition-colors"
-              title="Zoom Out"
-              aria-label="Zoom out"
             >
               −
-            </button>
-            <span className="px-1 font-bold text-[10px] text-[var(--ink-secondary)]">{zoomLevel}%</span>
-            <button
-              type="button"
+            </ToolbarButton>
+            <span className="px-1 font-medium text-[11px] text-[var(--ink-secondary)]">{zoomLevel}%</span>
+            <ToolbarButton
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-[var(--ink-primary)] font-bold"
+                  title="Zoom In"
+                  aria-label="Zoom in"
+                />
+              }
               onClick={handleZoomIn}
-              className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[var(--bg-tray)] text-[var(--ink-primary)] font-bold transition-colors"
-              title="Zoom In"
-              aria-label="Zoom in"
             >
               +
-            </button>
-          </div>
+            </ToolbarButton>
+          </ToolbarGroup>
 
-          {/* Layer toggles: CONST, DEEP, GRID */}
-          <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Sky display layers">
-            <button
-              type="button"
+          <ToolbarSeparator orientation="vertical" className="hidden sm:block h-4" />
+
+          {/* Layer toggles: CONST, LABELS, DEEP, GRID, HORIZON */}
+          <ToolbarGroup aria-label="Sky display layers" className="flex-wrap gap-1">
+            <ToolbarButton
+              render={
+                <Button
+                  variant={showConstellationLines ? 'default' : 'outline'}
+                  size="xs"
+                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
+                  title="Toggle Constellation Lines"
+                  aria-pressed={showConstellationLines}
+                  aria-label="Show constellation lines"
+                />
+              }
               onClick={() => setShowConstellationLines(!showConstellationLines)}
-              className={`tactile-pill min-h-9 text-[10px] font-mono font-bold px-3 py-2 ${
-                showConstellationLines ? 'active' : ''
-              }`}
-              title="Toggle Constellation Lines"
-              aria-pressed={showConstellationLines}
-              aria-label="Show constellation lines"
             >
               CONST
-            </button>
-            <button
-              type="button"
+            </ToolbarButton>
+            <ToolbarButton
+              render={
+                <Button
+                  variant={showConstellationLabels ? 'default' : 'outline'}
+                  size="xs"
+                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
+                  title="Toggle Constellation Labels"
+                  aria-pressed={showConstellationLabels}
+                  aria-label="Show constellation labels"
+                />
+              }
               onClick={() => setShowConstellationLabels(!showConstellationLabels)}
-              className={`tactile-pill min-h-9 text-[10px] font-mono font-bold px-3 py-2 ${
-                showConstellationLabels ? 'active' : ''
-              }`}
-              title="Toggle Labels & Deep Sky Indicators"
-              aria-pressed={showConstellationLabels}
-              aria-label="Show sky labels"
+            >
+              LABELS
+            </ToolbarButton>
+            <ToolbarButton
+              render={
+                <Button
+                  variant={showDeepSky ? 'default' : 'outline'}
+                  size="xs"
+                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
+                  title="Toggle NASA Milky Way Deep-Sky Backdrop"
+                  aria-pressed={showDeepSky}
+                  aria-label="Show Milky Way deep-sky backdrop"
+                />
+              }
+              onClick={() => setShowDeepSky(value => !value)}
             >
               DEEP
-            </button>
-            <button
-              type="button"
+            </ToolbarButton>
+            <ToolbarButton
+              render={
+                <Button
+                  variant={showEquatorialGrid ? 'default' : 'outline'}
+                  size="xs"
+                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
+                  title="Toggle Equatorial Coordinate Grid"
+                  aria-pressed={showEquatorialGrid}
+                  aria-label="Show equatorial grid"
+                />
+              }
               onClick={() => setShowEquatorialGrid(!showEquatorialGrid)}
-              className={`tactile-pill min-h-9 text-[10px] font-mono font-bold px-3 py-2 ${
-                showEquatorialGrid ? 'active' : ''
-              }`}
-              title="Toggle Equatorial Coordinate Grid"
-              aria-pressed={showEquatorialGrid}
-              aria-label="Show equatorial grid"
             >
               GRID
-            </button>
-            <button
-              type="button"
+            </ToolbarButton>
+            <ToolbarButton
+              render={
+                <Button
+                  variant={showHorizon ? 'default' : 'outline'}
+                  size="xs"
+                  className="h-7 text-[10px] font-mono tracking-[0.04em]"
+                  title="Toggle horizon and azimuth markers"
+                  aria-pressed={showHorizon}
+                  aria-label="Show horizon and azimuth markers"
+                />
+              }
               onClick={() => setShowHorizon(!showHorizon)}
-              className={`tactile-pill min-h-9 text-[10px] font-mono font-bold px-3 py-2 ${showHorizon ? 'active' : ''}`}
-              title="Toggle horizon and azimuth markers"
-              aria-pressed={showHorizon}
-              aria-label="Show horizon and azimuth markers"
             >
               HORIZON
-            </button>
-          </div>
+            </ToolbarButton>
+          </ToolbarGroup>
 
-          {/* Fullscreen Button */}
-          <button
-            type="button"
+          <ToolbarSeparator orientation="vertical" className="hidden sm:block h-4" />
+
+          <ToolbarButton
+            render={
+              <Button
+                variant="secondary"
+                size="xs"
+                className="h-7 text-[11px] font-semibold text-[var(--signal-mid)]"
+                title="Switch to Trace Mode"
+              />
+            }
+            onClick={() => setIsTraceMode(true)}
+          >
+            Trace ↗
+          </ToolbarButton>
+
+          <ToolbarButton
+            render={
+              <Button
+                variant="outline"
+                size="icon-xs"
+                className="h-7 w-7 text-[var(--ink-secondary)] hover:text-[var(--signal-mid)]"
+                title="Toggle Fullscreen"
+                aria-label="Toggle fullscreen"
+              />
+            }
             onClick={toggleFullscreen}
-            className="h-9 w-9 bg-[var(--bg-shell)] border border-[#D0D5DD] hover:border-[var(--signal-mid)] rounded-[8px] text-[var(--ink-muted)] hover:text-[var(--signal-cobalt)] transition-colors cursor-pointer text-sm"
-            title="Toggle Fullscreen"
-            aria-label="Toggle fullscreen"
           >
             ⛶
-          </button>
+          </ToolbarButton>
         </div>
-      </div>
+      </Toolbar>
 
-      {/* =========================================================================
-          ROW 3: Main Viewport Row (Matching Frame 2 Bounds)
-          - Left: Sky Canvas Viewport with TimelineBar (~920px in reference)
-          - Right: Star Inspector (~358px in reference) when not in trace mode
-          ========================================================================= */}
-      <div className="flex-1 relative flex gap-2 min-h-[220px] overflow-hidden">
-        {/* Sky Viewport Area */}
-        <div className="flex-1 relative flex flex-col rounded-[12px] overflow-hidden bento-card p-0 border border-white/60 bg-[var(--bg-viewport)] min-h-0">
-          <div className="relative flex-1 min-h-0"><SkyCanvas /></div>
+      {/* Dominant Planetarium Stage + Bounded Contextual Inspector */}
+      <div className="flex-1 relative flex gap-2 min-h-[240px] overflow-hidden">
+        <div className="atlas-stage flex-1 relative flex flex-col min-h-0">
+          <div className="relative flex-1 min-h-0">
+            <SkyCanvas showDeepSky={showDeepSky} />
+          </div>
           <TimelineBar />
         </div>
 
-        {/* Selected-Object Inspector (Visible in Sky Explorer mode matching Frame 2) */}
-        <aside className="w-[min(32vw,358px)] min-w-[300px] shrink-0 h-full overflow-hidden hidden md:block">
+        <aside className="w-[min(28vw,320px)] min-w-[268px] shrink-0 h-full overflow-hidden hidden md:block">
           <StarInspector />
         </aside>
-        <button
-          type="button"
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setShowMobileInspector(value => !value)}
           aria-expanded={showMobileInspector}
           aria-controls="sky-inspector-mobile"
-          className={`md:hidden min-h-10 rounded-lg border border-[#D0D5DD] bg-[var(--bg-card)] px-3 py-2 text-[11px] font-mono font-semibold text-[var(--ink-primary)] shadow-sm ${showMobileInspector ? 'fixed right-3 top-3 z-50' : 'absolute right-3 top-3 z-20'}`}
+          className={`md:hidden min-h-9 rounded-lg border-[var(--border-subtle)] bg-[var(--bg-card)]/95 px-3 py-1.5 text-[11px] font-sans font-semibold text-[var(--ink-primary)] ${
+            showMobileInspector ? 'fixed right-3 top-14 z-50' : 'absolute right-3 top-3 z-20'
+          }`}
         >
-          {showMobileInspector ? 'CLOSE DETAILS' : 'INSPECT OBJECT'}
-        </button>
+          {showMobileInspector ? 'Close details' : 'Inspect object'}
+        </Button>
+
         {showMobileInspector && (
-          <aside id="sky-inspector-mobile" aria-label="Selected object details" className="md:hidden fixed inset-x-3 top-16 bottom-40 z-40 rounded-xl shadow-lg overflow-hidden">
+          <aside
+            id="sky-inspector-mobile"
+            aria-label="Selected object details"
+            className="md:hidden fixed inset-x-3 top-14 bottom-24 z-40 rounded-[10px] overflow-hidden shadow-2xl"
+          >
             <StarInspector />
           </aside>
         )}
       </div>
 
-      {/* Observer Location Modal */}
-      {showLocationPicker && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="observer-picker-title" className="bg-white border border-[#D0D5DD] rounded-[16px] max-w-md w-full p-5 space-y-4 shadow-2xl font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-[#E2E5EC] pb-2">
-              <span id="observer-picker-title" className="font-bold text-sm uppercase">SELECT OBSERVATION SITE</span>
-              <button
-                type="button"
-                onClick={() => setShowLocationPicker(false)}
-                aria-label="Close observation site picker"
-                className="min-h-10 min-w-10 text-base text-[var(--ink-muted)] hover:text-[var(--ink-primary)]"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-              {PRESET_OBSERVERS.map((preset: ObserverLocation) => {
-                const isSelected = preset.name === observer.name;
-                return (
-                  <button
-                    key={preset.name}
-                    type="button"
-                    onClick={() => {
-                      setObserver(preset);
-                      setShowLocationPicker(false);
-                    }}
-                    className={`w-full text-left p-2.5 rounded-[8px] border transition-colors flex items-center justify-between ${
-                      isSelected
-                        ? 'border-[var(--signal-cobalt)] bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] font-bold'
-                        : 'border-[#E2E5EC] hover:bg-[var(--bg-shell)] text-[var(--ink-primary)]'
-                    }`}
-                  >
-                    <div>
-                      <div className="font-bold uppercase">{preset.name}</div>
-                      <div className="text-[10px] text-[var(--ink-muted)]">
-                        {formatObserverCoordinates(preset.latitude, preset.longitude, 2)}
-                      </div>
+      {/* Observation Site Picker Space UI Dialog */}
+      <Dialog
+        handle={siteDialogHandle}
+        open={showLocationPicker}
+        onOpenChange={setShowLocationPicker}
+      >
+        <DialogPopup
+          finalFocus={locationTriggerRef}
+          onKeyDown={handlePopupTabKeyDown}
+          className="max-w-md border border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--ink-primary)] font-sans"
+        >
+          <DialogHeader className="border-b border-[var(--border-subtle)]">
+            <DialogTitle className="text-sm font-semibold">Select observation site</DialogTitle>
+            <DialogDescription className="text-xs text-[var(--ink-secondary)]">
+              Choose an observatory or city horizon for the sky projection.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogPanel className="space-y-1.5">
+            {PRESET_OBSERVERS.map((preset: ObserverLocation) => {
+              const isSelected = preset.name === observer.name;
+              return (
+                <Button
+                  key={preset.name}
+                  variant={isSelected ? 'secondary' : 'outline'}
+                  onClick={() => {
+                    setObserver(preset);
+                    closeLocationPicker();
+                  }}
+                  className={`h-auto w-full text-left p-2.5 rounded-[8px] flex items-center justify-between text-xs font-normal ${
+                    isSelected
+                      ? 'border-[var(--signal-cobalt)] bg-[var(--bg-pill-active)] text-[var(--ink-primary)] font-semibold'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] hover:border-[var(--signal-surface)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
+                  }`}
+                >
+                  <div>
+                    <div className="font-semibold">{preset.name}</div>
+                    <div className="text-[10px] font-mono tabular-nums text-[var(--ink-muted)] mt-0.5">
+                      {formatObserverCoordinates(preset.latitude, preset.longitude, 2)}
                     </div>
-                    {isSelected && <span className="text-[var(--signal-cobalt)] font-bold">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+                  </div>
+                  {isSelected && <span className="text-[var(--signal-mid)] font-bold">✓</span>}
+                </Button>
+              );
+            })}
+          </DialogPanel>
+          <DialogFooter className="border-t border-[var(--border-subtle)] bg-[var(--bg-card-subtle)]">
+            <DialogClose render={<Button variant="ghost" size="sm" />}>Close</DialogClose>
+          </DialogFooter>
+        </DialogPopup>
+      </Dialog>
     </div>
   );
 };

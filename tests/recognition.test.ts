@@ -60,6 +60,15 @@ describe('Trace-to-Recognize End-to-End Pipeline', () => {
     expect(report.bestMatch?.constellationId).toBe('Cas');
   });
 
+  it('does not confirm a DFA accept without a same-length geometry reference', () => {
+    const pattern = patterns.find(p => p.id === 'Cas_fwd')!;
+    const report = recognizePattern(pattern.referencePoints, minDfa, []);
+    expect(report.dfaAccepted).toBe(true);
+    expect(report.bestMatch).toBeNull();
+    expect(report.status).toBe('GEOMETRIC_REJECT');
+    expect(report.explanation).toContain('no same-length reference geometry');
+  });
+
   it('reports VALID_PREFIX and reachable candidates on partial traces', () => {
     const umaPattern = patterns.find(p => p.id === 'UMa_fwd')!;
     // Trace first 4 stars of Big Dipper (first 2 turns)

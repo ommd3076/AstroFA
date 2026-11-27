@@ -3,6 +3,15 @@ import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATIONS, REFERENCE_PATTERNS, STAR_BY_ID } from '../../data/astroData';
 import { getHorizontalCoordinates, getMeridianCulmination } from '../../astronomy/coordinates';
 import type { IAUConstellation, Star } from '../../types/astronomy';
+import { PageHeader } from '../../components/PageHeader';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../../components/ui/space/empty';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Switch } from '../../components/ui/space/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 
 // Compass direction lookup from azimuth degrees
 const getAzimuthDirection = (az: number): string => {
@@ -119,8 +128,8 @@ const MiniAsterismPreview: React.FC<{ con: IAUConstellation; size?: 'card' | 'de
 
   if (coords.length === 0) {
     return (
-      <div className={`w-full ${size === 'detail' ? 'h-[250px]' : 'h-36'} bg-[#F8FAFC] border border-[var(--bg-tray)] rounded-[8px] flex items-center justify-center text-[10px] text-[var(--ink-muted)]`}>
-        NO ASTERISM GEOMETRY
+      <div className={`w-full ${size === 'detail' ? 'h-[250px]' : 'h-36'} bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-[8px] flex items-center justify-center text-[10px] text-[var(--ink-muted)]`}>
+        No asterism geometry
       </div>
     );
   }
@@ -146,11 +155,11 @@ const MiniAsterismPreview: React.FC<{ con: IAUConstellation; size?: 'card' | 'de
   );
 
   return (
-    <div className={`relative w-full shrink-0 ${size === 'detail' ? 'h-[250px]' : 'h-36'} bg-[#F8FAFC] rounded-[8px] overflow-hidden border border-[var(--bg-tray)] flex items-center justify-center`}>
+    <div className={`relative w-full shrink-0 ${size === 'detail' ? 'h-[240px]' : 'h-36'} bg-[var(--bg-viewport)] rounded-lg overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center`}>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
         <defs>
           <pattern id={`mini-dg-${con.id}`} width="8" height="8" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="0.75" fill="#94A3B8" opacity="0.45" />
+            <circle cx="2" cy="2" r="0.75" fill="#2A2A32" opacity="0.65" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#mini-dg-${con.id})`} />
@@ -165,9 +174,9 @@ const MiniAsterismPreview: React.FC<{ con: IAUConstellation; size?: 'card' | 'de
               y1={p1.y}
               x2={p2.x}
               y2={p2.y}
-              stroke="#1D55F5"
+              stroke="#8FA3FF"
               strokeWidth="1.2"
-              strokeOpacity="0.8"
+              strokeOpacity="0.85"
             />
           );
         })}
@@ -180,9 +189,9 @@ const MiniAsterismPreview: React.FC<{ con: IAUConstellation; size?: 'card' | 'de
               cx={pos.x}
               cy={pos.y}
               r="2.2"
-              fill="#1D55F5"
-              stroke="#FFFFFF"
-              strokeWidth="0.8"
+              fill="#F3F1EB"
+              stroke="#8FA3FF"
+              strokeWidth="0.9"
             />
           );
         })}
@@ -503,116 +512,68 @@ export const ConstellationExplorer: React.FC = () => {
     else if (currentHor && currentHor.altitude > 0) visibilityCategory = 'LOW';
 
     return (
-      <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-3 gap-3 overflow-y-auto">
-        {/* Top Header Row with Back Button */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setSelectedConstellation(null)}
-            className="tactile-pill hud-reticle px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer bg-white border border-[var(--bg-tray)] hover:border-[var(--signal-cobalt)] hover:text-[var(--signal-cobalt)]"
-          >
-            <span className="font-bold text-sm">←</span>
-            <span>CONSTELLATION DETAILS</span>
-          </button>
-        </div>
-
-        {/* Top Summary Bento Card matching Frame 12 */}
-        <div className="bento-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[var(--bg-tray)] bg-white rounded-[12px] shrink-0">
-          <div className="flex flex-wrap items-baseline gap-6">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <h1 className="text-2xl font-bold font-mono tracking-wider text-[var(--ink-primary)]">
-                  {selectedConstellation.name.toUpperCase()}
-                </h1>
-                <span className="text-xs font-mono font-semibold text-[var(--ink-muted)]">
-                  {selectedConstellation.id}
-                </span>
-              </div>
+      <div className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto pr-0.5">
+        <PageHeader
+          eyebrow={`IAU Constellation · ${selectedConstellation.family}`}
+          title={selectedConstellation.name}
+          meta={`${selectedConstellation.id} · Rank ${rank} / 88 · ${selectedConstellation.area} sq deg · Mag ${magRange}`}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedConstellation(null)}
+                className="text-xs font-semibold gap-1.5"
+              >
+                <span aria-hidden="true">←</span>
+                <span>Back to catalog</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleFocusSky(selectedConstellation)} className="text-xs font-semibold">
+                Open in Sky ↗
+              </Button>
+              <Button variant="default" size="sm" onClick={() => handleStartTrace(selectedConstellation)} className="text-xs font-semibold">
+                Start trace ▷
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleInspectAutomaton(selectedConstellation)}
+                className="text-xs font-semibold"
+                title="Inspect in Automata Lab"
+                aria-label="Inspect in Automata Lab"
+              >
+                DFA
+              </Button>
             </div>
+          }
+        />
 
-            <div className="flex items-center gap-6 text-xs">
-              <div>
-                <span className="micro-label block">TYPE</span>
-                <span className="font-semibold text-[var(--ink-primary)] tracking-wide">CONSTELLATION</span>
-              </div>
-              <div className="h-6 w-px bg-[var(--bg-tray)]" />
-              <div>
-                <span className="micro-label block">AREA</span>
-                <span className="font-bold font-dot text-sm text-[var(--ink-primary)]">
-                  {selectedConstellation.area} <span className="text-[10px] text-[var(--ink-muted)] font-mono">SQ DEG</span>
-                </span>
-              </div>
-              <div className="h-6 w-px bg-[var(--bg-tray)]" />
-              <div>
-                <span className="micro-label block">RANK</span>
-                <span className="font-bold font-dot text-sm text-[var(--ink-primary)]">
-                  {rank} <span className="text-[10px] text-[var(--ink-muted)] font-mono">/ 88</span>
-                </span>
-              </div>
-              <div className="h-6 w-px bg-[var(--bg-tray)]" />
-              <div>
-                <span className="micro-label block">MAG RANGE</span>
-                <span className="font-mono font-semibold text-xs text-[var(--ink-primary)]">
-                  {magRange}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons: Open in Sky, Start Trace, Inspect Automaton */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => handleFocusSky(selectedConstellation)}
-              className="tactile-button bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--bg-tray)] px-3 py-2 text-xs flex items-center gap-1.5"
-            >
-              <span>OPEN IN SKY</span>
-              <span>↗</span>
-            </button>
-            <button
-              onClick={() => handleStartTrace(selectedConstellation)}
-              className="tactile-button bg-[var(--signal-cobalt)] hover:bg-[#1545CC] text-white border border-[var(--signal-cobalt)] px-3.5 py-2 text-xs flex items-center gap-1.5 font-bold"
-            >
-              <span>START TRACE</span>
-              <span>▷</span>
-            </button>
-            <button
-              onClick={() => handleInspectAutomaton(selectedConstellation)}
-              className="tactile-button bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--ink-secondary)] hover:text-[var(--signal-cobalt)] border border-[var(--bg-tray)] px-2.5 py-2 text-xs flex items-center gap-1"
-              title="Inspect in Automata Lab"
-            >
-              <span>⚡</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Main 3-Column Content Layout (matching Frame 12) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0">
-          {/* COLUMN 1: Constellation Diagram + Metadata */}
-          <div className="flex flex-col gap-3">
-            {/* Constellation Diagram Card */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] flex flex-col">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--bg-tray)]">
-                <span className="telemetry-label text-[11px] font-bold">CONSTELLATION DIAGRAM</span>
+        {/* Primary Asymmetric Split: Diagram Left, Companion Analysis Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 shrink-0">
+          <div className="lg:col-span-5 flex flex-col gap-3">
+            <Card className="p-3.5 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] flex flex-col shadow-none h-full">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)]">Constellation diagram</span>
                 {asterismDiagramData?.refPattern && (
-                  <span className="text-[10px] text-[var(--signal-cobalt)] bg-[var(--bg-pill-active)] px-1.5 py-0.5 rounded-[4px] font-bold">
-                    DFA RECOGNIZABLE
+                  <span className="text-[10px] font-mono text-[var(--signal-mid)] bg-[var(--bg-pill-active)] px-1.5 py-0.5 rounded font-semibold uppercase">
+                    DFA Ready
                   </span>
                 )}
               </div>
 
               {asterismDiagramData && (
-                <div className="relative w-full h-[320px] md:h-[380px] xl:h-[430px] bg-[#F8FAFC] rounded-[8px] overflow-hidden border border-[var(--bg-tray)] flex items-center justify-center">
+                <div className="relative w-full h-[320px] md:h-[380px] xl:h-[440px] bg-[var(--bg-viewport)] rounded-lg overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center">
                   <svg
                     viewBox={`0 0 ${asterismDiagramData.svgWidth} ${asterismDiagramData.svgHeight}`}
                     className="w-full h-full"
                   >
                     <defs>
                       <pattern id="detail-dot-grid" width="12" height="12" patternUnits="userSpaceOnUse">
-                        <circle cx="3" cy="3" r="0.75" fill="#94A3B8" opacity="0.4" />
+                        <circle cx="3" cy="3" r="0.75" fill="#2A2A32" opacity="0.65" />
                       </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#detail-dot-grid)" />
 
-                    {/* Connecting constellation lines */}
                     {asterismDiagramData.segments.map((seg, idx) => (
                       <line
                         key={idx}
@@ -620,13 +581,12 @@ export const ConstellationExplorer: React.FC = () => {
                         y1={seg.y1}
                         x2={seg.x2}
                         y2={seg.y2}
-                        stroke="#6892F6"
+                        stroke="#8FA3FF"
                         strokeWidth="1.5"
                         strokeOpacity="0.85"
                       />
                     ))}
 
-                    {/* Star nodes */}
                     {asterismDiagramData.stars.map((s, idx) => {
                       const radius = s.isNotableReticle ? 4.5 : Math.max(2.5, 5 - s.star.mag * 0.6);
                       const starName = s.star.proper || s.star.name;
@@ -638,41 +598,38 @@ export const ConstellationExplorer: React.FC = () => {
                           onMouseEnter={() => setHoveredStar(s.star)}
                           onMouseLeave={() => setHoveredStar(null)}
                         >
-                          {/* Concentric reticle ring for prominent notable stars (matching Betelgeuse & Rigel in Frame 12) */}
                           {s.isNotableReticle && (
                             <circle
                               cx={s.px}
                               cy={s.py}
                               r={radius + 4.5}
                               fill="none"
-                              stroke="#1D55F5"
+                              stroke="#8FA3FF"
                               strokeWidth="1.2"
                               opacity="0.85"
                             />
                           )}
 
-                          {/* Main star circle */}
                           <circle
                             cx={s.px}
                             cy={s.py}
                             r={radius}
-                            fill="#1D55F5"
-                            stroke="#FFFFFF"
+                            fill="#F3F1EB"
+                            stroke="#8FA3FF"
                             strokeWidth="1.2"
                           />
 
-                          {/* Prominent label beside notable stars (Frame 12 Betelgeuse / Rigel style) */}
                           {s.isNotableReticle && starName && (
                             <text
                               x={s.px < asterismDiagramData.svgWidth / 2 ? s.px - radius - 6 : s.px + radius + 6}
                               y={s.py + 4}
-                              fill="#181A20"
+                              fill="#F3F1EB"
                               fontSize="10"
                               fontFamily="IBM Plex Mono, monospace"
-                              fontWeight="bold"
+                              fontWeight="600"
                               textAnchor={s.px < asterismDiagramData.svgWidth / 2 ? 'end' : 'start'}
                             >
-                              {starName.toUpperCase()}
+                              {starName}
                             </text>
                           )}
                         </g>
@@ -680,76 +637,74 @@ export const ConstellationExplorer: React.FC = () => {
                     })}
                   </svg>
 
-                  {/* Star details tooltip on hover */}
                   {hoveredStar && (
-                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 border border-[var(--signal-cobalt)] p-2 rounded-[6px] text-xs font-mono text-[var(--ink-primary)] flex items-center justify-between pointer-events-none">
+                    <div className="absolute bottom-2 left-2 right-2 bg-[var(--bg-card)]/95 border border-[var(--signal-surface)] p-2 rounded-md text-xs font-mono text-[var(--ink-primary)] flex items-center justify-between pointer-events-none">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[var(--signal-cobalt)]">{hoveredStar.proper || hoveredStar.name}</span>
+                        <span className="font-semibold text-[var(--signal-mid)]">{hoveredStar.proper || hoveredStar.name}</span>
                         {hoveredStar.bayer && <span className="text-[var(--ink-muted)]">({hoveredStar.bayer})</span>}
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] text-[var(--ink-secondary)]">
-                        <span>MAG: <strong className="text-[var(--signal-cobalt)]">{hoveredStar.mag.toFixed(2)}</strong></span>
-                        <span>SPECT: {hoveredStar.spect || '—'}</span>
-                        {hoveredStar.dist && <span>DIST: {Math.round(hoveredStar.dist)} PC</span>}
+                      <div className="flex items-center gap-3 text-[11px] tabular-nums text-[var(--ink-secondary)]">
+                        <span>MAG <strong className="text-[var(--signal-mid)]">{hoveredStar.mag.toFixed(2)}</strong></span>
+                        <span>SPECT {hoveredStar.spect || '—'}</span>
+                        {hoveredStar.dist && <span>DIST {Math.round(hoveredStar.dist)} pc</span>}
                       </div>
                     </div>
                   )}
                 </div>
               )}
-            </div>
-
+            </Card>
           </div>
 
-          {/* COLUMN 2: Notable Stars + Seasonal Visibility */}
-          <div className="flex flex-col gap-3">
-            {/* Notable Stars Table Card */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-2 flex-1">
-              <span className="telemetry-label text-[11px] font-bold block pb-1 border-b border-[var(--bg-tray)]">
-                NOTABLE STARS
+          <div className="lg:col-span-4 flex flex-col gap-3">
+            <Card className="p-3.5 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] flex-1 shadow-none">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block pb-1.5 border-b border-[var(--border-subtle)]">
+                Notable stars
               </span>
 
-              <div className="w-full text-xs font-mono">
-                <div className="grid grid-cols-12 text-[10px] text-[var(--ink-muted)] uppercase font-semibold pb-1.5 border-b border-[var(--bg-tray)]">
-                  <span className="col-span-5">STAR</span>
-                  <span className="col-span-4">TYPE</span>
-                  <span className="col-span-3 text-right">MAG</span>
-                </div>
-
-                <div className="divide-y divide-[var(--bg-tray)]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-[10px] uppercase">Star</TableHead>
+                    <TableHead className="text-[10px] uppercase">Type</TableHead>
+                    <TableHead className="text-right text-[10px] uppercase">Mag</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {selectedStars.slice(0, 6).map(star => {
                     const starTitle = star.proper || star.name;
                     const spectStr = formatSpectralType(star.spect);
                     const magStr = (star.mag >= 0 ? '+' : '') + star.mag.toFixed(2);
 
                     return (
-                      <div key={star.id} className="grid grid-cols-12 py-2 items-center hover:bg-[#F8FAFC]">
-                        <div className="col-span-5 flex items-center gap-1.5 truncate">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)] shrink-0" />
-                          <span className="font-bold text-[var(--ink-primary)] uppercase truncate">{starTitle}</span>
-                        </div>
-                        <div className="col-span-4 text-[11px] text-[var(--ink-secondary)] truncate">
+                      <TableRow key={star.id}>
+                        <TableCell className="py-2">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-mid)] shrink-0" />
+                            <span className="font-semibold text-[var(--ink-primary)] truncate text-xs">{starTitle}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-2 font-mono text-[10px] text-[var(--ink-secondary)]">
                           {spectStr}
-                        </div>
-                        <div className="col-span-3 text-right font-mono font-semibold text-[var(--ink-primary)]">
+                        </TableCell>
+                        <TableCell className="py-2 text-right font-mono tabular-nums font-semibold text-[var(--ink-primary)] text-xs">
                           {magStr}
-                        </div>
-                      </div>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </div>
-              </div>
-            </div>
+                </TableBody>
+              </Table>
+            </Card>
 
-            {/* Seasonal Visibility Dot Matrix Card */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-2.5">
-              <span className="telemetry-label text-[11px] font-bold block pb-1 border-b border-[var(--bg-tray)]">
-                SEASONAL VISIBILITY
+            <Card className="p-3.5 gap-2.5 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block pb-1.5 border-b border-[var(--border-subtle)]">
+                Seasonal visibility
               </span>
 
               <div className="space-y-2">
                 {seasonalMatrix.map(season => (
                   <div key={season.id} className="flex items-center justify-between text-xs font-mono">
-                    <span className="w-10 text-[10px] font-bold uppercase text-[var(--ink-secondary)]">
+                    <span className="w-10 text-[10px] font-semibold uppercase text-[var(--ink-secondary)]">
                       {season.id}
                     </span>
                     <div className="flex items-center gap-2">
@@ -757,7 +712,7 @@ export const ConstellationExplorer: React.FC = () => {
                         <span
                           key={idx}
                           className={`w-2.5 h-2.5 rounded-full ${
-                            active ? 'bg-[var(--signal-cobalt)]' : 'bg-[#E2E5EC]'
+                            active ? 'bg-[var(--signal-mid)]' : 'bg-[var(--dot-inactive)]'
                           }`}
                         />
                       ))}
@@ -765,36 +720,32 @@ export const ConstellationExplorer: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
-          {/* COLUMN 3: Sky Preview + Best Months + Visibility Curve */}
-          <div className="flex flex-col gap-3">
-            {/* Sky Preview Card (Schematic Night Sky) */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-2">
-              <span className="telemetry-label text-[11px] font-bold block pb-1 border-b border-[var(--bg-tray)]">
-                SKY PREVIEW
+          <div className="lg:col-span-3 flex flex-col gap-3">
+            <Card className="p-3.5 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block pb-1.5 border-b border-[var(--border-subtle)]">
+                Sky preview
               </span>
 
               {asterismDiagramData && (
-                <div className="relative w-full h-[140px] bg-[#070B16] rounded-[8px] overflow-hidden border border-[#1E293B] flex items-center justify-center">
+                <div className="relative w-full h-[140px] bg-[var(--bg-viewport)] rounded-lg overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center">
                   <svg
                     viewBox={`0 0 ${asterismDiagramData.svgWidth} ${asterismDiagramData.svgHeight}`}
                     className="w-full h-full"
                   >
-                    {/* Background star sprinkles */}
                     {Array.from({ length: 40 }).map((_, i) => (
                       <circle
                         key={i}
                         cx={(i * 37) % asterismDiagramData.svgWidth}
                         cy={(i * 59) % asterismDiagramData.svgHeight}
                         r={(i % 3) * 0.4 + 0.5}
-                        fill="#FFFFFF"
-                        opacity={(i % 5) * 0.15 + 0.25}
+                        fill="#F3F1EB"
+                        opacity={(i % 5) * 0.14 + 0.2}
                       />
                     ))}
 
-                    {/* Glowing constellation segments */}
                     {asterismDiagramData.segments.map((seg, idx) => (
                       <line
                         key={idx}
@@ -802,16 +753,15 @@ export const ConstellationExplorer: React.FC = () => {
                         y1={seg.y1}
                         x2={seg.x2}
                         y2={seg.y2}
-                        stroke="#60A5FA"
+                        stroke="#8FA3FF"
                         strokeWidth="1.6"
-                        strokeOpacity="0.8"
+                        strokeOpacity="0.85"
                       />
                     ))}
 
-                    {/* Constellation stars with warm/blue colors */}
                     {asterismDiagramData.stars.map((s, idx) => {
                       const isWarm = s.star.proper === 'Betelgeuse' || (s.star.spect && s.star.spect.startsWith('M'));
-                      const starColor = isWarm ? '#FF9E42' : '#93C5FD';
+                      const starColor = isWarm ? '#F5A962' : '#A8B8FF';
                       const radius = s.isNotableReticle ? 4.5 : Math.max(2, 4.5 - s.star.mag * 0.5);
 
                       return (
@@ -821,40 +771,41 @@ export const ConstellationExplorer: React.FC = () => {
                           cy={s.py}
                           r={radius}
                           fill={starColor}
-                          stroke="#FFFFFF"
+                          stroke="#F3F1EB"
                           strokeWidth="0.8"
                         />
                       );
                     })}
                   </svg>
-                  <span className="absolute bottom-1 right-2 text-[8px] text-white/40 tracking-wider">
-                    SCHEMATIC SKY VIEW
+                  <span className="absolute bottom-1 right-2 text-[9px] font-mono text-[var(--ink-muted)] uppercase">
+                    Schematic preview
                   </span>
                 </div>
               )}
-            </div>
+            </Card>
 
-            {/* Best Viewing Months Card */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-1.5">
-              <span className="telemetry-label text-[11px] font-bold block">BEST VIEWING MONTHS</span>
-              <div className="flex items-center gap-4 text-base font-bold font-mono text-[var(--signal-cobalt)] tracking-widest pt-0.5">
+            <Card className="p-3.5 gap-1.5 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block">
+                Best viewing months
+              </span>
+              <div className="flex items-center gap-4 text-sm font-semibold font-mono text-[var(--signal-mid)] tracking-widest pt-0.5">
                 {bestMonths.map(m => (
                   <span key={m}>{m}</span>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Visibility Through The Night Curve Chart */}
-            <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-2">
+            <Card className="p-3.5 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
               <div className="flex items-center justify-between">
-                <span className="telemetry-label text-[11px] font-bold">VISIBILITY THROUGH THE NIGHT</span>
-                <span className="text-[9px] text-[var(--ink-muted)]">HORIZON SAMPLING</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)]">
+                  Visibility tonight
+                </span>
+                <span className="text-[10px] font-mono text-[var(--ink-muted)]">Horizon curve</span>
               </div>
 
               {nightVisibility && (
-                <div className="relative w-full h-[120px] bg-[#F8FAFC] rounded-[8px] border border-[var(--bg-tray)] p-2 flex flex-col justify-between">
+                <div className="relative w-full h-[120px] bg-[var(--bg-card-subtle)] rounded-lg border border-[var(--border-subtle)] p-2 flex flex-col justify-between">
                   <svg viewBox="0 0 340 85" className="w-full h-[65px] overflow-visible">
-                    {/* Horizontal percentage grid lines (0%, 25%, 50%, 75%, 100%) */}
                     {[0, 25, 50, 75, 100].map(pct => {
                       const y = 65 - (pct / 100) * 55;
                       return (
@@ -864,14 +815,13 @@ export const ConstellationExplorer: React.FC = () => {
                           y1={y}
                           x2="330"
                           y2={y}
-                          stroke="#E2E5EC"
+                          stroke="#2A2A32"
                           strokeWidth="0.8"
                           strokeDasharray="2 2"
                         />
                       );
                     })}
 
-                    {/* Percentage Y-axis labels */}
                     {[100, 50, 0].map(pct => {
                       const y = 65 - (pct / 100) * 55 + 3;
                       return (
@@ -879,7 +829,7 @@ export const ConstellationExplorer: React.FC = () => {
                           key={pct}
                           x="2"
                           y={y}
-                          fill="#8C93A0"
+                          fill="#7C7A72"
                           fontSize="7"
                           fontFamily="IBM Plex Mono, monospace"
                         >
@@ -888,7 +838,6 @@ export const ConstellationExplorer: React.FC = () => {
                       );
                     })}
 
-                    {/* Sample dots along the night curve */}
                     {nightVisibility.samples.map((s, idx) => {
                       const x = 32 + (idx / 30) * 295;
                       const y = 65 - (s.pct / 100) * 55;
@@ -898,14 +847,13 @@ export const ConstellationExplorer: React.FC = () => {
                           cx={x}
                           cy={y}
                           r={s.isAboveHorizon ? '1.8' : '1.2'}
-                          fill={s.isAboveHorizon ? '#1D55F5' : '#CBD5E1'}
+                          fill={s.isAboveHorizon ? '#8FA3FF' : '#2A2A32'}
                         />
                       );
                     })}
                   </svg>
 
-                  {/* Hour labels along the bottom */}
-                  <div className="flex justify-between text-[8px] text-[var(--ink-muted)] font-mono pl-7 pr-1 pt-1 border-t border-[var(--bg-tray)]">
+                  <div className="flex justify-between text-[9px] text-[var(--ink-muted)] font-mono pl-7 pr-1 pt-1 border-t border-[var(--border-subtle)]">
                     <span>18:00</span>
                     <span>20:00</span>
                     <span>22:00</span>
@@ -915,258 +863,307 @@ export const ConstellationExplorer: React.FC = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         </div>
 
         {/* BOTTOM ROW: Metadata and observation summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0">
-          <div className="bento-card p-3.5 bg-white border border-[var(--bg-tray)] rounded-[12px] space-y-2">
-            <span className="telemetry-label text-[11px] font-bold block pb-1 border-b border-[var(--bg-tray)]">METADATA</span>
-            <div className="space-y-1.5 text-xs font-mono">
-              <div className="flex justify-between items-center"><span className="text-[var(--ink-muted)] uppercase">NAME</span><span className="font-semibold">{selectedConstellation.name.toUpperCase()}</span></div>
-              <div className="flex justify-between items-center"><span className="text-[var(--ink-muted)] uppercase">ABBREVIATION</span><span className="font-semibold">{selectedConstellation.id}</span></div>
-              <div className="flex justify-between items-center"><span className="text-[var(--ink-muted)] uppercase">AREA</span><span className="font-semibold">{selectedConstellation.area} SQ DEG</span></div>
-              <div className="flex justify-between items-center"><span className="text-[var(--ink-muted)] uppercase">RANK</span><span className="font-semibold">{rank} / 88</span></div>
-              <div className="flex justify-between items-center"><span className="text-[var(--ink-muted)] uppercase">FAMILY</span><span className="font-semibold">{selectedConstellation.family.toUpperCase()}</span></div>
-            </div>
-          </div>
-          <div className="bento-card lg:col-span-2 p-4 bg-white border border-[var(--bg-tray)] rounded-[12px]">
-          <span className="telemetry-label text-[11px] font-bold block pb-2 mb-2 border-b border-[var(--bg-tray)]">
-            OBSERVATION SUMMARY
-          </span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
+          <Card className="p-3.5 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block pb-1.5 border-b border-[var(--border-subtle)]">
+              Metadata
+            </span>
+            <dl className="space-y-1.5 text-xs">
+              <div className="flex justify-between items-center"><dt className="text-[var(--ink-muted)]">Name</dt><dd className="font-mono font-semibold">{selectedConstellation.name}</dd></div>
+              <div className="flex justify-between items-center"><dt className="text-[var(--ink-muted)]">Abbreviation</dt><dd className="font-mono font-semibold">{selectedConstellation.id}</dd></div>
+              <div className="flex justify-between items-center"><dt className="text-[var(--ink-muted)]">Area</dt><dd className="font-mono tabular-nums font-semibold">{selectedConstellation.area} sq deg</dd></div>
+              <div className="flex justify-between items-center"><dt className="text-[var(--ink-muted)]">Rank</dt><dd className="font-mono tabular-nums font-semibold">{rank} / 88</dd></div>
+              <div className="flex justify-between items-center"><dt className="text-[var(--ink-muted)]">Family</dt><dd className="font-mono font-semibold">{selectedConstellation.family}</dd></div>
+            </dl>
+          </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono">
-            <div>
-              <span className="micro-label block text-[10px]">CURRENT VISIBILITY</span>
-              <span className="font-bold font-mono text-xl tracking-wide text-[var(--ink-primary)] block pt-0.5">
-                {visibilityCategory}
-              </span>
-              <span className="text-[10px] text-[var(--ink-secondary)]">
-                {currentHor ? `ALT ${currentHor.altitude.toFixed(1)}° (${getAzimuthDirection(currentHor.azimuth)})` : 'NO DATA'}
-              </span>
-            </div>
+          <Card className="lg:col-span-2 p-4 gap-2 bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] shadow-none">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] block pb-2 border-b border-[var(--border-subtle)]">
+              Observation summary
+            </span>
 
-            <div className="border-l border-[var(--bg-tray)] pl-4">
-              <span className="micro-label block text-[10px]">NEXT BEST WINDOW</span>
-              <span className="font-bold font-dot text-lg text-[var(--signal-cobalt)] block pt-0.5">
-                {nightVisibility ? nightVisibility.nextWindow : '—'}
-              </span>
-              <span className="text-[10px] text-[var(--ink-muted)]">
-                OBSERVER: {observer.name.toUpperCase()}
-              </span>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)] block">Current visibility</span>
+                <span className="font-mono font-semibold text-xl text-[var(--ink-primary)] block pt-0.5">
+                  {visibilityCategory}
+                </span>
+                <span className="font-mono text-[11px] text-[var(--ink-secondary)]">
+                  {currentHor ? `Alt ${currentHor.altitude.toFixed(1)}° (${getAzimuthDirection(currentHor.azimuth)})` : 'No data'}
+                </span>
+              </div>
 
-            <div className="border-l border-[var(--bg-tray)] pl-4">
-              <span className="micro-label block text-[10px]">PEAK ALTITUDE</span>
-              <span className="font-bold font-dot text-xl text-[var(--signal-cobalt)] block pt-0.5">
-                {nightVisibility ? `${nightVisibility.peakAlt.toFixed(0)}°` : '—'}
-              </span>
-              <span className="text-[10px] text-[var(--ink-muted)]">
-                {meridian ? `TRANSIT ~${meridian.transitDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'MAX TONIGHT'}
-              </span>
+              <div className="md:border-l border-[var(--border-subtle)] md:pl-4">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)] block">Next best window</span>
+                <span className="font-mono tabular-nums font-semibold text-lg text-[var(--signal-mid)] block pt-0.5">
+                  {nightVisibility ? nightVisibility.nextWindow : '—'}
+                </span>
+                <span className="font-mono text-[10px] text-[var(--ink-muted)]">
+                  Site: {observer.name}
+                </span>
+              </div>
+
+              <div className="md:border-l border-[var(--border-subtle)] md:pl-4">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)] block">Peak altitude</span>
+                <span className="font-mono tabular-nums font-semibold text-xl text-[var(--signal-mid)] block pt-0.5">
+                  {nightVisibility ? `${nightVisibility.peakAlt.toFixed(0)}°` : '—'}
+                </span>
+                <span className="font-mono text-[10px] text-[var(--ink-muted)]">
+                  {meridian ? `Transit ~${meridian.transitDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Max tonight'}
+                </span>
+              </div>
             </div>
-          </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
   }
 
   // =========================================================================
-  // VIEW 2: CATALOG LIBRARY GRID (Frame 6)
+  // VIEW 2: CATALOG LIBRARY GRID
   // =========================================================================
   return (
-    <div className="w-full h-full min-h-0 flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-3 gap-3 overflow-hidden">
-      {/* Top Header Row matching Frame 6 */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold font-mono uppercase tracking-wider text-[var(--ink-primary)]">
-            CONSTELLATION LIBRARY
-          </h1>
-        </div>
-
-        {/* Search Omnibar in Bracket Reticle */}
-        <div className="w-full md:w-auto">
-          <div className="hud-reticle w-full md:w-auto">
-            <div className="relative flex w-full items-center">
-              <span className="absolute left-3 text-[var(--ink-muted)] text-xs">🔍</span>
-              <input
-                type="text"
-                aria-label="SEARCH CONSTELLATIONS"
-                placeholder="Search constellations"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="bg-white border border-[var(--bg-tray)] rounded-[8px] pl-8 pr-4 py-2 text-xs text-[var(--ink-primary)] font-mono tracking-wide w-full md:w-72 focus:outline-none focus:border-[var(--signal-cobalt)] placeholder:text-[var(--ink-muted)]"
-              />
-            </div>
+    <div className="w-full h-full min-h-0 flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-hidden">
+      <PageHeader
+        eyebrow="IAU Regions · 88 Catalog Entries"
+        title="Constellation library"
+        meta={`Showing ${filtered.length} / ${CONSTELLATIONS.length}`}
+        description="Inspect any of the 88 IAU constellations, preview asterisms, or open reference DFA sequences."
+        actions={
+          <div className="w-full md:w-72">
+            <Input
+              type="text"
+              size="sm"
+              aria-label="SEARCH CONSTELLATIONS"
+              placeholder="Search constellations..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.stopPropagation()}
+              className="w-full text-xs"
+            />
           </div>
-        </div>
-      </div>
-
-      {/* Filter Toolbar matching Frame 6 pills */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-1">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Main Frame 6 Filter Pills */}
-          {(['ALL', 'ZODIAC', 'SEASONAL', 'NORTHERN', 'SOUTHERN', 'FAVORITES'] as const).map(f => {
-            const isActive = activeFilter === f;
-            const label = f === 'FAVORITES' ? `FAVORITES${favorites.size ? ` · ${favorites.size}` : ''}` : f;
-            return (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                aria-pressed={isActive}
-                className={`tactile-pill text-[11px] uppercase tracking-wider ${
-                  isActive ? 'active' : 'bg-white border-[var(--bg-tray)] text-[var(--ink-secondary)]'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-
-          <div className="h-4 w-px bg-[var(--bg-tray)] mx-1" />
-
-          {/* Family Filter Pills */}
-          <div className="hud-reticle">
-            <select
-              value={selectedFamily}
-              onChange={e => setSelectedFamily(e.target.value)}
-              className="bg-white border border-[var(--bg-tray)] rounded-[6px] px-2 py-1 text-[10px] text-[var(--ink-secondary)] font-mono uppercase tracking-wider cursor-pointer focus:outline-none focus:border-[var(--signal-cobalt)]"
+        }
+      >
+        {/* Filter Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <ToggleGroup
+              aria-label="Catalog filter tabs"
+              size="sm"
+              value={[activeFilter]}
+              onValueChange={vals => {
+                const next = vals.find(v => v !== activeFilter) ?? vals[0];
+                if (next) setActiveFilter(next as typeof activeFilter);
+              }}
+              className="bg-[var(--bg-card)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5 flex-wrap"
             >
-              {families.map(f => (
-                <option key={f} value={f}>
-                  {f === 'ALL' ? 'ALL FAMILIES' : `${f.toUpperCase()} FAMILY`}
-                </option>
-              ))}
-            </select>
+              {(['ALL', 'ZODIAC', 'SEASONAL', 'NORTHERN', 'SOUTHERN', 'FAVORITES'] as const).map(f => {
+                const label = f === 'FAVORITES' ? `Favorites${favorites.size ? ` (${favorites.size})` : ''}` : f.charAt(0) + f.slice(1).toLowerCase();
+                return (
+                  <ToggleGroupItem
+                    key={f}
+                    value={f}
+                    className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
+                  >
+                    {label}
+                  </ToggleGroupItem>
+                );
+              })}
+            </ToggleGroup>
+
+            <Select
+              value={selectedFamily}
+              onValueChange={val => {
+                if (val) setSelectedFamily(val);
+              }}
+            >
+              <SelectTrigger size="sm" aria-label="Filter by constellation family" className="w-auto min-w-[140px] text-xs">
+                <SelectValue>
+                  {val => (val === 'ALL' ? 'All families' : `${val} family`)}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup>
+                {families.map(f => (
+                  <SelectItem key={f} value={f} className="text-xs">
+                    {f === 'ALL' ? 'All families' : `${f} family`}
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
+
+            <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] px-2.5 py-1 text-[11px] font-semibold text-[var(--ink-secondary)] cursor-pointer select-none">
+              <Switch
+                checked={recognitionOnly}
+                onCheckedChange={checked => setRecognitionOnly(checked)}
+                aria-label="DFA ready filter"
+              />
+              <span>
+                {recognitionOnly ? `DFA ready (${REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').length})` : 'DFA ready only'}
+              </span>
+            </label>
           </div>
 
-          {/* Recognition Only Badge */}
-          <button
-            onClick={() => setRecognitionOnly(!recognitionOnly)}
-            className={`tactile-pill text-[10px] uppercase tracking-wider font-bold ${
-              recognitionOnly ? 'active' : 'bg-white border-[var(--bg-tray)] text-[var(--ink-secondary)]'
-            }`}
-          >
-            {recognitionOnly ? `✓ DFA READY (${REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').length})` : 'SHOW ALL ASTERISMS'}
-          </button>
+          {librarySelection && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMobileDetailsOpen(true)}
+              className="xl:hidden w-full sm:w-auto justify-start text-xs font-semibold"
+            >
+              <span className="text-[var(--signal-mid)]">View details</span>
+              <span className="ml-1 text-[var(--ink-secondary)] font-normal">{librarySelection.name} · {librarySelection.id}</span>
+            </Button>
+          )}
         </div>
-
-        <div className="text-[11px] font-mono text-[var(--ink-muted)] flex items-center gap-1.5 shrink-0">
-          <span>CATALOG:</span>
-          <span className="font-dot text-[var(--signal-cobalt)] font-bold text-xs">{filtered.length}</span>
-          <span>/ {CONSTELLATIONS.length} MODULES</span>
-        </div>
-        {librarySelection && <button type="button" onClick={() => setMobileDetailsOpen(true)} className="xl:hidden w-full rounded-[8px] border border-[var(--bg-tray)] bg-white px-3 py-2 text-left text-xs text-[var(--ink-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--signal-cobalt)]">
-          <span className="font-semibold text-[var(--signal-cobalt)]">VIEW DETAILS</span><span className="ml-2">{librarySelection.name} · {librarySelection.id.toUpperCase()}</span>
-        </button>}
-      </div>
+      </PageHeader>
 
       {/* Library cards and selected constellation preview */}
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(340px,388px)] gap-3.5 flex-1 min-h-0 overflow-y-auto xl:overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[310px] content-start gap-3.5 min-h-0 xl:overflow-y-auto xl:pr-1">
-        {filtered.length === 0 ? <div className="col-span-full rounded-[10px] border border-dashed border-[var(--bg-tray)] bg-[#f6f6f5] p-8 text-center text-sm text-[var(--ink-muted)]">
-          {activeFilter === 'FAVORITES' && favorites.size === 0 ? 'No favorites yet. Use the star on a constellation card to add one.' : 'No constellations match these filters.'}
-        </div> : filtered.map(con => {
-          const isFavorite = favorites.has(con.id);
-          const hasPattern = REFERENCE_PATTERNS.some(p => p.constellationId === con.id);
-          const season = getConstellationSeason(con.raCenter);
-          const stars = con.starIds.map(sid => STAR_BY_ID.get(sid)).filter(Boolean) as Star[];
-          stars.sort((a, b) => a.mag - b.mag);
-          const brightestMag = stars.length > 0 ? (stars[0].mag >= 0 ? '+' : '') + stars[0].mag.toFixed(1) : '—';
-          const isSelected = librarySelectionId === con.id;
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(340px,388px)] gap-4 flex-1 min-h-0 overflow-y-auto xl:overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[304px] content-start gap-3.5 min-h-0 xl:overflow-y-auto xl:pr-1">
+          {filtered.length === 0 ? (
+            <Card className="col-span-full rounded-[12px] border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)] p-8 shadow-none">
+              <Empty className="border-0 p-2">
+                <EmptyHeader>
+                  <EmptyTitle className="text-sm">No matching constellations</EmptyTitle>
+                  <EmptyDescription className="text-xs">
+                    {activeFilter === 'FAVORITES' && favorites.size === 0
+                      ? 'No favorites yet. Use the star on a constellation card to add one.'
+                      : 'No constellations match these filters.'}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </Card>
+          ) : filtered.map(con => {
+            const isFavorite = favorites.has(con.id);
+            const hasPattern = REFERENCE_PATTERNS.some(p => p.constellationId === con.id);
+            const season = getConstellationSeason(con.raCenter);
+            const stars = con.starIds.map(sid => STAR_BY_ID.get(sid)).filter(Boolean) as Star[];
+            stars.sort((a, b) => a.mag - b.mag);
+            const brightestMag = stars.length > 0 ? (stars[0].mag >= 0 ? '+' : '') + stars[0].mag.toFixed(1) : '—';
+            const isSelected = librarySelectionId === con.id;
 
-          return (
-            <article
-              key={con.id}
-              className={`bento-card rounded-[10px] p-3 bg-[#f6f6f5] border flex flex-col gap-2 relative h-full min-h-[310px] ${
-                isSelected ? 'border-[var(--signal-cobalt)] bg-[#F0F4FF]' : 'border-[#E2E5EC]'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <button type="button" onClick={() => setLibrarySelectionId(con.id)} aria-pressed={isSelected} className="min-w-0 flex items-baseline gap-1.5 rounded-sm text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--signal-cobalt)]">
-                  <span className="truncate font-bold text-xs uppercase tracking-wider text-[var(--ink-primary)]">{con.name}</span>
-                  <span className="shrink-0 text-[10px] text-[var(--ink-muted)] uppercase">{con.id}</span>
-                  <span className="sr-only">Select constellation</span>
-                </button>
-                <div className="flex items-center gap-1.5">
-                  {hasPattern && <span className="px-1 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] text-[8px] font-bold uppercase rounded-[3px]">DFA</span>}
-                  <button type="button" onClick={() => toggleFavorite(con.id)} aria-label={isFavorite ? `Remove ${con.name} from favorites` : `Add ${con.name} to favorites`} aria-pressed={isFavorite} className={`h-7 min-w-7 rounded-full border text-base leading-none ${isFavorite ? 'border-[var(--signal-cobalt)] text-[var(--signal-cobalt)] bg-[#edf2ff]' : 'border-[var(--bg-tray)] text-[var(--ink-muted)] bg-white'}`}>
-                    {isFavorite ? '★' : '☆'}
-                  </button>
+            return (
+              <Card
+                key={con.id}
+                className={`rounded-[12px] p-3 gap-2 flex flex-col relative h-full min-h-[304px] shadow-none transition-colors ${
+                  isSelected
+                    ? 'border-[var(--signal-mid)] bg-[var(--bg-pill-active)]'
+                    : 'border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--signal-surface)]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <Button variant="ghost" size="xs" onClick={() => setLibrarySelectionId(con.id)} aria-pressed={isSelected} className="h-auto px-1 py-0.5 min-w-0 flex items-baseline gap-1.5 rounded-sm text-left">
+                    <span className="truncate font-semibold text-xs text-[var(--ink-primary)]">{con.name}</span>
+                    <span className="shrink-0 font-mono text-[10px] text-[var(--ink-muted)] uppercase">{con.id}</span>
+                    <span className="sr-only">Select constellation</span>
+                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    {hasPattern && <span className="px-1.5 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-mono text-[9px] font-semibold uppercase rounded">DFA</span>}
+                    <Button
+                      variant={isFavorite ? 'default' : 'outline'}
+                      size="icon-xs"
+                      onClick={() => toggleFavorite(con.id)}
+                      aria-label={isFavorite ? `Remove ${con.name} from favorites` : `Add ${con.name} to favorites`}
+                      aria-pressed={isFavorite}
+                      className="rounded-full text-xs leading-none"
+                    >
+                      {isFavorite ? '★' : '☆'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <button type="button" onClick={() => setLibrarySelectionId(con.id)} aria-pressed={isSelected} aria-label={`Select ${con.name} constellation and view preview`} className="flex min-h-0 flex-1 flex-col gap-2 text-left rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--signal-cobalt)]">
-                <MiniAsterismPreview con={con} />
-                <div className="mt-1 w-full space-y-1.5 text-xs font-mono">
-                  <div className="flex justify-between items-center text-[10px]"><span className="text-[var(--ink-muted)] uppercase">BEST SEASON</span><span className="font-semibold text-[var(--ink-primary)] uppercase">{season}</span></div>
-                  <div className="flex justify-between items-center text-[10px]"><span className="text-[var(--ink-muted)] uppercase">KEY STARS</span><span className="font-semibold text-[var(--ink-primary)]">{con.starIds.length}</span></div>
+                <Button variant="ghost" onClick={() => setLibrarySelectionId(con.id)} aria-pressed={isSelected} aria-label={`Select ${con.name} constellation and view preview`} className="h-auto p-0 flex min-h-0 flex-1 flex-col items-stretch gap-2 text-left rounded-sm font-normal hover:bg-transparent">
+                  <MiniAsterismPreview con={con} />
+                  <div className="mt-1 w-full space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center text-[11px]"><span className="text-[var(--ink-muted)]">Best season</span><span className="font-mono font-medium text-[var(--ink-primary)]">{season}</span></div>
+                    <div className="flex justify-between items-center text-[11px]"><span className="text-[var(--ink-muted)]">Key stars</span><span className="font-mono tabular-nums font-medium text-[var(--ink-primary)]">{con.starIds.length}</span></div>
+                  </div>
+                </Button>
+
+                <div className="shrink-0 pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px]">
+                  <span className="px-1.5 py-0.5 bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] text-[var(--ink-secondary)] font-mono tabular-nums text-[10px] font-medium rounded">
+                    mag {brightestMag}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={event => { event.stopPropagation(); setSelectedConstellation(con); }}
+                    aria-label={`Open ${con.name} details`}
+                    className="text-[var(--signal-mid)] font-semibold px-2"
+                  >
+                    Details →
+                  </Button>
                 </div>
-              </button>
-
-              {/* Bottom Card Footer with Mag Badge & Arrow Button */}
-              <div className="shrink-0 pt-2 border-t border-[var(--bg-tray)] flex items-center justify-between text-[10px]">
-                <span className="px-1.5 py-0.5 bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] text-[var(--ink-secondary)] font-mono text-[9px] font-semibold rounded-[4px]">
-                  MAG {brightestMag}
-                </span>
-                <button
-                  type="button"
-                  onClick={event => { event.stopPropagation(); setSelectedConstellation(con); }}
-                  onKeyDown={event => event.stopPropagation()}
-                  aria-label={`Open ${con.name} details`}
-                  className="text-[var(--signal-cobalt)] font-bold text-sm px-1 focus-visible:outline-2 focus-visible:outline-[var(--signal-cobalt)]"
-                >→</button>
-              </div>
-            </article>
-          );
-        })}
+              </Card>
+            );
+          })}
         </div>
 
         <div className={`${mobileDetailsOpen && librarySelection ? 'fixed inset-3 z-[100] block max-h-[calc(100dvh-24px)]' : 'hidden'} xl:static xl:z-auto xl:block xl:order-last`}>
-        <aside aria-label={librarySelection ? `${librarySelection.name} constellation details` : 'Constellation details'} className={`bento-card ${librarySelection ? 'min-h-[360px] xl:min-h-0 xl:h-full' : 'min-h-[96px] xl:min-h-0 xl:h-[104px] xl:self-start'} rounded-[10px] border border-[var(--bg-tray)] bg-[#f6f6f5] p-3 xl:p-4 flex flex-col gap-3 xl:gap-4 overflow-y-auto`}>
-          {librarySelection ? <>
-            <div className="flex items-center justify-between">
-              <div className="flex items-baseline gap-2">
-                <h2 className="text-xl font-bold uppercase tracking-wide">{librarySelection.name}</h2>
-                <span className="text-xs text-[var(--ink-muted)]">{librarySelection.id.toUpperCase()}</span>
-              </div>
-              <div className="flex items-center gap-2"><span className="text-[10px] uppercase tracking-wide text-[var(--ink-muted)]">CATALOG ENTRY</span><button type="button" onClick={() => setMobileDetailsOpen(false)} className="xl:hidden rounded-[6px] border border-[var(--bg-tray)] bg-white px-2 py-1 text-xs" aria-label="Close constellation details">CLOSE</button></div>
-            </div>
-
-            <MiniAsterismPreview con={librarySelection} size="detail" />
-
-            <section>
-              <h3 className="telemetry-label text-[11px] font-bold pb-2 border-b border-[var(--bg-tray)]">NOTABLE STARS</h3>
-              <div className="divide-y divide-[var(--bg-tray)]">
-                {librarySelection.starIds.map(id => STAR_BY_ID.get(id)).filter((star): star is Star => !!star).sort((a, b) => a.mag - b.mag).slice(0, 3).map(star => (
-                  <div key={star.id} className="flex items-center justify-between gap-2 py-2 text-xs">
-                    <span className="flex items-center gap-2 min-w-0"><span className="text-[var(--signal-cobalt)]">●</span><span className="truncate uppercase">{star.proper || star.name}</span></span>
-                    <span className="text-[var(--ink-muted)] shrink-0">{star.bayer || `+${star.mag.toFixed(2)}`}</span>
+          <Card aria-label={librarySelection ? `${librarySelection.name} constellation details` : 'Constellation details'} className={`${librarySelection ? 'min-h-[360px] xl:min-h-0 xl:h-full' : 'min-h-[96px] xl:min-h-0 xl:h-[112px] xl:self-start'} rounded-[12px] border-[var(--border-subtle)] bg-[var(--bg-card)] p-3.5 xl:p-4 flex flex-col gap-3 xl:gap-4 overflow-y-auto shadow-none`}>
+            {librarySelection ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <h2 className="text-lg font-semibold text-[var(--ink-primary)]">{librarySelection.name}</h2>
+                    <span className="text-xs font-mono text-[var(--signal-mid)] uppercase">{librarySelection.id}</span>
                   </div>
-                ))}
-              </div>
-            </section>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">Catalog entry</span>
+                    <Button variant="outline" size="xs" onClick={() => setMobileDetailsOpen(false)} className="xl:hidden" aria-label="Close constellation details">
+                      Close
+                    </Button>
+                  </div>
+                </div>
 
-            <section>
-              <h3 className="telemetry-label text-[11px] font-bold pb-2 border-b border-[var(--bg-tray)]">CATALOG SUMMARY</h3>
-              <div className="grid grid-cols-3 gap-2 pt-3 text-center">
-                <div><span className="micro-label block text-[9px]">BEST SEASON</span><span className="text-sm font-semibold">{getConstellationSeason(librarySelection.raCenter).toUpperCase()}</span></div>
-                <div className="border-l border-[var(--bg-tray)]"><span className="micro-label block text-[9px]">KEY STARS</span><span className="text-sm font-semibold">{librarySelection.starIds.length}</span></div>
-                <div className="border-l border-[var(--bg-tray)]"><span className="micro-label block text-[9px]">HEMISPHERE</span><span className="text-sm font-semibold">{librarySelection.decCenter >= 0 ? 'NORTH' : 'SOUTH'}</span></div>
-              </div>
-            </section>
+                <MiniAsterismPreview con={librarySelection} size="detail" />
 
-            <div className="mt-auto grid grid-cols-2 gap-2 pt-2">
-              <button type="button" onClick={() => setSelectedConstellation(librarySelection)} className="tactile-button bg-[var(--signal-cobalt)] text-white border border-[var(--signal-cobalt)] px-3 py-3 text-xs font-bold flex items-center justify-center gap-2">VIEW DETAILS <span>→</span></button>
-              <button type="button" onClick={() => handleStartTrace(librarySelection)} className="tactile-button bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--bg-tray)] px-3 py-3 text-xs font-bold flex items-center justify-center gap-2">START TRACE <span>→</span></button>
-            </div>
-          </> : <div className="m-auto max-w-[260px] text-center text-sm text-[var(--ink-muted)]">
-            <h2 className="font-semibold text-[var(--ink-primary)]">Choose a constellation</h2>
-            <p className="mt-1 text-xs leading-relaxed">Select a card to see its star geometry and actions.</p>
-          </div>}
-        </aside>
+                <section>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] pb-2 border-b border-[var(--border-subtle)]">
+                    Notable stars
+                  </h3>
+                  <div className="divide-y divide-[var(--border-subtle)]">
+                    {librarySelection.starIds.map(id => STAR_BY_ID.get(id)).filter((star): star is Star => !!star).sort((a, b) => a.mag - b.mag).slice(0, 3).map(star => (
+                      <div key={star.id} className="flex items-center justify-between gap-2 py-2 text-xs">
+                        <span className="flex items-center gap-2 min-w-0"><span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-mid)] shrink-0" /><span className="truncate font-medium">{star.proper || star.name}</span></span>
+                        <span className="font-mono text-[var(--ink-muted)] shrink-0">{star.bayer || `+${star.mag.toFixed(2)}`}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-secondary)] pb-2 border-b border-[var(--border-subtle)]">
+                    Catalog summary
+                  </h3>
+                  <dl className="grid grid-cols-3 gap-2 pt-3 text-center">
+                    <div><dt className="text-[10px] text-[var(--ink-muted)] uppercase block">Season</dt><dd className="text-xs font-mono font-semibold">{getConstellationSeason(librarySelection.raCenter)}</dd></div>
+                    <div className="border-l border-[var(--border-subtle)]"><dt className="text-[10px] text-[var(--ink-muted)] uppercase block">Key stars</dt><dd className="text-xs font-mono tabular-nums font-semibold">{librarySelection.starIds.length}</dd></div>
+                    <div className="border-l border-[var(--border-subtle)]"><dt className="text-[10px] text-[var(--ink-muted)] uppercase block">Sky</dt><dd className="text-xs font-mono font-semibold">{librarySelection.decCenter >= 0 ? 'North' : 'South'}</dd></div>
+                  </dl>
+                </section>
+
+                <div className="mt-auto grid grid-cols-2 gap-2 pt-2">
+                  <Button variant="default" size="sm" onClick={() => setSelectedConstellation(librarySelection)} className="text-xs font-semibold">
+                    View details →
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleStartTrace(librarySelection)} className="text-xs font-semibold">
+                    Start trace →
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="m-auto max-w-[260px] text-center text-sm text-[var(--ink-muted)]">
+                <h2 className="font-semibold text-[var(--ink-primary)]">Choose a constellation</h2>
+                <p className="mt-1 text-xs leading-relaxed">Select a card to see its star geometry and actions.</p>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </div>

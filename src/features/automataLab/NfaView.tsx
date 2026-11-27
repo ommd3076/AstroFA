@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { NFA_MACHINE, REFERENCE_PATTERNS } from '../../data/astroData';
 import type { StateId, NFATransition } from '../../automata/types';
+import { Card } from '../../components/ui/space/card';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
 
 export const NfaView: React.FC = () => {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('ALL');
@@ -81,51 +83,62 @@ export const NfaView: React.FC = () => {
   }, [activePatterns]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-hidden">
-      {/* Control Banner — Elevated Bento Module Card */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+    <div className="w-full h-full flex flex-col gap-3 font-mono overflow-hidden">
+      {/* Control Banner */}
+      <Card className="atlas-surface rounded-xl p-3 gap-3 flex-row flex-wrap items-center justify-between shrink-0 shadow-none">
         <div className="space-y-1">
-          <div className="text-[11px] font-bold text-[var(--ink-primary,#181A20)] uppercase tracking-wider flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)]" />
+          <div className="text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" />
             <span>Nondeterministic Finite Automaton (ε-NFA)</span>
-            <span className="hud-reticle px-2 py-0.5 rounded-[4px] bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] text-[10px] font-mono uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-[4px] bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] text-[10px] font-mono uppercase tracking-wider">
               {NFA_MACHINE.states.length} STATES / {NFA_MACHINE.transitions.length} TRANSITIONS
             </span>
           </div>
-          <p className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider">
+          <p className="text-[10px] text-[var(--ink-secondary)] uppercase tracking-wider">
             Pattern chains mapped from Master initial state q₀ via ε-transitions.
           </p>
         </div>
 
         {/* Filter pattern */}
         <div className="flex items-center gap-2">
-          <label className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase tracking-wider font-semibold">
-            PATTERN FILTER:
+          <label htmlFor="nfa-pattern-filter" className="text-[10px] text-[var(--ink-secondary)] uppercase tracking-wider font-semibold">
+            Pattern filter:
           </label>
-          <div className="hud-reticle">
-            <select
-              value={selectedPatternId}
-              onChange={e => setSelectedPatternId(e.target.value)}
-              className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2.5 py-1 text-[11px] text-[var(--ink-primary,#181A20)] font-mono uppercase tracking-wider cursor-pointer"
-            >
-              <option value="ALL">SHOW ALL 24 PATTERNS</option>
+          <Select
+            value={selectedPatternId}
+            onValueChange={val => {
+              if (val) setSelectedPatternId(val);
+            }}
+          >
+            <SelectTrigger id="nfa-pattern-filter" size="sm" aria-label="Filter NFA reference patterns" className="w-auto min-w-[200px] text-[11px] font-mono">
+              <SelectValue>
+                {val => {
+                  if (val === 'ALL') return `Show all ${REFERENCE_PATTERNS.length} patterns`;
+                  const found = REFERENCE_PATTERNS.find(p => p.id === val);
+                  return found ? `${found.name} [${found.constellationId}]` : String(val);
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end">
+              <SelectItem value="ALL" className="text-xs font-mono">
+                Show all {REFERENCE_PATTERNS.length} patterns
+              </SelectItem>
               {REFERENCE_PATTERNS.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name.toUpperCase()} [{p.constellationId}]
-                </option>
+                <SelectItem key={p.id} value={p.id} className="text-xs font-mono">
+                  {p.name} [{p.constellationId}]
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectPopup>
+          </Select>
         </div>
-      </div>
+      </Card>
 
-      {/* Uniform Matte Technical Canvas */}
-      <div className="flex-1 min-h-0 rounded-[10px] border border-[var(--bg-tray,#dedfdf)] overflow-auto relative bg-[var(--bg-card,#f6f6f5)]">
+      {/* Obsidian Technical Canvas */}
+      <div className="flex-1 min-h-0 rounded-xl border border-[var(--border-subtle)] overflow-auto relative bg-[var(--bg-viewport)]">
         <svg
           width={layout.width}
           height={layout.height}
-          className="min-w-full"
-          style={{ background: '#f6f6f5' }}
+          className="min-w-full bg-[var(--bg-viewport)]"
         >
           <defs>
             <marker
@@ -136,7 +149,7 @@ export const NfaView: React.FC = () => {
               refY="3"
               orient="auto"
             >
-              <polygon points="0 0, 8 3, 0 6" fill="#1D55F5" />
+              <polygon points="0 0, 8 3, 0 6" fill="#8FA3FF" />
             </marker>
             <marker
               id="arrowhead-eps"
@@ -146,7 +159,7 @@ export const NfaView: React.FC = () => {
               refY="3"
               orient="auto"
             >
-              <polygon points="0 0, 8 3, 0 6" fill="#8FA4C4" />
+              <polygon points="0 0, 8 3, 0 6" fill="#7C7A72" />
             </marker>
           </defs>
 
@@ -173,13 +186,13 @@ export const NfaView: React.FC = () => {
                 onMouseEnter={() => setHoveredTransition(t)}
                 onMouseLeave={() => setHoveredTransition(null)}
                 className="cursor-pointer transition-opacity"
-                opacity={isHighlighted ? 1 : 0.75}
+                opacity={isHighlighted ? 1 : 0.78}
               >
                 <path
                   d={pathD}
                   fill="none"
-                  stroke={isHighlighted ? '#1D55F5' : isEps ? '#8FA4C4' : '#525866'}
-                  strokeWidth={isHighlighted ? 2.5 : 1.5}
+                  stroke={isHighlighted ? '#8FA3FF' : isEps ? '#52515A' : '#3F3E46'}
+                  strokeWidth={isHighlighted ? 2.2 : 1.4}
                   strokeDasharray={isEps ? '4 3' : undefined}
                   markerEnd={`url(#${isEps ? 'arrowhead-eps' : 'arrowhead-nfa'})`}
                 />
@@ -190,8 +203,8 @@ export const NfaView: React.FC = () => {
                   width={isEps ? 20 : 40}
                   height={18}
                   rx={3}
-                  fill="#f6f6f5"
-                  stroke={isHighlighted ? '#064bdc' : isEps ? '#8a8f96' : '#dedfdf'}
+                  fill="#151519"
+                  stroke={isHighlighted ? '#8FA3FF' : '#2A2A32'}
                   strokeWidth={1}
                 />
                 <text
@@ -199,7 +212,7 @@ export const NfaView: React.FC = () => {
                   y={midY + 3}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill={isHighlighted ? '#064bdc' : '#565b64'}
+                  fill={isHighlighted ? '#A8B8FF' : '#B5B2A9'}
                   fontSize={isEps ? '11px' : '9px'}
                   fontWeight="600"
                   fontFamily="'IBM Plex Mono', monospace"
@@ -239,7 +252,7 @@ export const NfaView: React.FC = () => {
                 {isInitial && (
                   <path
                     d="M -40 0 L -24 0"
-                    stroke="#1D55F5"
+                    stroke="#A8B8FF"
                     strokeWidth={2}
                     markerEnd="url(#arrowhead-nfa)"
                   />
@@ -250,18 +263,18 @@ export const NfaView: React.FC = () => {
                   <circle
                     r={26}
                     fill="none"
-                    stroke="#1D55F5"
+                    stroke="#F3F1EB"
                     strokeWidth={1.5}
                     strokeDasharray="4 2"
                   />
                 )}
 
-                {/* Double-ring solid cobalt for final accept states */}
+                {/* Double-ring solid periwinkle for final accept states */}
                 {node.isAccepting && (
                   <circle
                     r={24}
                     fill="none"
-                    stroke="#1D55F5"
+                    stroke="#8FA3FF"
                     strokeWidth={2}
                   />
                 )}
@@ -269,8 +282,8 @@ export const NfaView: React.FC = () => {
                 {/* Main state circle */}
                 <circle
                   r={20}
-                  fill={isInitial || node.isAccepting ? '#e5edff' : '#f6f6f5'}
-                  stroke={isInitial || node.isAccepting || isHovered ? '#064bdc' : '#8a8f96'}
+                  fill={node.isAccepting ? '#8FA3FF' : isInitial ? '#202026' : '#1B1B20'}
+                  stroke={isInitial || node.isAccepting || isHovered ? '#A8B8FF' : '#52515A'}
                   strokeWidth={isHovered ? 2.5 : 1.8}
                 />
 
@@ -278,7 +291,7 @@ export const NfaView: React.FC = () => {
                 <text
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill="#18191b"
+                  fill={node.isAccepting ? '#0B0B10' : '#F3F1EB'}
                   fontSize={isInitial ? '11px' : '9px'}
                   fontFamily="'IBM Plex Mono', monospace"
                   fontWeight="600"
@@ -295,14 +308,14 @@ export const NfaView: React.FC = () => {
                       width={56}
                       height={16}
                       rx={3}
-                      fill="#e5edff"
-                      stroke="#064bdc"
+                      fill="#151519"
+                      stroke="#8FA3FF"
                       strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill="#064bdc"
+                      fill="#A8B8FF"
                       fontSize="9px"
                       fontFamily="'IBM Plex Mono', monospace"
                       fontWeight="600"
@@ -319,12 +332,12 @@ export const NfaView: React.FC = () => {
 
       {/* State Inspector Footer — Module Card */}
       {hoveredState && (
-        <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] px-3 py-2 text-[11px] flex items-center justify-between shrink-0">
+        <Card className="atlas-surface rounded-xl px-3 py-2 text-[11px] flex-row items-center justify-between shrink-0 shadow-none">
           <div className="flex items-center gap-3">
-            <span className="font-bold text-[var(--signal-cobalt,#1D55F5)] uppercase tracking-wider">
+            <span className="font-bold text-[var(--signal-mid)] uppercase tracking-wider">
               STATE: {hoveredState}
             </span>
-            <span className="text-[var(--ink-secondary,#525866)] uppercase tracking-wider text-[10px]">
+            <span className="text-[var(--ink-secondary)] uppercase tracking-wider text-[10px]">
               {hoveredState === 'q0'
                 ? 'MASTER INITIAL STATE (BRANCH UNIFICATION)'
                 : layout.nodeCoords.get(hoveredState)?.isAccepting
@@ -332,10 +345,10 @@ export const NfaView: React.FC = () => {
                   : 'INTERMEDIATE PATTERN STATE'}
             </span>
           </div>
-          <div className="text-[10px] text-[var(--ink-muted,#8C93A0)] uppercase tracking-wider">
+          <div className="text-[10px] text-[var(--ink-muted)] uppercase tracking-wider">
             M = (Q, Σ, δ, q₀, F)
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

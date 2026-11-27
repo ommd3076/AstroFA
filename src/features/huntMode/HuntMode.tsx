@@ -3,6 +3,8 @@ import { useAstroStore } from '../../stores/useAstroStore';
 import { CONSTELLATION_BY_ID } from '../../data/astroData';
 import { SkyCanvas } from '../../sky/SkyCanvas';
 import { TraceHud } from '../traceMode/TraceHud';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
 
 export const HuntMode: React.FC = () => {
   const huntEntryState = useRef<{
@@ -12,6 +14,7 @@ export const HuntMode: React.FC = () => {
     tracedStarIds: number[];
     tracedPoints: { x: number; y: number }[];
     recognitionReport: ReturnType<typeof useAstroStore.getState>['recognitionReport'];
+    backendRecognition: ReturnType<typeof useAstroStore.getState>['backendRecognition'];
     focusedConstellationId: string | null;
     targetFocusCoords: ReturnType<typeof useAstroStore.getState>['targetFocusCoords'];
   } | null>(null);
@@ -21,6 +24,7 @@ export const HuntMode: React.FC = () => {
     huntHintLevel,
     setHuntHintLevel,
     recognitionReport,
+    backendRecognition,
     setActiveView,
     setAutomataTab,
     setSimulatorSymbols,
@@ -36,6 +40,7 @@ export const HuntMode: React.FC = () => {
         tracedStarIds: state.tracedStarIds,
         tracedPoints: state.tracedPoints,
         recognitionReport: state.recognitionReport,
+        backendRecognition: state.backendRecognition,
         focusedConstellationId: state.focusedConstellationId,
         targetFocusCoords: state.targetFocusCoords,
       };
@@ -56,6 +61,7 @@ export const HuntMode: React.FC = () => {
               tracedStarIds: entry.tracedStarIds,
               tracedPoints: entry.tracedPoints,
               recognitionReport: entry.recognitionReport,
+              backendRecognition: entry.backendRecognition,
               focusedConstellationId: entry.focusedConstellationId,
               targetFocusCoords: entry.targetFocusCoords,
             }),
@@ -69,67 +75,84 @@ export const HuntMode: React.FC = () => {
     return unsubscribe;
   }, [huntTarget, startNewHunt]);
 
-  const isSuccess = recognitionReport?.status === 'FULL_MATCH' &&
-    recognitionReport.bestMatch?.isVerified === true &&
-    recognitionReport.bestMatch.constellationId === huntTarget?.constellationId;
+  const isSuccess = backendRecognition?.state === 'available' &&
+    backendRecognition.result.status === 'FULL_MATCH' &&
+    backendRecognition.result.bestMatch?.constellationId === huntTarget?.constellationId;
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[var(--bg-shell)] overflow-hidden font-mono">
-      {/* Challenge controls occupy their own strip so the tracing HUD stays unobscured. */}
-      <div className="shrink-0 px-2 pt-2 font-mono">
-          <div className="bento-card p-3 shadow-none border border-[var(--card-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-3 text-[var(--ink-primary)]">
-            <div className="space-y-1 text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2">
-                <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-                <span className="telemetry-label text-[11px]">CONSTELLATION HUNT</span>
-              </div>
-              <div className="flex items-center justify-center sm:justify-start gap-2 pt-0.5">
-                <span className="text-[11px] text-[var(--ink-muted)] uppercase">TARGET:</span>
-                <span className="font-dot text-base text-[var(--signal-cobalt)] font-bold tracking-wider">
-                  {huntTarget?.name.toUpperCase()}
-                </span>
-                <span className="hud-reticle px-1.5 py-0.2 bg-[var(--bg-pill-neutral)] text-[var(--signal-cobalt)] text-[9px] font-bold uppercase font-dot">
-                  {huntTarget?.constellationId}
-                </span>
-              </div>
-              <p className="text-[10px] text-[var(--ink-secondary)]">
-                LOCATE &amp; TRACE THE <strong className="font-dot text-[var(--signal-cobalt)] font-bold">{huntTarget?.orderedStarIds.length}</strong> REFERENCE STARS IN THE LIVE SKY CANVAS.
+    <div className="relative w-full h-full flex flex-col bg-[var(--bg-viewport)] overflow-hidden font-sans">
+      {/* Slim mission & hint strip anchored above the live sky stage */}
+      <div className="shrink-0 z-20 border-b border-[var(--border-subtle)] bg-[var(--bg-tray)] px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[var(--ink-primary)]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--ink-muted)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />
+              Constellation hunt
+            </span>
+            <span className="text-[var(--border-hairline)]" aria-hidden="true">|</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[var(--ink-secondary)]">Target:</span>
+              <strong className="font-sans text-sm sm:text-base font-semibold text-[var(--ink-primary)]">
+                {huntTarget?.name}
+              </strong>
+              <span className="px-1.5 py-0.5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] text-[var(--signal-mid)] rounded text-[10px] font-mono font-semibold uppercase">
+                {huntTarget?.constellationId}
+              </span>
+              <span className="font-mono tabular-nums text-[11px] text-[var(--ink-secondary)]">
+                · {huntTarget?.orderedStarIds.length ?? 0} reference stars
+              </span>
+            </div>
+            {huntTarget?.description && (
+              <p className="hidden xl:block text-[11px] text-[var(--ink-muted)] truncate max-w-md">
+                {huntTarget.description}
               </p>
-              {huntTarget?.description && (
-                <p className="max-w-2xl text-[10px] leading-relaxed text-[var(--ink-muted)]">{huntTarget.description}</p>
-              )}
-              {huntHintLevel >= 1 && huntTarget && (
-                <p className="text-[10px] font-semibold text-[var(--signal-cobalt)]" aria-live="polite">
-                  HINT 1 · REGION RA {((CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.raCenter || 0) / 15).toFixed(1)}H, DEC {(CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.decCenter || 0).toFixed(0)}°
-                </p>
-              )}
-              {huntHintLevel >= 2 && huntTarget && (
-                <p className="text-[10px] font-semibold text-[var(--signal-cobalt)]" aria-live="polite">
-                  HINT 2 · INITIAL STAR: {huntTarget.starNames[0]}
-                </p>
-              )}
-            </div>
-
-            {/* Hint Stepper & Target Stepper Buttons */}
-            <div className="flex items-center gap-2 shrink-0">
-              {huntHintLevel < 2 && (
-                <button
-                  onClick={() => setHuntHintLevel(huntHintLevel + 1)}
-                  aria-label={`Show hint ${huntHintLevel + 1} of 2`}
-                  className="tactile-pill bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-surface)] text-[10px] py-2 px-3 font-bold uppercase tracking-wider cursor-pointer"
-                >
-                  HINT ({huntHintLevel + 1}/2)
-                </button>
-              )}
-              <button
-                onClick={() => startNewHunt()}
-                aria-label="Start next hunt target"
-                className="tactile-pill bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] border border-[var(--bg-tray)] text-[10px] py-1.5 px-2.5 font-bold uppercase tracking-wider cursor-pointer"
-              >
-                NEXT TARGET ↗
-              </button>
-            </div>
+            )}
           </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <span className="font-mono text-[11px] text-[var(--ink-muted)]" aria-live="polite">
+              {backendRecognition?.state === 'pending' ? 'Server shape check pending'
+                : backendRecognition?.state === 'unavailable' ? `Server unavailable · ${backendRecognition.error}`
+                : backendRecognition?.state === 'available' ? `Server result · ${backendRecognition.result.status}${backendRecognition.result.status === 'AMBIGUOUS' ? ' · refine trace' : ''}`
+                : 'Trace >= 3 stars'}
+            </span>
+            {huntHintLevel < 2 && (
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setHuntHintLevel(huntHintLevel + 1)}
+                aria-label={`Show hint ${huntHintLevel + 1} of 2`}
+                className="text-[11px] font-semibold text-[var(--signal-mid)] border-[var(--signal-surface)] bg-[var(--bg-pill-active)]"
+              >
+                Hint ({huntHintLevel + 1}/2)
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => startNewHunt()}
+              aria-label="Start next hunt target"
+              className="text-[11px] font-semibold"
+            >
+              Next target ↗
+            </Button>
+          </div>
+        </div>
+
+        {(huntHintLevel >= 1 || huntHintLevel >= 2) && huntTarget && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border-subtle)] pt-1.5 text-[11px] font-mono text-[var(--signal-mid)]" aria-live="polite">
+            {huntHintLevel >= 1 && (
+              <span>
+                Hint 1 · Region RA {((CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.raCenter || 0) / 15).toFixed(1)}h, Dec {(CONSTELLATION_BY_ID.get(huntTarget.constellationId)?.decCenter || 0).toFixed(0)}°
+              </span>
+            )}
+            {huntHintLevel >= 2 && (
+              <span>
+                Hint 2 · Starting star: {huntTarget.starNames[0]}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Real 3D Sky Canvas Viewport & Trace HUD */}
@@ -137,57 +160,55 @@ export const HuntMode: React.FC = () => {
         <SkyCanvas />
         <TraceHud />
 
-        {/* Tactical Telemetry Verdict Dialog (Costellar Hardware Verdict) */}
+        {/* Verdict Surface */}
         {isSuccess && (
-          <div className="absolute inset-0 z-40 bg-[#060A14]/70 backdrop-blur-[2px] flex items-center justify-center p-4 font-mono pointer-events-auto">
-            <div className="bento-card border-2 border-[var(--signal-cobalt)] max-w-md w-full p-6 text-left space-y-4 shadow-none hud-reticle-4corner animate-in zoom-in-95 duration-150">
-              {/* Verdict Header with Tier 1 Doto READOUT */}
-              <div className="space-y-1 border-b border-[var(--card-border-subtle)] pb-3">
+          <div className="absolute inset-0 z-40 bg-[#070709]/80 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
+            <Card className="atlas-surface border-[var(--signal-surface)] max-w-md w-full p-6 text-left gap-4 shadow-2xl">
+              <div className="space-y-1 border-b border-[var(--border-subtle)] pb-3">
                 <div className="flex items-center justify-between">
-                  <span className="telemetry-label text-[10px]">HUNT RESULT</span>
-                  <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ink-muted)]">Hunt result</span>
+                  <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" aria-hidden="true" />
                 </div>
-                <div className="font-dot text-3xl font-bold tracking-wider text-[var(--signal-cobalt)] pt-1">
-                  MATCHED
+                <div className="font-sans text-2xl font-semibold text-[var(--signal-mid)] pt-1">
+                  Matched
                 </div>
-                <div className="text-[11px] uppercase font-bold tracking-wider text-[var(--ink-secondary)]">
-                  TARGET RECOGNIZED
+                <div className="text-xs font-medium text-[var(--ink-secondary)]">
+                  Target recognized
                 </div>
               </div>
 
-              {/* Explanation Text */}
               <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-                You traced <strong className="text-[var(--ink-primary)] font-bold">{huntTarget?.name.toUpperCase()}</strong>. The pattern and its geometry match.
+                You traced <strong className="text-[var(--ink-primary)] font-semibold">{huntTarget?.name}</strong>. The symbol sequence and Procrustes geometry match.
               </p>
 
-              {/* Telemetry Breakdown Box */}
-              <div className="p-3 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] space-y-2 text-[11px] font-mono">
+              <dl className="atlas-surface-subtle rounded-lg p-3 space-y-2 text-xs font-mono">
                 <div className="flex justify-between items-center">
-                  <span className="telemetry-label text-[9px]">TARGET ASTERISM:</span>
-                  <span className="font-dot text-[var(--ink-primary)] font-bold">{huntTarget?.name} ({huntTarget?.constellationId})</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="telemetry-label text-[9px]">DFA FINAL STATE:</span>
-                  <span className="font-dot text-[var(--signal-cobalt)] font-bold">{recognitionReport?.finalState} ∈ F</span>
+                  <dt className="text-[10px] text-[var(--ink-muted)] uppercase">Target</dt>
+                  <dd className="text-[var(--ink-primary)] font-semibold">{huntTarget?.name} ({huntTarget?.constellationId})</dd>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="telemetry-label text-[9px]">PROCRUSTES RESIDUAL:</span>
-                  <div className="flex items-center gap-1">
-                    <span className="font-dot text-[var(--signal-cobalt)] font-bold">{recognitionReport?.bestMatch?.residual}</span>
-                    <span className="text-[10px] text-[var(--ink-muted)]">(&le; 0.32 TOLERANCE)</span>
-                  </div>
+                  <dt className="text-[10px] text-[var(--ink-muted)] uppercase">DFA state</dt>
+                  <dd className="text-[var(--signal-mid)] font-semibold">{recognitionReport?.finalState} ∈ F</dd>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-[var(--bg-tray)]">
-                  <span className="telemetry-label text-[9px]">VERDICT STATUS:</span>
-                  <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] text-[9px] font-bold uppercase font-dot">
-                    FULL MATCH ACCEPTED
-                  </span>
+                <div className="flex justify-between items-center">
+                  <dt className="text-[10px] text-[var(--ink-muted)] uppercase">Residual</dt>
+                  <dd className="flex items-center gap-1.5 tabular-nums">
+                    <span className="text-[var(--signal-mid)] font-semibold">{backendRecognition?.state === 'available' ? backendRecognition.result.bestMatch?.residual : '—'}</span>
+                    <span className="text-[10px] text-[var(--ink-muted)]">(&le; 0.32 tolerance)</span>
+                  </dd>
                 </div>
-              </div>
+                <div className="flex justify-between items-center pt-1.5 border-t border-[var(--border-subtle)]">
+                  <dt className="text-[10px] text-[var(--ink-muted)] uppercase">Status</dt>
+                  <dd className="px-2 py-0.5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] text-[var(--signal-mid)] rounded text-[10px] font-semibold uppercase">
+                    Server full match
+                  </dd>
+                </div>
+              </dl>
 
-              {/* Tactile Hardware Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     if (recognitionReport?.inputSymbols) {
                       setSimulatorSymbols(recognitionReport.inputSymbols);
@@ -195,18 +216,20 @@ export const HuntMode: React.FC = () => {
                     setAutomataTab('simulator');
                     setActiveView('automataLab');
                   }}
-                  className="tactile-button bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] border border-[var(--signal-surface)] py-2.5 px-3 rounded-[6px] text-xs font-semibold uppercase tracking-wider flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 text-xs font-semibold"
                 >
-                  <span>INSPECT IN AUTOMATA LAB ↗</span>
-                </button>
-                <button
+                  Inspect in Automata Lab ↗
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
                   onClick={() => startNewHunt()}
-                  className="tactile-button bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] text-white border border-[var(--signal-mid)] py-2.5 px-3 rounded-[6px] text-xs font-semibold uppercase tracking-wider flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 text-xs font-semibold"
                 >
-                  <span>PLAY ANOTHER HUNT</span>
-                </button>
+                  Play another hunt
+                </Button>
               </div>
-            </div>
+            </Card>
           </div>
         )}
       </div>

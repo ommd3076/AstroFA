@@ -38,4 +38,18 @@ export interface RecognitionReport {
   bestMatch: GeometricCandidateScore | null;
   status: 'FULL_MATCH' | 'VALID_PREFIX' | 'SYMBOLIC_REJECT' | 'GEOMETRIC_REJECT';
   explanation: string;
+  /** Server shape decision for user supplied traces; local DFA/geometric data remains diagnostic. */
+  backendRecognition?: BackendRecognitionState;
 }
+
+export interface BackendRecognitionCandidate extends GeometricCandidateScore {}
+export interface BackendRecognitionResult {
+  status: 'FULL_MATCH' | 'AMBIGUOUS' | 'NO_MATCH';
+  candidates: BackendRecognitionCandidate[];
+  bestMatch: BackendRecognitionCandidate | null;
+}
+export type BackendRecognitionState =
+  | { state: 'pending' }
+  | { state: 'available'; result: BackendRecognitionResult }
+  | { state: 'unavailable'; error: string }
+  | { state: 'not-requested'; reason: 'educational-demo' | 'insufficient-points' };

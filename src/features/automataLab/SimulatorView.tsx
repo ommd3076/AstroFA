@@ -2,6 +2,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { MINIMIZED_DFA_MACHINE, REFERENCE_PATTERNS } from '../../data/astroData';
 import { simulateDfa } from '../../automata/simulate';
+import { Alert, AlertDescription, AlertTitle } from '../../components/ui/space/alert';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+
+const SPEED_CHOICES = [
+  { value: '1200', label: '0.5X SLOW (1.2S)' },
+  { value: '750', label: '1.0X NORMAL (750MS)' },
+  { value: '350', label: '2.0X FAST (350MS)' },
+  { value: '150', label: '5.0X TURBO (150MS)' },
+];
 
 export const SimulatorView: React.FC = () => {
   const {
@@ -15,6 +28,7 @@ export const SimulatorView: React.FC = () => {
 
   const [inputStringRaw, setInputStringRaw] = useState<string>(simulatorSymbols.join(' '));
   const [playbackSpeedMs, setPlaybackSpeedMs] = useState<number>(750);
+  const [presetSelection, setPresetSelection] = useState<string>('');
   const [inputError, setInputError] = useState<string | null>(null);
 
   // Parse raw text into symbol array
@@ -66,194 +80,218 @@ export const SimulatorView: React.FC = () => {
   const isFinalStep = simulatorStep === totalSteps;
 
   return (
-    <div className="w-full h-full flex flex-col gap-[6px] font-mono  overflow-y-auto pr-0.5">
-      {/* Overview Banner — Module Card */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3.5 rounded-[12px] space-y-1.5 shrink-0">
+    <div className="w-full h-full flex flex-col gap-[6px] font-mono overflow-y-auto pr-0.5">
+      {/* Overview Banner */}
+      <Card className="bg-[var(--bg-card)] border-[var(--border-subtle)] p-3.5 rounded-[12px] gap-1.5 shrink-0 shadow-none">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--signal-cobalt,#1D55F5)]" />
-            <h3 className="font-bold text-[var(--ink-primary,#181A20)] text-[11px] uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[var(--signal-mid)]" />
+            <h3 className="font-bold text-[var(--ink-primary)] text-[11px] uppercase tracking-wider">
               DFA Step-by-Step String Simulator
             </h3>
-            <span className="hud-reticle px-2 py-0.5 rounded-[4px] bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--signal-cobalt,#1D55F5)] text-[10px] font-mono uppercase tracking-wider font-semibold">
+            <span className="px-2 py-0.5 rounded-[4px] bg-[var(--bg-pill-neutral)] text-[var(--signal-mid)] text-[10px] font-mono uppercase tracking-wider font-semibold">
               MACHINE: MINIMIZED DFA ({MINIMIZED_DFA_MACHINE.states.length} STATES)
             </span>
           </div>
-          <span className="text-[10px] text-[var(--ink-secondary,#525866)] font-mono tracking-wider">
+          <span className="text-[10px] text-[var(--ink-secondary)] font-mono tracking-wider">
             TAPE HEAD: {simulatorStep} / {totalSteps} SYMBOLS
           </span>
         </div>
-        <p className="text-[11px] text-[var(--ink-secondary,#525866)] leading-relaxed uppercase tracking-wider">
+        <p className="text-[11px] text-[var(--ink-secondary)] leading-relaxed uppercase tracking-wider">
           Single-step execution over formal transition function δ. Inspects discrete tape consumption,
           active state transitions, and deterministic acceptance criteria.
         </p>
-      </div>
+      </Card>
 
       {/* String Input & Preset Toolbar */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-3 rounded-[12px] space-y-2.5 shrink-0">
+      <Card className="bg-[var(--bg-card)] border-[var(--border-subtle)] p-3 rounded-[12px] gap-2.5 shrink-0 shadow-none">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="flex-1 flex gap-2">
-            <div className="hud-reticle flex-1">
-              <input
-                type="text"
-                value={inputStringRaw}
-                onChange={e => setInputStringRaw(e.target.value)}
-                placeholder="E.G. LL:M RR:M L:M OR S:S R:G"
-                aria-label="Input string over the minimized DFA alphabet"
-                aria-invalid={Boolean(inputError)}
-                aria-describedby={inputError ? 'simulator-input-error' : undefined}
-                className="w-full bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-[var(--ink-primary,#181A20)] placeholder:text-[var(--ink-muted,#8C93A0)]"
-              />
-            </div>
-            <button
+            <Input
+              type="text"
+              size="sm"
+              value={inputStringRaw}
+              onChange={e => setInputStringRaw(e.target.value)}
+              onKeyDown={e => e.stopPropagation()}
+              placeholder="E.G. LL:M RR:M L:M OR S:S R:G"
+              aria-label="Input string over the minimized DFA alphabet"
+              aria-invalid={Boolean(inputError)}
+              aria-describedby={inputError ? 'simulator-input-error' : undefined}
+              className="flex-1 text-[11px] font-mono uppercase tracking-wider"
+            />
+            <Button
+              variant="default"
+              size="sm"
               onClick={handleApplyInput}
-              className="hud-reticle active px-3.5 py-1.5 bg-[var(--signal-cobalt,#1D55F5)] text-white rounded-[6px] text-[10px] font-mono uppercase tracking-wider font-semibold cursor-pointer shrink-0"
+              className="text-[10px] font-mono uppercase tracking-wider font-semibold shrink-0"
             >
               LOAD STRING
-            </button>
+            </Button>
           </div>
 
           {/* Quick presets */}
-          <div className="hud-reticle">
-            <select
-              onChange={e => {
-                const pat = REFERENCE_PATTERNS.find(p => p.id === e.target.value);
-                if (pat) {
-                  setInputStringRaw(pat.encodedSymbols.join(' '));
-                  setInputError(null);
-                  setSimulatorStep(0);
-                  setSimulatorIsPlaying(false);
-                  setSimulatorSymbols(pat.encodedSymbols);
-                }
-                e.currentTarget.value = '';
-              }}
-              defaultValue=""
-              className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2.5 py-1.5 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase tracking-wider cursor-pointer"
-            >
-              <option value="" disabled>-- PRESET PATTERNS --</option>
+          <Select
+            value={presetSelection}
+            onValueChange={val => {
+              if (!val) return;
+              const pat = REFERENCE_PATTERNS.find(p => p.id === val);
+              if (pat) {
+                setPresetSelection(val);
+                setInputStringRaw(pat.encodedSymbols.join(' '));
+                setInputError(null);
+                setSimulatorStep(0);
+                setSimulatorIsPlaying(false);
+                setSimulatorSymbols(pat.encodedSymbols);
+              }
+            }}
+          >
+            <SelectTrigger size="sm" aria-label="Load preset reference pattern" className="w-auto min-w-[210px] text-[10px] font-mono uppercase tracking-wider">
+              <SelectValue placeholder="PRESET PATTERNS">
+                {val => {
+                  const found = REFERENCE_PATTERNS.find(p => p.id === val);
+                  return found ? `${found.name.toUpperCase()} [${found.constellationId}]` : '-- PRESET PATTERNS --';
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end">
               {REFERENCE_PATTERNS.map(p => (
-                <option key={p.id} value={p.id}>
+                <SelectItem key={p.id} value={p.id} className="text-[11px] font-mono">
                   {p.name.toUpperCase()} [{p.encodedSymbols.join(' ')}]
-                </option>
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectPopup>
+          </Select>
         </div>
 
-        {inputError && <p id="simulator-input-error" role="alert" className="text-[10px] text-red-700">{inputError}</p>}
+        {inputError && (
+          <Alert id="simulator-input-error" variant="error" role="alert" className="p-2 text-[10px]">
+            <AlertDescription>{inputError}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Quick-insert alphabet symbol buttons */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--bg-tray,#E2E5EC)]">
-          <span className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase font-semibold mr-1">
+        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--border-subtle)]">
+          <span className="text-[10px] text-[var(--ink-secondary)] uppercase font-semibold mr-1">
             ALPHABET Σ:
           </span>
           {MINIMIZED_DFA_MACHINE.alphabet.map((sym, idx) => (
-            <button
+            <Button
               key={idx}
+              variant="outline"
+              size="xs"
               onClick={() => {
                 const nextStr = inputStringRaw ? `${inputStringRaw} ${sym}` : sym;
                 setInputStringRaw(nextStr);
                 setSimulatorSymbols(nextStr.split(/[\s,]+/).filter(Boolean));
               }}
-              className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--ink-primary,#181A20)] rounded-[4px] text-[10px] font-mono border border-[rgba(0,0,0,0.06)] transition-colors cursor-pointer"
+              className="h-6 px-2 text-[10px] font-mono"
             >
               +{sym}
-            </button>
+            </Button>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* Stepper Controls */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] p-2.5 rounded-[12px] flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <Card className="bg-[var(--bg-card)] border-[var(--border-subtle)] p-2.5 rounded-[12px] flex-row flex-wrap items-center justify-between gap-3 shrink-0 shadow-none">
         <div className="flex items-center gap-1.5">
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => { setSimulatorStep(0); setSimulatorIsPlaying(false); }}
             disabled={simulatorStep === 0}
-            className="hud-reticle px-2.5 py-1 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] disabled:opacity-40 text-[var(--ink-primary,#181A20)] text-[10px] font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            className="text-[10px] font-mono font-semibold uppercase tracking-wider"
           >
             |◀ RESET
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => { setSimulatorStep(prev => Math.max(0, prev - 1)); setSimulatorIsPlaying(false); }}
             disabled={simulatorStep === 0}
-            className="hud-reticle px-2.5 py-1 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] disabled:opacity-40 text-[var(--ink-primary,#181A20)] text-[10px] font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            className="text-[10px] font-mono font-semibold uppercase tracking-wider"
           >
             - STEP
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={simulatorIsPlaying ? 'outline' : 'default'}
+            size="xs"
             onClick={() => setSimulatorIsPlaying(!simulatorIsPlaying)}
             disabled={!simulatorIsPlaying && (totalSteps === 0 || simulatorStep >= totalSteps)}
-            className={`hud-reticle active px-3 py-1 rounded-[6px] text-[10px] font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1 ${
-              simulatorIsPlaying
-                ? 'bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--signal-cobalt,#1D55F5)] border border-[var(--signal-mid,#6892F6)]'
-                : 'bg-[var(--signal-cobalt,#1D55F5)] text-white'
-            }`}
+            className="text-[10px] font-mono font-semibold uppercase tracking-wider"
           >
             <span>{simulatorIsPlaying ? '⏸ PAUSE' : '▶ RUN'}</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => { setSimulatorStep(prev => Math.min(totalSteps, prev + 1)); setSimulatorIsPlaying(false); }}
             disabled={simulatorStep === totalSteps}
-            className="hud-reticle px-2.5 py-1 rounded-[6px] bg-[var(--bg-pill-neutral,#E6E9EF)] hover:bg-[#D9DDE6] disabled:opacity-40 text-[var(--ink-primary,#181A20)] text-[10px] font-mono font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            className="text-[10px] font-mono font-semibold uppercase tracking-wider"
           >
             + STEP
-          </button>
+          </Button>
         </div>
 
         {/* Playback speed selector */}
         <div className="flex items-center gap-2">
-          <label className="text-[10px] text-[var(--ink-secondary,#525866)] uppercase font-semibold">
+          <span className="text-[10px] text-[var(--ink-secondary)] uppercase font-semibold">
             SPEED:
-          </label>
-          <div className="hud-reticle">
-            <select
-              value={playbackSpeedMs}
-              onChange={e => setPlaybackSpeedMs(Number(e.target.value))}
-              className="bg-[var(--bg-card,#F5F6F8)] border border-[var(--bg-tray,#E2E5EC)] rounded-[6px] px-2 py-0.5 text-[10px] text-[var(--ink-primary,#181A20)] font-mono uppercase cursor-pointer"
-            >
-              <option value={1200}>0.5X SLOW (1.2S)</option>
-              <option value={750}>1.0X NORMAL (750MS)</option>
-              <option value={350}>2.0X FAST (350MS)</option>
-              <option value={150}>5.0X TURBO (150MS)</option>
-            </select>
-          </div>
+          </span>
+          <Select
+            value={String(playbackSpeedMs)}
+            onValueChange={val => {
+              if (val) setPlaybackSpeedMs(Number(val));
+            }}
+          >
+            <SelectTrigger size="sm" aria-label="Simulator playback speed" className="w-auto min-w-[160px] text-[10px] font-mono uppercase">
+              <SelectValue>
+                {val => SPEED_CHOICES.find(c => c.value === val)?.label ?? `${val}MS`}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup align="end">
+              {SPEED_CHOICES.map(c => (
+                <SelectItem key={c.value} value={c.value} className="text-xs font-mono">
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
         </div>
-      </div>
+      </Card>
 
-      {/* Interactive Active State & Tape HUD Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[6px]">
-        {/* Active State Card */}
-        <div className="p-3.5 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] space-y-2.5">
+      {/* Interactive Active State & Tape HUD */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Card className="atlas-surface p-3.5 rounded-xl gap-2.5 shadow-none">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-[var(--ink-secondary,#525866)] tracking-wider">
+            <span className="text-[10px] uppercase font-bold text-[var(--ink-secondary)] tracking-wider">
               ACTIVE TELEMETRY STATE
             </span>
             {activeState?.isAccepting ? (
-              <span className="hud-reticle active px-2 py-0.5 bg-[var(--signal-cobalt,#1D55F5)] text-white rounded-[4px] text-[9px] font-bold font-mono uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-[9px] font-bold font-mono uppercase tracking-wider">
                 ACCEPTING STATE
               </span>
             ) : activeState?.isDead ? (
-              <span className="hud-reticle px-2 py-0.5 bg-[#8C93A0] text-white rounded-[4px] text-[9px] font-bold font-mono uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-[var(--ink-muted)] text-[var(--bg-shell)] rounded text-[9px] font-bold font-mono uppercase tracking-wider">
                 DEAD / TRAP STATE
               </span>
             ) : (
-              <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-secondary,#525866)] rounded-[4px] text-[9px] font-mono uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-[var(--bg-pill-neutral)] text-[var(--ink-secondary)] rounded text-[9px] font-mono uppercase tracking-wider">
                 TRANSIT STATE
               </span>
             )}
           </div>
 
-          {/* Recessed HUD reticle cavity and Doto LED active state readout */}
-          <div className="p-3 bg-[var(--bg-tray,#E2E5EC)] rounded-[8px] border border-[rgba(0,0,0,0.06)] flex items-center gap-3">
-            <div className="w-14 h-14 rounded-[8px] bg-[var(--bg-card,#F5F6F8)] border border-[var(--reticle-tick,#8FA4C4)] flex items-center justify-center font-['Doto',monospace] font-bold text-[var(--signal-cobalt,#1D55F5)] text-xl hud-reticle active shrink-0">
+          <div className="p-3 bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] flex items-center gap-3">
+            <div className="w-14 h-14 rounded-[8px] bg-[var(--bg-card)] border border-[var(--reticle-tick)] flex items-center justify-center font-mono tabular-nums font-bold text-[var(--signal-mid)] text-xl shrink-0">
               {activeStateId}
             </div>
             <div className="space-y-0.5 overflow-hidden">
-              <div className="text-[11px] font-bold text-[var(--ink-primary,#181A20)] truncate uppercase">
+              <div className="text-[11px] font-bold text-[var(--ink-primary)] truncate uppercase">
                 {activeState?.name}
               </div>
               {activeState?.acceptingLabels && activeState.acceptingLabels.length > 0 && (
-                <div className="text-[10px] font-mono text-[var(--signal-cobalt,#1D55F5)] font-bold uppercase tracking-wider">
+                <div className="text-[10px] font-mono text-[var(--signal-mid)] font-bold uppercase tracking-wider">
                   RECOGNIZES: {activeState.acceptingLabels.join(', ')}
                 </div>
               )}
@@ -261,32 +299,30 @@ export const SimulatorView: React.FC = () => {
           </div>
 
           {currentStep && (
-            <div className="text-[10px] font-mono text-[var(--ink-primary,#181A20)] bg-[var(--bg-tray,#E2E5EC)] p-2 rounded-[6px] border border-[rgba(0,0,0,0.06)] uppercase tracking-wider">
-              TRANSITION: <strong className="text-[var(--signal-cobalt,#1D55F5)] font-['Doto',monospace]">{currentStep.currentState}</strong> ──[<span className="text-[var(--signal-cobalt,#1D55F5)] font-bold">{currentStep.inputSymbol}</span>]──➔ <strong className="text-[var(--signal-cobalt,#1D55F5)] font-['Doto',monospace]">{currentStep.nextState}</strong>
+            <div className="text-[10px] font-mono text-[var(--ink-primary)] bg-[var(--bg-tray)] p-2 rounded-[6px] border border-[var(--border-subtle)] uppercase tracking-wider">
+              TRANSITION: <strong className="text-[var(--signal-mid)] font-mono tabular-nums">{currentStep.currentState}</strong> ──[<span className="text-[var(--signal-mid)] font-bold">{currentStep.inputSymbol}</span>]──➔ <strong className="text-[var(--signal-mid)] font-mono tabular-nums">{currentStep.nextState}</strong>
             </div>
           )}
-        </div>
+        </Card>
 
-        {/* Input Symbol Tape & Acceptance Outcome Card */}
-        <div className="p-3.5 bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] space-y-2.5">
-          <div className="text-[10px] uppercase font-bold text-[var(--ink-secondary,#525866)] tracking-wider">
+        <Card className="atlas-surface p-3.5 rounded-xl gap-2.5 shadow-none">
+          <div className="text-[10px] uppercase font-bold text-[var(--ink-secondary)] tracking-wider">
             INPUT SYMBOL TAPE (Σ*)
           </div>
 
-          {/* Discrete Mechanical Tape Cells */}
-          <div className="p-2.5 bg-[var(--bg-tray,#E2E5EC)] rounded-[8px] border border-[rgba(0,0,0,0.06)] flex items-center gap-1.5 overflow-x-auto min-h-[48px]">
+          <div className="p-2.5 bg-[var(--bg-viewport)] rounded-lg border border-[var(--border-subtle)] flex items-center gap-1.5 overflow-x-auto min-h-[48px]">
             {simulatorSymbols.map((sym, idx) => {
               const isConsumed = idx < simulatorStep;
               const isCurrent = idx === simulatorStep - 1;
               return (
                 <div
                   key={idx}
-                  className={`px-2.5 py-1.5 rounded-[4px] text-[10px] font-mono font-bold border transition-colors shrink-0 ${
+                  className={`px-2.5 py-1.5 rounded text-[10px] font-mono font-bold border transition-colors shrink-0 ${
                     isCurrent
-                      ? 'bg-[var(--signal-cobalt,#1D55F5)] border-[var(--signal-mid,#6892F6)] text-white shadow-none hud-reticle active'
+                      ? 'bg-primary border-[var(--signal-mid)] text-primary-foreground'
                       : isConsumed
-                        ? 'bg-[var(--bg-pill-neutral,#E6E9EF)] border-[rgba(0,0,0,0.08)] text-[var(--ink-muted,#8C93A0)]'
-                        : 'bg-[var(--bg-card,#F5F6F8)] border-[rgba(0,0,0,0.12)] text-[var(--ink-primary,#181A20)]'
+                        ? 'bg-[var(--bg-pill-neutral)] border-[var(--border-subtle)] text-[var(--ink-muted)]'
+                        : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--ink-primary)]'
                   }`}
                 >
                   {sym}
@@ -295,79 +331,72 @@ export const SimulatorView: React.FC = () => {
             })}
           </div>
 
-          {/* Outcome Badge at End of Tape */}
           {isFinalStep && (
-            <div
-              className={`p-3 rounded-[8px] border text-[11px] font-mono space-y-1 ${
-                simResult.accepted
-                  ? 'bg-[var(--bg-pill-active,#E0E8F9)] border-[var(--signal-mid,#6892F6)] text-[var(--signal-cobalt,#1D55F5)]'
-                  : 'bg-[var(--bg-pill-neutral,#E6E9EF)] border-[rgba(0,0,0,0.12)] text-[var(--ink-primary,#181A20)]'
-              }`}
-            >
-              <div className="font-bold flex items-center gap-1.5 text-xs uppercase tracking-wider">
-                <span>{simResult.accepted ? '✓ STRING ACCEPTED BY DFA' : '✕ STRING REJECTED'}</span>
-              </div>
-              <p className="text-[10px] leading-relaxed uppercase tracking-wider">
+            <Alert variant={simResult.accepted ? 'success' : 'warning'} className="p-3 font-mono text-[11px]">
+              <AlertTitle className="text-xs font-bold uppercase tracking-wider">
+                {simResult.accepted ? '✓ STRING ACCEPTED BY DFA' : '✕ STRING REJECTED'}
+              </AlertTitle>
+              <AlertDescription className="text-[10px] uppercase tracking-wider leading-relaxed">
                 {simResult.accepted
                   ? `Automaton halted in accepting state ${simResult.finalState}. Successfully recognized pattern: ${simResult.acceptingLabels.join(', ')}.`
                   : simResult.failureReason || `Halted in non-accepting state ${simResult.finalState}.`}
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
+        </Card>
       </div>
 
-      {/* Step Execution Trace Table — Recessed Matrix List */}
-      <div className="bg-[var(--bg-card,#F5F6F8)] border border-[rgba(0,0,0,0.08)] rounded-[12px] p-3.5 space-y-2 flex-1 flex flex-col">
-        <h4 className="text-[11px] font-bold text-[var(--ink-primary,#181A20)] uppercase tracking-wider">
+      {/* Step Execution Trace Table */}
+      <Card className="bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[12px] p-3.5 gap-2 flex-1 flex flex-col shadow-none">
+        <h4 className="text-[11px] font-bold text-[var(--ink-primary)] uppercase tracking-wider">
           Step-by-Step Simulation Trace Matrix ({simResult.steps.length} Steps)
         </h4>
-        <div className="flex-1 overflow-auto border border-[var(--bg-tray,#E2E5EC)] rounded-[8px] max-h-72 bg-[var(--bg-card,#F5F6F8)]">
-          <table className="w-full text-left text-xs border-collapse font-mono">
-            <thead className="bg-[var(--bg-tray,#E2E5EC)] text-[var(--ink-secondary,#525866)] uppercase text-[10px] sticky top-0 border-b border-[rgba(0,0,0,0.08)] font-semibold tracking-wider">
-              <tr>
-                <th className="p-2.5">STEP</th>
-                <th className="p-2.5">CURRENT STATE q</th>
-                <th className="p-2.5">SYMBOL a</th>
-                <th className="p-2.5">NEXT STATE δ(q, a)</th>
-                <th className="p-2.5">REMAINING TAPE</th>
-                <th className="p-2.5">ACCEPTING STATUS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--bg-tray,#E2E5EC)] text-[11px]">
+        <div className="flex-1 overflow-auto border border-[var(--border-subtle)] rounded-[8px] max-h-72 bg-[var(--bg-card)]">
+          <Table className="text-xs font-mono">
+            <TableHeader className="bg-[var(--bg-card-subtle)] sticky top-0 z-10">
+              <TableRow>
+                <TableHead className="p-2.5 uppercase text-[10px]">STEP</TableHead>
+                <TableHead className="p-2.5 uppercase text-[10px]">CURRENT STATE q</TableHead>
+                <TableHead className="p-2.5 uppercase text-[10px]">SYMBOL a</TableHead>
+                <TableHead className="p-2.5 uppercase text-[10px]">NEXT STATE δ(q, a)</TableHead>
+                <TableHead className="p-2.5 uppercase text-[10px]">REMAINING TAPE</TableHead>
+                <TableHead className="p-2.5 uppercase text-[10px]">ACCEPTING STATUS</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="text-[11px]">
               {simResult.steps.map((st, idx) => {
                 const isCurrentActive = idx + 1 === simulatorStep;
                 return (
-                  <tr
+                  <TableRow
                     key={idx}
                     onClick={() => { setSimulatorStep(idx + 1); setSimulatorIsPlaying(false); }}
-                    className={`cursor-pointer transition-colors ${
+                    className={`cursor-pointer ${
                       isCurrentActive
-                        ? 'bg-[var(--bg-pill-active,#E0E8F9)] text-[var(--signal-cobalt,#1D55F5)] font-bold'
-                        : 'hover:bg-[var(--bg-pill-neutral,#E6E9EF)] text-[var(--ink-primary,#181A20)]'
+                        ? 'bg-[var(--bg-pill-active)] text-[var(--signal-mid)] font-bold'
+                        : 'hover:bg-[var(--bg-pill-neutral)] text-[var(--ink-primary)]'
                     }`}
                   >
-                    <td className="p-2.5 text-[var(--ink-muted,#8C93A0)]">{st.step}</td>
-                    <td className="p-2.5 font-['Doto',monospace] font-bold text-[var(--signal-cobalt,#1D55F5)]">{st.currentState}</td>
-                    <td className="p-2.5 font-bold">{st.inputSymbol}</td>
-                    <td className="p-2.5 font-['Doto',monospace] font-bold text-[var(--signal-cobalt,#1D55F5)]">{st.nextState}</td>
-                    <td className="p-2.5 text-[var(--ink-muted,#8C93A0)] text-[10px]">{st.remainingSymbols.join(' ') || 'ε (EMPTY)'}</td>
-                    <td className="p-2.5">
+                    <TableCell className="p-2.5 text-[var(--ink-muted)]">{st.step}</TableCell>
+                    <TableCell className="p-2.5 font-mono tabular-nums font-bold text-[var(--signal-mid)]">{st.currentState}</TableCell>
+                    <TableCell className="p-2.5 font-bold">{st.inputSymbol}</TableCell>
+                    <TableCell className="p-2.5 font-mono tabular-nums font-bold text-[var(--signal-mid)]">{st.nextState}</TableCell>
+                    <TableCell className="p-2.5 text-[var(--ink-muted)] text-[10px]">{st.remainingSymbols.join(' ') || 'ε (EMPTY)'}</TableCell>
+                    <TableCell className="p-2.5">
                       {st.isAccepting ? (
-                        <span className="hud-reticle active px-1.5 py-0.2 rounded bg-[var(--signal-cobalt,#1D55F5)] text-white text-[9px] font-bold uppercase">
+                        <span className="px-1.5 py-0.2 rounded bg-primary text-primary-foreground text-[9px] font-bold uppercase">
                           ACCEPT ({st.acceptingLabels.join(', ')})
                         </span>
                       ) : (
-                        <span className="text-[var(--ink-muted,#8C93A0)] text-[10px] uppercase">NON-ACCEPTING</span>
+                        <span className="text-[var(--ink-muted)] text-[10px] uppercase">NON-ACCEPTING</span>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

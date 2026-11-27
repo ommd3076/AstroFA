@@ -158,9 +158,12 @@ describe('LIBRARY-01 and DETAIL-01: Constellation Explorer & Detail View Verific
   });
 
   describe('Visual Reference Source Code Fidelity Checks (Frame 6 & Frame 12)', () => {
-    it('enforces 12px radius bento cards matching Frame 6', () => {
+    it('renders Space UI Card components on semantic observatory surfaces', () => {
+      expect(explorerSource).toMatch(/components\/ui\/space\/card/);
+      expect(explorerSource).toMatch(/<Card/);
       expect(explorerSource).toMatch(/rounded-\[12px\]/);
-      expect(explorerSource).toMatch(/bento-card/);
+      expect(explorerSource).toMatch(/bg-\[var\(--bg-card\)\]/);
+      expect(explorerSource).toMatch(/border-\[var\(--border-subtle\)\]/);
     });
 
     it('provides Frame 6 filter pills: ALL, ZODIAC, SEASONAL, NORTHERN, SOUTHERN, FAVORITES', () => {
@@ -171,36 +174,49 @@ describe('LIBRARY-01 and DETAIL-01: Constellation Explorer & Detail View Verific
       expect(explorerSource).toMatch(/FAVORITES/);
     });
 
-    it('provides search input wrapped in HUD brackets with search icon', () => {
-      expect(explorerSource).toMatch(/hud-reticle/);
-      expect(explorerSource).toMatch(/SEARCH CONSTELLATIONS/);
+    it('provides accessible search input bound to the search filter query without HUD brackets', () => {
+      expect(explorerSource).toMatch(/aria-label="SEARCH CONSTELLATIONS"/);
+      expect(explorerSource).toMatch(/value=\{search\}/);
+      expect(explorerSource).toMatch(/setSearch\(/);
+      expect(explorerSource).not.toMatch(/hud-reticle/);
     });
 
     it('provides magnitude badge on catalog cards', () => {
       expect(explorerSource).toMatch(/MAG\s+/);
     });
 
-    it('provides full in-app detail view matching Frame 12 with back button', () => {
-      expect(explorerSource).toMatch(/CONSTELLATION DETAILS/);
+    it('provides full in-app detail view with heading and Back to catalog button', () => {
+      expect(explorerSource).toMatch(/selectedConstellation\.name/);
+      expect(explorerSource).toMatch(/Back to catalog/);
       expect(explorerSource).toMatch(/setSelectedConstellation\(null\)/);
     });
 
-    it('includes all Frame 12 modules: asterism diagram, notable stars table, seasonal visibility, sky preview, observing window, and observation summary', () => {
-      expect(explorerSource).toMatch(/CONSTELLATION DIAGRAM/);
-      expect(explorerSource).toMatch(/NOTABLE STARS/);
-      expect(explorerSource).toMatch(/SEASONAL VISIBILITY/);
-      expect(explorerSource).toMatch(/SKY PREVIEW/);
-      expect(explorerSource).toMatch(/BEST VIEWING MONTHS/);
-      expect(explorerSource).toMatch(/VISIBILITY THROUGH THE NIGHT/);
-      expect(explorerSource).toMatch(/OBSERVATION SUMMARY/);
-      expect(explorerSource).toMatch(/NEXT BEST WINDOW/);
-      expect(explorerSource).toMatch(/PEAK ALTITUDE/);
+    it('includes all detail modules under sentence-case headings with underlying data bindings', () => {
+      expect(explorerSource).toMatch(/Constellation diagram/);
+      expect(explorerSource).toMatch(/asterismDiagramData/);
+      expect(explorerSource).toMatch(/Notable stars/);
+      expect(explorerSource).toMatch(/selectedStars/);
+      expect(explorerSource).toMatch(/Seasonal visibility/);
+      expect(explorerSource).toMatch(/seasonalMatrix/);
+      expect(explorerSource).toMatch(/Sky preview/);
+      expect(explorerSource).toMatch(/Best viewing months/);
+      expect(explorerSource).toMatch(/bestMonths/);
+      expect(explorerSource).toMatch(/Visibility tonight/);
+      expect(explorerSource).toMatch(/nightVisibility\.peakAlt/);
+      expect(explorerSource).toMatch(/Observation summary/);
+      expect(explorerSource).toMatch(/visibilityCategory/);
+      expect(explorerSource).toMatch(/Next best window/);
+      expect(explorerSource).toMatch(/nightVisibility\.nextWindow/);
+      expect(explorerSource).toMatch(/Peak altitude/);
     });
 
-    it('wires OPEN IN SKY, START TRACE, and INSPECT AUTOMATON actions', () => {
-      expect(explorerSource).toMatch(/OPEN IN SKY/);
-      expect(explorerSource).toMatch(/START TRACE/);
-      expect(explorerSource).toMatch(/handleInspectAutomaton/);
+    it('wires Open in Sky, Start trace, and Inspect in Automata Lab controls to actual handlers', () => {
+      expect(explorerSource).toMatch(/Open in Sky/);
+      expect(explorerSource).toMatch(/handleFocusSky\(selectedConstellation\)/);
+      expect(explorerSource).toMatch(/Start trace/);
+      expect(explorerSource).toMatch(/handleStartTrace\(selectedConstellation\)/);
+      expect(explorerSource).toMatch(/Inspect in Automata Lab/);
+      expect(explorerSource).toMatch(/handleInspectAutomaton\(selectedConstellation\)/);
     });
 
     it('has zero motion jitter risks (no animate-in or transition-all on dimensions)', () => {

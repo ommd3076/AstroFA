@@ -1,6 +1,8 @@
 # Costellar: System Architecture
 
-Costellar is architected as a modular, purely client-side static web application designed for deployment to static hosting platforms such as Cloudflare Pages.
+Costellar uses a browser frontend with a same-origin Node service for curated trace recognition and live daily Sun/Moon data. Star catalog browsing, sky rendering, and photo pixel processing run in the browser. Backend endpoints, data flow, privacy notes, and startup requirements are described in [Backend contract and runbook](BACKEND.md).
+
+The frontend automata lab remains an educational TypeScript implementation. Confirmed trace recognition uses the C++ worker behind the Node API; do not read the older client-side recognition diagram below as the active confirmation path.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

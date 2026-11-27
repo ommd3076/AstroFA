@@ -131,9 +131,11 @@ describe('AUTOMATA-01: Automata Lab Hardware Instrument Panel & Frame 10 Visual 
       }
     });
 
-    it('contains ExportModal integration', () => {
+    it('integrates ExportModal via Space UI DialogTrigger labeled Export suite', () => {
+      expect(labSource).toContain('DialogTrigger');
+      expect(labSource).toContain('exportDialogHandle');
       expect(labSource).toContain('ExportModal');
-      expect(labSource).toContain('EXPORT SUITE');
+      expect(labSource).toContain('Export suite');
     });
 
     it('renders double ring for accepting states in AutomataInstrumentPanel', () => {
@@ -151,10 +153,10 @@ describe('AUTOMATA-01: Automata Lab Hardware Instrument Panel & Frame 10 Visual 
       expect(panelSource).toContain('M = (Q, Σ, δ, q₀, F)');
     });
 
-    it('uses monospace typography (IBM Plex Mono and Doto)', () => {
+    it('uses semantic monospace typography (IBM Plex Mono and font-mono tabular-nums)', () => {
       expect(panelSource).toContain('IBM Plex Mono');
-      expect(panelSource).toContain('Doto');
       expect(panelSource).toContain('font-mono');
+      expect(panelSource).toContain('tabular-nums');
     });
 
     it('narrowed transitions: no transition-all on interactive state buttons', () => {

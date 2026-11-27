@@ -11,6 +11,11 @@ import { computeEpsilonClosure } from '../../automata/epsilonClosure';
 import { simulateDfa } from '../../automata/simulate';
 import { computeProcrustesAlignment } from '../../geometry/similarity';
 import { normalizeGeometry } from '../../geometry/normalize';
+import { PageHeader } from '../../components/PageHeader';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
 
 export const AcademicWalkthrough: React.FC = () => {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('Cas_fwd');
@@ -61,103 +66,146 @@ export const AcademicWalkthrough: React.FC = () => {
   ];
 
   return (
-    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-mono p-2 sm:p-3 gap-2 overflow-y-auto" aria-label="Academic viva walkthrough">
-      {/* Top Header Bento Card */}
-      <div className="bento-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--signal-cobalt)]" />
-          <span className="telemetry-label text-xs">ACADEMIC VIVA · FORMAL WALKTHROUGH</span>
-          </div>
-          <p className="text-[11px] text-[var(--ink-secondary)] mt-1">
-            End-to-end mathematical theory of computation proof for college viva &amp; formal examination.
-          </p>
-        </div>
-
-        {/* Demonstration Target Selector wrapped in HUD Reticle */}
-        <div className="flex items-center gap-2">
-          <span className="telemetry-label text-[10px] text-[var(--ink-muted)]">TARGET:</span>
-          <div className="hud-reticle">
-            <select
+    <section className="w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans p-3 sm:p-4 gap-4 overflow-y-auto" aria-label="Academic viva walkthrough">
+      <PageHeader
+        eyebrow="Formal Proof · 11 Stages"
+        title="Academic viva walkthrough"
+        meta={`Stage ${String(activeStep).padStart(2, '0')} / 11 · ${pattern.name}`}
+        description="Step-by-step formal theory of computation and Procrustes geometry proof across all 11 pipeline stages."
+        actions={
+          <div className="flex items-center gap-2 shrink-0">
+            <label htmlFor="viva-target-select" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-muted)]">Target</label>
+            <Select
               value={selectedPatternId}
-              onChange={e => setSelectedPatternId(e.target.value)}
-              className="bg-[var(--bg-card-subtle)] border border-[var(--bg-tray)] rounded-[6px] px-3 py-1.5 text-xs text-[var(--signal-cobalt)] font-bold cursor-pointer font-mono uppercase focus:outline-none focus:border-[var(--signal-cobalt)]"
+              onValueChange={val => {
+                if (val) setSelectedPatternId(val);
+              }}
             >
-              {REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name.toUpperCase()} ({p.constellationId})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="viva-target-select" size="sm" aria-label="Choose walkthrough target constellation" className="w-auto min-w-[180px] text-xs font-mono font-semibold text-[var(--signal-mid)]">
+                <SelectValue>
+                  {val => {
+                    const found = REFERENCE_PATTERNS.find(p => p.id === val);
+                    return found ? `${found.name} (${found.constellationId})` : String(val);
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectPopup align="end">
+                {REFERENCE_PATTERNS.filter(p => p.traversalVariant === 'forward').map(p => (
+                  <SelectItem key={p.id} value={p.id} className="text-xs font-mono">
+                    {p.name} ({p.constellationId})
+                  </SelectItem>
+                ))}
+              </SelectPopup>
+            </Select>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Compact step selector keeps all eleven named stages available on short screens. */}
-      <nav className="bento-card p-3 flex flex-row items-center justify-between gap-3" aria-label="Walkthrough steps" style={{ flexDirection: 'row' }}>
-        <label className="flex min-w-0 flex-col gap-1 text-[10px] text-[var(--ink-muted)] uppercase tracking-wide">
+      {/* Mobile/compact stage switcher */}
+      <Card className="lg:hidden atlas-surface p-3 gap-2 flex flex-row flex-wrap items-center justify-between rounded-xl shadow-none" aria-label="Walkthrough steps">
+        <div className="flex min-w-0 flex-col gap-1 text-[10px] text-[var(--ink-muted)] font-mono uppercase tracking-wider">
           <span>Step {String(activeStep).padStart(2, '0')} of 11</span>
-          <select
-            value={activeStep}
-            onChange={event => setActiveStep(Number(event.target.value))}
-            className="max-w-full rounded-[6px] border border-[var(--bg-tray)] bg-[var(--bg-card-subtle)] px-3 py-2 text-xs font-semibold text-[var(--ink-primary)] focus:outline-none focus:border-[var(--signal-cobalt)]"
-            aria-label="Choose walkthrough step"
+          <Select
+            value={String(activeStep)}
+            onValueChange={val => {
+              if (val) setActiveStep(Number(val));
+            }}
           >
-            {stepsList.map(step => (
-              <option key={step.num} value={step.num}>
-                {String(step.num).padStart(2, '0')}. {step.title} — {step.subtitle}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="min-w-0 text-right">
-          <p className="truncate text-sm font-semibold text-[var(--signal-cobalt)]">{stepsList[activeStep - 1].title}</p>
-          <p className="truncate text-[10px] text-[var(--ink-muted)]">{stepsList[activeStep - 1].subtitle}</p>
+            <SelectTrigger size="sm" aria-label="Choose walkthrough step" className="w-auto max-w-full min-w-[260px] text-xs font-sans font-semibold text-[var(--ink-primary)]">
+              <SelectValue>
+                {val => {
+                  const st = stepsList.find(s => String(s.num) === String(val));
+                  return st ? `${String(st.num).padStart(2, '0')}. ${st.title} — ${st.subtitle}` : String(val);
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectPopup>
+              {stepsList.map(step => (
+                <SelectItem key={step.num} value={String(step.num)} className="text-xs font-sans">
+                  {String(step.num).padStart(2, '0')}. {step.title} — {step.subtitle}
+                </SelectItem>
+              ))}
+            </SelectPopup>
+          </Select>
         </div>
-      </nav>
+        <div className="min-w-0 text-right">
+          <p className="truncate text-sm font-semibold text-[var(--signal-mid)]">{stepsList[activeStep - 1].title}</p>
+          <p className="truncate text-xs text-[var(--ink-secondary)]">{stepsList[activeStep - 1].subtitle}</p>
+        </div>
+      </Card>
 
-      {/* Active Step Content Card */}
-      <div className="bento-card p-5 space-y-4">
+      {/* Two-pane Desktop Viva Reader: Sticky 1..11 Stage Index Left, Focused Stage Proof Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 items-start flex-1 min-h-0">
+        <nav aria-label="Walkthrough stages" className="hidden lg:flex flex-col gap-1 atlas-surface rounded-xl p-2.5 sticky top-0">
+          {stepsList.map(step => {
+            const isActive = step.num === activeStep;
+            return (
+              <Button
+                key={step.num}
+                variant={isActive ? 'secondary' : 'ghost'}
+                onClick={() => setActiveStep(step.num)}
+                aria-current={isActive ? 'step' : undefined}
+                className={`h-auto w-full justify-start px-2.5 py-2 rounded-lg text-left border font-normal gap-2.5 ${
+                  isActive
+                    ? 'bg-[var(--bg-pill-active)] border-[var(--signal-surface)] text-[var(--ink-primary)]'
+                    : 'border-transparent text-[var(--ink-secondary)] hover:bg-[var(--bg-card-subtle)]'
+                }`}
+              >
+                <span className={`font-mono text-[10px] font-semibold tabular-nums shrink-0 ${
+                  isActive ? 'text-[var(--signal-mid)]' : 'text-[var(--ink-muted)]'
+                }`}>
+                  {String(step.num).padStart(2, '0')}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs font-semibold">{step.title}</span>
+                  <span className="block truncate text-[10px] text-[var(--ink-muted)]">{step.subtitle}</span>
+                </span>
+              </Button>
+            );
+          })}
+        </nav>
+
+        {/* Active Step Content Card */}
+        <Card className="atlas-surface p-5 sm:p-6 gap-4 rounded-xl shadow-none">
         {/* Step 1: Input Star Pattern */}
         {activeStep === 1 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 01 // ASTRONOMICAL INPUT CATALOG</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                INPUT STAR CATALOG COORDINATES // {pattern.name.toUpperCase()}
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 01 · Astronomical input catalog</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Input star catalog coordinates · {pattern.name}
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               Astronomical star positions are extracted from the HYG database by Harvard Revised / Yale Bright Star (HR) identifiers.
-              Here is the genuine sequence of celestial catalog coordinates (J2000 Right Ascension &amp; Declination) for {pattern.constellationId}:
+              Sequence of celestial catalog coordinates (J2000 Right Ascension &amp; Declination) for {pattern.constellationId}:
             </p>
 
-            {/* Recessed Matrix List */}
-            <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse font-mono">
-                <thead className="bg-[var(--bg-tray)] text-[var(--ink-muted)] uppercase text-[10px] tracking-wider border-b border-[var(--bg-tray)]">
-                  <tr>
-                    <th className="p-2.5">NODE #</th>
-                    <th className="p-2.5">STAR NAME</th>
-                    <th className="p-2.5">HR IDENTIFIER</th>
-                    <th className="p-2.5">RA (DEGREES)</th>
-                    <th className="p-2.5">DEC (DEGREES)</th>
-                    <th className="p-2.5">MAGNITUDE</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--bg-tray)] text-[11px]">
+            <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-[8px] overflow-x-auto">
+              <Table className="text-xs font-mono tabular-nums">
+                <TableHeader className="bg-[var(--bg-tray)]">
+                  <TableRow>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Node #</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Star name</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">HR ID</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">RA (deg)</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Dec (deg)</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Mag</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="text-[11px]">
                   {starObjects.map((s, idx) => (
-                    <tr key={idx} className="hover:bg-[var(--bg-card)] transition-colors">
-                      <td className="p-2.5 font-dot text-[var(--signal-cobalt)] font-bold">{idx + 1}</td>
-                      <td className="p-2.5 font-bold text-[var(--ink-primary)]">{s.proper || s.name}</td>
-                      <td className="p-2.5 text-[var(--ink-muted)]">{s.hr}</td>
-                      <td className="p-2.5 font-dot text-[var(--ink-secondary)]">{s.ra.toFixed(4)}°</td>
-                      <td className="p-2.5 font-dot text-[var(--ink-secondary)]">{s.dec.toFixed(4)}°</td>
-                      <td className="p-2.5 font-dot text-[var(--signal-cobalt)] font-bold">{s.mag.toFixed(2)}</td>
-                    </tr>
+                    <TableRow key={idx}>
+                      <TableCell className="p-2.5 text-[var(--signal-mid)] font-semibold">{idx + 1}</TableCell>
+                      <TableCell className="p-2.5 font-sans font-semibold text-[var(--ink-primary)]">{s.proper || s.name}</TableCell>
+                      <TableCell className="p-2.5 text-[var(--ink-muted)]">{s.hr}</TableCell>
+                      <TableCell className="p-2.5 text-[var(--ink-secondary)]">{s.ra.toFixed(4)}°</TableCell>
+                      <TableCell className="p-2.5 text-[var(--ink-secondary)]">{s.dec.toFixed(4)}°</TableCell>
+                      <TableCell className="p-2.5 text-[var(--signal-mid)] font-semibold">{s.mag.toFixed(2)}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}
@@ -166,35 +214,33 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 2 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 02 // INVARIANT TRANSFORMATION</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                NORMALIZED GEOMETRIC REPRESENTATION // P' = (P - c) / σ
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 02 · Invariant transformation</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Normalized geometric representation · P' = (P − c) / σ
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-              To achieve mathematical invariance against camera zoom, viewport scale, and translation across the sky,
+              To achieve invariance against camera zoom, viewport scale, and translation across the sky,
               the centroid is subtracted and points are scaled to unit root-mean-square (RMS) radius.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] space-y-1">
-                <span className="telemetry-label text-[10px] block">COMPUTED CENTROID VECTOR c</span>
-                <div className="telemetry-kpi pt-1">
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] space-y-1">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">Computed centroid vector c</span>
+                <div className="text-lg font-semibold tabular-nums text-[var(--ink-primary)] pt-1">
                   ({normalized.centroid.x.toFixed(3)}, {normalized.centroid.y.toFixed(3)})
-                  <sup>COORD</sup>
                 </div>
-                <div className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider pt-2">
-                  TRANSLATION INVARIANT: P' = P - c
+                <div className="text-[11px] text-[var(--ink-muted)] pt-2">
+                  Translation invariant: P' = P − c
                 </div>
               </div>
 
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] space-y-1">
-                <span className="telemetry-label text-[10px] block">RMS SCALE FACTOR σ</span>
-                <div className="telemetry-kpi pt-1">
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] space-y-1">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">RMS scale factor σ</span>
+                <div className="text-lg font-semibold tabular-nums text-[var(--signal-mid)] pt-1">
                   {normalized.scale.toFixed(4)}
-                  <sup>RMS</sup>
                 </div>
-                <div className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider pt-2">
-                  SCALE INVARIANT: P_NORM = P' / σ
+                <div className="text-[11px] text-[var(--ink-muted)] pt-2">
+                  Scale invariant: P_norm = P' / σ
                 </div>
               </div>
             </div>
@@ -205,28 +251,28 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 3 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 03 // SYMBOLIC QUANTIZATION</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                ENCODED INPUT STRING // ALPHABET w ∈ Σ*
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 03 · Symbolic quantization</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Encoded input string · Alphabet w ∈ Σ*
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               Each interior vertex produces an invariant turning angle θ (via cross/dot products) and an edge length ratio r = |E_&#123;i+1&#125;| / |E_i|.
               These continuous quantities are quantized into discrete symbols:
             </p>
-            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] space-y-3 font-mono text-xs">
+            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] space-y-3 font-mono text-xs">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <span className="telemetry-label text-[11px]">RESULTING SYMBOLIC WORD w =</span>
-                <div className="flex flex-wrap gap-1">
+                <span className="text-[11px] text-[var(--ink-secondary)]">Word w =</span>
+                <div className="flex flex-wrap gap-1.5">
                   {encodedSymbols.map((sym, idx) => (
-                    <span key={idx} className="hud-reticle px-2.5 py-1 bg-[var(--bg-card)] border border-[var(--card-border-subtle)] rounded-[4px] text-[var(--signal-cobalt)] font-bold font-mono text-xs">
+                    <span key={idx} className="px-2.5 py-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[5px] text-[var(--signal-mid)] font-semibold font-mono text-xs">
                       {sym}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="text-[11px] text-[var(--ink-muted)] border-t border-[var(--bg-tray)] pt-2 uppercase">
-                FEATURE TRANSITIONS COUNT: <strong className="font-dot text-[var(--signal-cobalt)]">{encodedSymbols.length}</strong> (FROM {pattern.orderedStarIds.length} STARS)
+              <div className="text-[11px] text-[var(--ink-muted)] border-t border-[var(--border-subtle)] pt-2">
+                Feature transitions: <strong className="text-[var(--signal-mid)]">{encodedSymbols.length}</strong> (from {pattern.orderedStarIds.length} stars)
               </div>
             </div>
           </div>
@@ -236,35 +282,26 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 4 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 04 // NON-DETERMINISTIC FINITE AUTOMATON</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                BRANCHING ε-NFA MACHINE ASSEMBLY // M_NFA
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 04 · Non-deterministic finite automaton</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Branching ε-NFA machine assembly · M_NFA
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               An ε-NFA is assembled with a shared master initial state q₀ branching to each pattern's start state via ε-transitions.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">TOTAL NFA STATES |Q_NFA|</span>
-                <div className="telemetry-kpi pt-1">
-                  {NFA_MACHINE.states.length}
-                  <sup>STATES</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">NFA states |Q_NFA|</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--ink-primary)] pt-1">{NFA_MACHINE.states.length}</div>
               </div>
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">TOTAL TRANSITIONS |δ_NFA|</span>
-                <div className="telemetry-kpi pt-1">
-                  {NFA_MACHINE.transitions.length}
-                  <sup>EDGES</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">Transitions |δ_NFA|</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--ink-primary)] pt-1">{NFA_MACHINE.transitions.length}</div>
               </div>
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">ε-TRANSITIONS COUNT</span>
-                <div className="telemetry-kpi pt-1">
-                  {NFA_MACHINE.transitions.filter(t => t.symbol === 'ε').length}
-                  <sup>EPSILON</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">ε-transitions</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--signal-mid)] pt-1">{NFA_MACHINE.transitions.filter(t => t.symbol === 'ε').length}</div>
               </div>
             </div>
           </div>
@@ -274,21 +311,21 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 5 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 05 // INITIAL CLOSURE</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                ε-CLOSURE COMPUTATION // ε-closure(q₀) = D₀
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 05 · Initial closure</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                ε-closure computation · ε-closure(q₀) = D₀
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               Computing ε-closure(q₀) finds all states reachable before any input symbol is consumed.
               This closure forms initial state D₀ of the DFA:
             </p>
-            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] font-mono text-xs space-y-2">
-              <div className="font-bold text-[var(--signal-cobalt)] font-dot text-sm">
-                ε-CLOSURE(q₀) = &#123; {q0Closure.join(', ')} &#125;
+            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] font-mono text-xs space-y-2">
+              <div className="font-semibold text-[var(--signal-mid)] text-sm break-words">
+                ε-closure(q₀) = &#123; {q0Closure.join(', ')} &#125;
               </div>
-              <div className="text-[11px] text-[var(--ink-muted)] border-t border-[var(--bg-tray)] pt-2 uppercase">
-                INITIAL SUBSET CARDINALITY: <strong className="font-dot text-[var(--ink-primary)]">{q0Closure.length} STATES</strong>
+              <div className="text-[11px] text-[var(--ink-muted)] border-t border-[var(--border-subtle)] pt-2">
+                Initial subset cardinality: <strong className="text-[var(--ink-primary)] tabular-nums">{q0Closure.length} states</strong>
               </div>
             </div>
           </div>
@@ -298,29 +335,23 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 6 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 06 // DETERMINIZATION</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                SUBSET (POWERSET) CONSTRUCTION // NFA &rarr; DFA
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 06 · Determinization</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Subset (powerset) construction · NFA → DFA
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               Powerset construction computes D_next = ε-closure(Move(D_current, symbol)) for each symbol in Σ.
               This converts the {NFA_MACHINE.states.length}-state NFA into a deterministic state machine with {DFA_MACHINE.states.length} DFA states.
             </p>
             <div className="grid grid-cols-2 gap-3 font-mono text-xs">
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">TOTAL DFA STATES |Q_DFA|</span>
-                <div className="telemetry-kpi pt-1">
-                  {DFA_MACHINE.states.length}
-                  <sup>STATES</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">DFA states |Q_DFA|</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--ink-primary)] pt-1">{DFA_MACHINE.states.length}</div>
               </div>
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">ACCEPTING STATES |F_DFA|</span>
-                <div className="telemetry-kpi pt-1">
-                  {DFA_MACHINE.acceptingStates.length}
-                  <sup>ACCEPT</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">Accepting states |F_DFA|</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--signal-mid)] pt-1">{DFA_MACHINE.acceptingStates.length}</div>
               </div>
             </div>
           </div>
@@ -330,21 +361,20 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 7 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 07 // TRANSITION FUNCTION</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                ORIGINAL DFA TRANSITION TABLE // δ : Q &times; Σ &rarr; Q
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 07 · Transition function</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Original DFA transition table · δ : Q × Σ → Q
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
-              Complete transition function δ : Q &times; Σ &rarr; Q. Dead/trap state added to guarantee total function completeness.
+              Complete transition function δ : Q × Σ → Q. Dead/trap state added to guarantee total function completeness.
             </p>
-            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] font-mono text-xs">
-              <div className="telemetry-kpi">
-                {DFA_MACHINE.states.length} &times; {DFA_MACHINE.alphabet.length}
-                <sup>MATRIX</sup>
+            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] font-mono text-xs">
+              <div className="text-xl font-semibold tabular-nums text-[var(--signal-mid)]">
+                {DFA_MACHINE.states.length} × {DFA_MACHINE.alphabet.length} matrix
               </div>
-              <div className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider pt-2">
-                TOTAL FUNCTION MATRIX: {DFA_MACHINE.states.length} STATES &times; {DFA_MACHINE.alphabet.length} SYMBOLS
+              <div className="text-[11px] text-[var(--ink-muted)] pt-2">
+                {DFA_MACHINE.states.length} states × {DFA_MACHINE.alphabet.length} symbols
               </div>
             </div>
           </div>
@@ -354,35 +384,26 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 8 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 08 // HOPCROFT PARTITION REFINEMENT</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                DFA MINIMIZATION // EQUIVALENCE PARTITIONING
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 08 · Hopcroft partition refinement</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                DFA minimization · Equivalence partitioning
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               Redundant equivalent states are merged while strictly preserving distinct accepting constellation labels.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">ORIGINAL DFA STATES</span>
-                <div className="telemetry-kpi pt-1">
-                  {MINIMIZATION_RESULT.originalStateCount}
-                  <sup>INITIAL</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">Original DFA states</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--ink-primary)] pt-1">{MINIMIZATION_RESULT.originalStateCount}</div>
               </div>
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">MINIMIZED DFA STATES</span>
-                <div className="telemetry-kpi pt-1 text-[var(--signal-cobalt)]">
-                  {MINIMIZATION_RESULT.minimizedStateCount}
-                  <sup>OPTIMAL</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">Minimized DFA states</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--signal-mid)] pt-1">{MINIMIZATION_RESULT.minimizedStateCount}</div>
               </div>
-              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)]">
-                <span className="telemetry-label text-[10px] block">STATES COMPACTED</span>
-                <div className="telemetry-kpi pt-1">
-                  {MINIMIZATION_RESULT.originalStateCount - MINIMIZATION_RESULT.minimizedStateCount}
-                  <sup>MERGED</sup>
-                </div>
+              <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)] block">States merged</span>
+                <div className="text-xl font-semibold tabular-nums text-[var(--ink-primary)] pt-1">{MINIMIZATION_RESULT.originalStateCount - MINIMIZATION_RESULT.minimizedStateCount}</div>
               </div>
             </div>
           </div>
@@ -392,47 +413,46 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 9 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 09 // SIMULATION TRACE</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                STEP-BY-STEP STRING TRAVERSAL ON MINIMIZED DFA
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 09 · Simulation trace</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Step-by-step string traversal on minimized DFA
+              </h2>
             </div>
-            {/* Recessed Matrix List */}
-            <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--card-border-subtle)] rounded-[8px] overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse font-mono">
-                <thead className="bg-[var(--bg-tray)] text-[var(--ink-muted)] uppercase text-[10px] tracking-wider border-b border-[var(--bg-tray)]">
-                  <tr>
-                    <th className="p-2.5">STEP</th>
-                    <th className="p-2.5">CURRENT STATE (Q)</th>
-                    <th className="p-2.5">CONSUMED SYMBOL (Σ)</th>
-                    <th className="p-2.5">NEXT STATE (Q')</th>
-                    <th className="p-2.5">ACCEPTING STATUS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--bg-tray)] text-[11px]">
+            <div className="p-2 bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] rounded-[8px] overflow-x-auto">
+              <Table className="text-xs font-mono tabular-nums">
+                <TableHeader className="bg-[var(--bg-tray)]">
+                  <TableRow>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Step</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Current (Q)</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Symbol (Σ)</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Next (Q')</TableHead>
+                    <TableHead className="p-2.5 text-[10px] uppercase">Accepting</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="text-[11px]">
                   {sim.steps.map((st, idx) => (
-                    <tr key={idx} className="hover:bg-[var(--bg-card)] transition-colors">
-                      <td className="p-2.5 font-dot text-[var(--signal-cobalt)] font-bold">{st.step}</td>
-                      <td className="p-2.5 font-dot text-[var(--ink-primary)] font-semibold">{st.currentState}</td>
-                      <td className="p-2.5">
-                        <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-neutral)] text-[var(--signal-cobalt)] font-bold text-[10px]">
+                    <TableRow key={idx}>
+                      <TableCell className="p-2.5 text-[var(--signal-mid)] font-semibold">{st.step}</TableCell>
+                      <TableCell className="p-2.5 text-[var(--ink-primary)] font-semibold">{st.currentState}</TableCell>
+                      <TableCell className="p-2.5">
+                        <span className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[4px] text-[var(--signal-mid)] font-semibold text-[10px]">
                           {st.inputSymbol}
                         </span>
-                      </td>
-                      <td className="p-2.5 font-dot text-[var(--ink-secondary)] font-semibold">{st.nextState}</td>
-                      <td className="p-2.5">
+                      </TableCell>
+                      <TableCell className="p-2.5 text-[var(--ink-secondary)] font-semibold">{st.nextState}</TableCell>
+                      <TableCell className="p-2.5">
                         {st.isAccepting ? (
-                          <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] font-bold text-[10px] uppercase font-dot">
+                          <span className="px-2 py-0.5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] rounded-[4px] text-[var(--signal-mid)] font-semibold text-[10px]">
                             YES ({st.acceptingLabels.join(', ')})
                           </span>
                         ) : (
-                          <span className="text-[var(--ink-muted)] uppercase text-[10px]">NO</span>
+                          <span className="text-[var(--ink-muted)] text-[10px]">NO</span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}
@@ -441,18 +461,18 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 10 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 10 // FORMAL ACCEPTANCE</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                ACCEPTED STATE &amp; CONSTELLATION IDENTIFICATION
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 10 · Formal acceptance</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Accepted state &amp; constellation identification
+              </h2>
             </div>
-            <div className="hud-reticle-4corner p-5 bg-[var(--bg-pill-active)] border border-[var(--signal-cobalt)] rounded-[8px] space-y-2.5">
-              <div className="font-dot text-lg font-bold text-[var(--signal-cobalt)] flex items-center gap-2">
-                <span>[ ✓ FINAL STATE {sim.finalState} &isin; F ]</span>
+            <div className="p-5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] rounded-[8px] space-y-2.5">
+              <div className="font-mono text-base font-semibold text-[var(--signal-mid)] flex items-center gap-2">
+                <span>✓ Final state {sim.finalState} ∈ F</span>
               </div>
               <p className="text-xs text-[var(--ink-primary)] leading-relaxed">
-                Automaton successfully halted with an empty tape in formal accepting state <strong className="font-dot text-[var(--signal-cobalt)] font-bold">{sim.finalState}</strong>.
-                Recognized constellation identity: <strong className="font-dot text-[var(--signal-cobalt)] font-bold">{sim.acceptingLabels.join(', ')}</strong>.
+                Automaton halted with an empty tape in formal accepting state <strong className="font-mono text-[var(--signal-mid)] font-semibold">{sim.finalState}</strong>.
+                Recognized constellation identity: <strong className="font-mono text-[var(--signal-mid)] font-semibold">{sim.acceptingLabels.join(', ')}</strong>.
               </p>
             </div>
           </div>
@@ -462,27 +482,27 @@ export const AcademicWalkthrough: React.FC = () => {
         {activeStep === 11 && (
           <div className="space-y-3.5">
             <div>
-              <span className="telemetry-label text-[10px] block text-[var(--ink-muted)]">STAGE 11 // 2D PROCRUSTES ALIGNMENT</span>
-              <h3 className="font-dot text-lg font-bold text-[var(--signal-cobalt)] tracking-wider">
-                GEOMETRIC SIMILARITY VERIFICATION (LAYER 2)
-              </h3>
+              <span className="font-mono text-[10px] uppercase tracking-wider block text-[var(--ink-muted)]">Stage 11 · 2D Procrustes alignment</span>
+              <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] mt-0.5">
+                Geometric similarity verification (Layer 2)
+              </h2>
             </div>
             <p className="text-xs text-[var(--ink-secondary)] leading-relaxed">
               To avoid false positives from distinct celestial shapes sharing identical quantized turn sequences, 2D Procrustes Analysis
               (Kabsch algorithm) computes the optimal rotation and Root Mean Square Error (RMSE).
             </p>
-            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--card-border-subtle)] space-y-2.5 font-mono text-xs">
+            <div className="p-4 bg-[var(--bg-card-subtle)] rounded-[8px] border border-[var(--border-subtle)] space-y-2.5 font-mono text-xs">
               <div className="flex justify-between items-center">
-                <span className="telemetry-label text-[10px]">GEOMETRIC RESIDUAL (RMSE):</span>
-                <span className="font-dot text-sm text-[var(--signal-cobalt)] font-bold">{procrustes.residual} (TOLERANCE &le; 0.32)</span>
+                <span className="text-[10px] uppercase text-[var(--ink-muted)]">Geometric residual (RMSE)</span>
+                <span className="text-sm tabular-nums text-[var(--signal-mid)] font-semibold">{procrustes.residual} (tolerance &le; 0.32)</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="telemetry-label text-[10px]">OPTIMAL ROTATION θ_OPT:</span>
-                <span className="font-dot text-sm text-[var(--ink-primary)] font-bold">{procrustes.rotationDeg}°</span>
+                <span className="text-[10px] uppercase text-[var(--ink-muted)]">Optimal rotation θ_opt</span>
+                <span className="text-sm tabular-nums text-[var(--ink-primary)] font-semibold">{procrustes.rotationDeg}°</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-[var(--bg-tray)]">
-                <span className="telemetry-label text-[10px]">FINAL VERIFICATION STATUS:</span>
-                <span className="hud-reticle px-2 py-0.5 bg-[var(--bg-pill-active)] text-[var(--signal-cobalt)] font-bold text-[10px] uppercase font-dot">
+              <div className="flex justify-between items-center pt-2 border-t border-[var(--border-subtle)]">
+                <span className="text-[10px] uppercase text-[var(--ink-muted)]">Verification status</span>
+                <span className="px-2 py-0.5 bg-[var(--bg-pill-active)] border border-[var(--signal-surface)] rounded-[4px] text-[var(--signal-mid)] font-semibold text-[10px]">
                   VERIFIED ASTRONOMICAL ASTERISM
                 </span>
               </div>
@@ -490,23 +510,28 @@ export const AcademicWalkthrough: React.FC = () => {
           </div>
         )}
 
-        {/* Hardware Step Navigation Buttons */}
-        <div className="flex justify-between pt-4 border-t border-[var(--card-border-subtle)]">
-          <button
+        {/* Step Navigation Buttons */}
+        <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)]">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setActiveStep(prev => Math.max(1, prev - 1))}
             disabled={activeStep === 1}
-            className="tactile-pill bg-[var(--bg-pill-neutral)] hover:bg-[var(--bg-pill-active)] disabled:opacity-30 text-[var(--ink-primary)] border border-[var(--bg-tray)] text-xs py-2 px-4 font-bold uppercase tracking-wider cursor-pointer"
+            className="text-xs font-semibold"
           >
-            ◀ PREVIOUS STEP
-          </button>
-          <button
+            ← Previous step
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
             onClick={() => setActiveStep(prev => Math.min(11, prev + 1))}
             disabled={activeStep === 11}
-            className="tactile-pill hud-reticle bg-[var(--signal-cobalt)] hover:bg-[var(--signal-mid)] disabled:opacity-30 text-white border border-[var(--signal-mid)] text-xs py-2 px-4 font-bold uppercase tracking-wider cursor-pointer"
+            className="text-xs font-semibold"
           >
-            NEXT STEP ▶
-          </button>
+            Next step →
+          </Button>
         </div>
+      </Card>
       </div>
     </section>
   );
