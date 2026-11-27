@@ -1,0 +1,159 @@
+/* BoardUI utilities used only by the scoped Costellar atlas surfaces. */
+@theme inline {
+  --color-button-primary: var(--bui-button-primary);
+  --color-button-danger: var(--bui-button-danger);
+  --color-button-primary-disabled-foreground: var(--bui-muted);
+  --color-foreground-disabled-danger: var(--bui-muted);
+  --color-text-white: var(--bui-ink-on-accent);
+  --color-text-primary: var(--bui-ink-primary);
+  --color-text-secondary: var(--bui-ink-secondary);
+  --color-text-tertiary: var(--bui-ink-muted);
+  --color-background-primary-default: var(--bui-surface);
+  --color-background-primary-hover: var(--bui-surface-hover);
+  --color-background-primary-active: var(--bui-surface-active);
+  --color-background-primary-disabled: var(--bui-surface);
+  --color-background-secondary-default: var(--bui-surface-subtle);
+  --color-background-tertiary-default: var(--bui-surface-subtle);
+  --color-border-button-default: var(--bui-border);
+  --color-border-button-hover: var(--bui-border-strong);
+  --color-border-button-active: var(--bui-border-strong);
+  --color-border-button-group: var(--bui-border);
+  --color-border-focus-ring: var(--signal-mid);
+  --color-button-ghost-background: var(--bui-ghost);
+  --color-button-ghost-foreground: var(--signal-mid);
+  --color-button-ghost-hover: var(--bui-ghost-hover);
+  --color-button-ghost-active: var(--bui-ghost-active);
+  --color-button-ghost-disabled: transparent;
+  --color-button-ghost-disabled-foreground: var(--bui-ink-muted);
+  --color-status-blue-background: var(--bui-status-blue-bg);
+  --color-status-blue-text: var(--bui-status-blue-ink);
+  --color-status-rose-background: var(--bui-status-rose-bg);
+  --color-status-rose-text: var(--bui-status-rose-ink);
+  --color-status-yellow-background: var(--bui-status-yellow-bg);
+  --color-status-yellow-text: var(--bui-status-yellow-ink);
+  --color-separator-border: var(--bui-border);
+  --text-body-medium: 0.875rem;
+  --text-body-medium--line-height: 1.25rem;
+  --text-body-medium--font-weight: 500;
+  --text-body-regular: 0.875rem;
+  --text-body-regular--line-height: 1.25rem;
+  --text-body-regular--font-weight: 400;
+  --text-caption-1-semibold: 0.75rem;
+  --text-caption-1-semibold--line-height: 1rem;
+  --text-caption-1-semibold--font-weight: 600;
+  --text-caption-1-medium: 0.75rem;
+  --text-caption-1-medium--line-height: 1rem;
+  --text-caption-1-medium--font-weight: 500;
+  --radius-2lg: 10px;
+}
+
+.boardui-surface {
+  --bui-button-primary: #8fa3ff;
+  --bui-button-danger: #d94a55;
+  --bui-gradient-button-primary-default: linear-gradient(180deg, #a8b8ff 0%, #8fa3ff 100%);
+  --bui-gradient-button-primary-hover: linear-gradient(180deg, #bfcbff 0%, #a8b8ff 100%);
+  --bui-gradient-button-primary-active: linear-gradient(180deg, #8fa3ff 0%, #788eef 100%);
+  --bui-gradient-button-primary-disabled: linear-gradient(180deg, #444755 0%, #343641 100%);
+  --bui-gradient-button-danger-default: linear-gradient(180deg, #ef737b 0%, #d94a55 100%);
+  --bui-ink-on-accent: #0b0b10;
+  --bui-ink-primary: #f3f1eb;
+  --bui-ink-secondary: #c0bec5;
+  --bui-ink-muted: #94939b;
+  --bui-surface: #151519;
+  --bui-surface-hover: #202027;
+  --bui-surface-active: #26262f;
+  --bui-surface-subtle: #1b1b20;
+  --bui-border: rgb(243 241 235 / 12%);
+  --bui-border-strong: rgb(168 184 255 / 38%);
+  --bui-ghost: rgb(143 163 255 / 12%);
+  --bui-ghost-hover: rgb(143 163 255 / 20%);
+  --bui-ghost-active: rgb(143 163 255 / 26%);
+  --bui-status-blue-bg: rgb(143 163 255 / 18%);
+  --bui-status-blue-ink: #c3ceff;
+  --bui-status-rose-bg: rgb(229 72 77 / 16%);
+  --bui-status-rose-ink: #ff9a9e;
+  --bui-status-yellow-bg: rgb(229 169 59 / 18%);
+  --bui-status-yellow-ink: #f3ca7a;
+  font-family: var(--font-sans);
+}
+
+.boardui-surface .button-press-motion {
+  transition: filter 140ms ease, transform 140ms ease;
+}
+
+.boardui-surface .button-press-motion:active {
+  transform: translateY(1px);
+}
+
+.boardui-surface .bg-button-primary {
+  background-image: var(--bui-gradient-button-primary-default);
+}
+
+.boardui-surface .bg-button-primary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-image: var(--bui-gradient-button-primary-hover);
+}
+
+.boardui-surface .bg-button-primary:active:not(:disabled):not([aria-disabled="true"]) {
+  background-image: var(--bui-gradient-button-primary-active);
+}
+
+.boardui-surface .bg-button-primary:disabled,
+.boardui-surface .bg-button-primary[aria-disabled="true"] {
+  background-image: var(--bui-gradient-button-primary-disabled);
+}
+
+.boardui-surface .bg-button-danger {
+  background-image: var(--bui-gradient-button-danger-default);
+}
+
+.boardui-surface .bui-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+}
+
+.boardui-surface .bui-table th {
+  padding: 0.5rem 0.625rem;
+  background: var(--bui-surface-subtle);
+  border-block: 1px solid var(--bui-border);
+  color: var(--bui-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.boardui-surface .bui-table td {
+  padding: 0.5rem 0.625rem;
+  color: var(--bui-ink-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+}
+
+.boardui-surface .bui-table tbody tr:not(:last-child) {
+  border-bottom: 1px solid var(--bui-border);
+}
+
+.boardui-surface .bui-table tbody tr {
+  transition: background-color 150ms ease;
+  cursor: pointer;
+}
+
+.boardui-surface .bui-table tbody tr:hover,
+.boardui-surface .bui-table tbody tr[data-focus-visible] {
+  background: var(--bui-ghost);
+}
+
+.boardui-surface .bui-table.bui-table-sm th,
+.boardui-surface .bui-table.bui-table-sm td {
+  padding-block: 0.375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boardui-surface .button-press-motion,
+  .boardui-surface .bui-table tbody tr {
+    transition: none;
+  }
+}
