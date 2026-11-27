@@ -14,6 +14,9 @@ import {
 import type { Star } from '../types/astronomy';
 import { Button } from './ui/space/button';
 import { Card } from './ui/space/card';
+import { Button as BoardButton } from './ui/board/base/buttons/button';
+import { Chip } from './ui/board/base/badges/chip';
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from './ui/board/base/table/table';
 
 // Map 3-letter Bayer abbreviations to Greek characters
 const BAYER_GREEK: Record<string, string> = {
@@ -48,7 +51,7 @@ export const StarInspector: React.FC = () => {
 
   const [isDismissed, setIsDismissed] = useState(false);
 
-  const activeConstellationId = focusedConstellationId || (selectedStarId ? null : 'ORI');
+  const activeConstellationId = focusedConstellationId || (selectedStarId ? null : 'Ori');
   const currentConstellation = activeConstellationId ? CONSTELLATION_BY_ID.get(activeConstellationId) || null : null;
 
   const selectedStar: Star | null = selectedStarId !== null ? STAR_BY_ID.get(selectedStarId) || null : null;
@@ -96,7 +99,7 @@ export const StarInspector: React.FC = () => {
   }, [currentConstellation, observer, observationDate]);
 
   const handlePrevConstellation = () => {
-    const curId = currentConstellation?.id || 'ORI';
+    const curId = currentConstellation?.id || 'Ori';
     const idx = CONSTELLATIONS.findIndex(c => c.id === curId);
     const prevIdx = (idx - 1 + CONSTELLATIONS.length) % CONSTELLATIONS.length;
     setSelectedStarId(null);
@@ -104,7 +107,7 @@ export const StarInspector: React.FC = () => {
   };
 
   const handleNextConstellation = () => {
-    const curId = currentConstellation?.id || 'ORI';
+    const curId = currentConstellation?.id || 'Ori';
     const idx = CONSTELLATIONS.findIndex(c => c.id === curId);
     const nextIdx = (idx + 1) % CONSTELLATIONS.length;
     setSelectedStarId(null);
@@ -146,7 +149,7 @@ export const StarInspector: React.FC = () => {
   // --- VARIANT 1: SELECTED STAR ---
   if (selectedStar && starHorizontal) {
     return (
-      <Card className="w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
+      <Card className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
         <div className="flex items-start justify-between border-b border-[var(--border-subtle)] pb-2.5 shrink-0">
           <div className="min-w-0">
             <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-0.5">
@@ -183,18 +186,9 @@ export const StarInspector: React.FC = () => {
         <div className="flex-1 min-h-0 overflow-y-auto py-2.5 space-y-3 pr-0.5">
           <div className="flex items-center justify-between py-1">
             <span className="text-[var(--ink-muted)]">Horizon state</span>
-            <span
-              className={`font-mono font-semibold text-[11px] flex items-center gap-1.5 ${
-                starHorizontal.isAboveHorizon ? 'text-[var(--signal-mid)]' : 'text-[var(--destructive-foreground)]'
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  starHorizontal.isAboveHorizon ? 'bg-[var(--signal-mid)]' : 'bg-[var(--destructive)]'
-                }`}
-              />
+            <Chip variant="caption" color={starHorizontal.isAboveHorizon ? 'blue' : 'rose'}>
               {starHorizontal.isAboveHorizon ? 'Above horizon' : 'Below horizon'}
-            </span>
+            </Chip>
           </div>
 
           <dl className="divide-y divide-[var(--border-subtle)] border-y border-[var(--border-subtle)] text-xs">
@@ -246,17 +240,17 @@ export const StarInspector: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 pt-2.5 border-t border-[var(--border-subtle)] shrink-0">
-          <Button
+          <BoardButton
             onClick={() => {
               if (!isTraceMode) setIsTraceMode(true);
               addTracedStar(selectedStar);
             }}
-            variant="default"
-            size="sm"
-            className="flex-1 text-xs font-semibold"
+            variant="primary"
+            size="small"
+            className="flex-1"
           >
             Trace from star
-          </Button>
+          </BoardButton>
           <Button
             onClick={() => setSelectedStarId(null)}
             variant="outline"
@@ -272,11 +266,11 @@ export const StarInspector: React.FC = () => {
 
   // --- VARIANT 2: SELECTED CONSTELLATION ---
   return (
-    <Card className="w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
+    <Card className="boardui-surface w-full h-full bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-[10px] p-3.5 gap-0 text-xs font-sans flex flex-col min-h-0 overflow-hidden shadow-none">
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5 shrink-0">
         <div className="min-w-0">
           <div className="text-[10px] font-mono text-[var(--ink-muted)] uppercase tracking-wider mb-0.5">
-            {currentConstellation?.id || 'ORI'} · IAU Region
+            {currentConstellation?.id || 'Ori'} · IAU Region
           </div>
           <h2 className="font-sans text-lg font-semibold text-[var(--ink-primary)] tracking-tight truncate">
             {currentConstellation?.name || 'Orion'}
@@ -320,17 +314,10 @@ export const StarInspector: React.FC = () => {
         <dl className="divide-y divide-[var(--border-subtle)] text-xs">
           <div className="flex items-center justify-between py-1.5">
             <dt className="text-[var(--ink-muted)]">Visibility</dt>
-            <dd
-              className={`font-mono font-semibold text-[11px] flex items-center gap-1.5 ${
-                conHorizontal?.isAboveHorizon ? 'text-[var(--signal-mid)]' : 'text-[var(--destructive-foreground)]'
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  conHorizontal?.isAboveHorizon ? 'bg-[var(--signal-mid)]' : 'bg-[var(--destructive)]'
-                }`}
-              />
-              {conHorizontal?.isAboveHorizon ? 'Above horizon' : 'Below horizon'}
+            <dd>
+              <Chip variant="caption" color={conHorizontal?.isAboveHorizon ? 'blue' : 'rose'}>
+                {conHorizontal?.isAboveHorizon ? 'Above horizon' : 'Below horizon'}
+              </Chip>
             </dd>
           </div>
           <div className="flex items-center justify-between py-1.5">
@@ -349,65 +336,67 @@ export const StarInspector: React.FC = () => {
           )}
         </dl>
 
-        {/* Notable Stars */}
+        {/* Notable stars */}
         <div className="space-y-1.5 border-t border-[var(--border-subtle)] pt-2.5">
           <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--ink-secondary)]">
-            <span>Notable stars</span>
-            <span className="text-[10px] font-normal text-[var(--ink-muted)]">Select to inspect</span>
+            <span>Brightest stars</span>
+            <span className="text-[10px] font-normal text-[var(--ink-muted)]">Select a star for details</span>
           </div>
-          <div className="space-y-1">
+          <Table
+            size="sm"
+            aria-label={`Brightest stars in ${currentConstellation?.name || 'Orion'}`}
+            selectionMode="none"
+            onRowAction={key => setSelectedStarId(Number(key))}
+          >
+            <TableHeader>
+              <TableColumn isRowHeader>Star</TableColumn>
+              <TableColumn>Magnitude</TableColumn>
+            </TableHeader>
+            <TableBody>
             {notableStars.map(star => {
               const bayerGreek = star.bayer && BAYER_GREEK[star.bayer]
                 ? `${BAYER_GREEK[star.bayer]} ${currentConstellation?.id}`
                 : (star.bayer ? `${star.bayer} ${currentConstellation?.id}` : null);
               return (
-                <Button
-                  variant="ghost"
+                <TableRow
                   key={star.id}
-                  onClick={() => setSelectedStarId(star.id)}
-                  aria-label={`Inspect ${star.proper || star.name}, magnitude ${star.mag.toFixed(2)}`}
-                  className="flex h-auto w-full items-center justify-between py-1.5 px-2 rounded-md bg-[var(--bg-card-subtle)] hover:bg-[var(--bg-pill-active)] border border-transparent hover:border-[var(--signal-surface)] text-left text-xs font-normal"
-                  title={`Select ${star.proper || star.name}`}
+                  id={String(star.id)}
+                  textValue={`${star.proper || star.name}, magnitude ${star.mag.toFixed(2)}`}
                 >
-                  <span className="flex items-center gap-2 min-w-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-mid)] shrink-0" />
-                    <span className="font-medium text-[var(--ink-primary)] truncate">
-                      {star.proper || star.name}
+                  <TableCell>
+                    <span className="inline-flex min-w-0 items-center gap-1.5">
+                      <span className="truncate">{star.proper || star.name}</span>
+                      {bayerGreek && <span className="shrink-0 text-xs text-[var(--ink-muted)]">{bayerGreek}</span>}
                     </span>
-                    {bayerGreek && (
-                      <span className="text-[10px] font-mono text-[var(--ink-muted)] shrink-0">
-                        {bayerGreek}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-[11px] font-mono tabular-nums text-[var(--signal-mid)] shrink-0 ml-2">
-                    {star.mag.toFixed(2)}m
-                  </span>
-                </Button>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-mono tabular-nums text-[var(--signal-mid)]">{star.mag.toFixed(2)}m</span>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </div>
+            </TableBody>
+          </Table>
         </div>
       </div>
 
       <div className="pt-2.5 border-t border-[var(--border-subtle)] flex items-center gap-2 shrink-0">
-        <Button
+        <BoardButton
           onClick={handleStartTrace}
-          variant="default"
-          size="sm"
-          className="flex-1 text-xs font-semibold"
+          variant="primary"
+          size="small"
+          className="flex-1"
         >
           Start trace
-        </Button>
-        <Button
+        </BoardButton>
+        <BoardButton
           onClick={handleOpenDetails}
-          variant="outline"
-          size="sm"
-          className="flex-1 text-xs font-semibold"
+          variant="secondary"
+          size="small"
+          className="flex-1"
         >
           <span>Full entry</span>
-          <span aria-hidden="true">→</span>
-        </Button>
+        </BoardButton>
       </div>
     </Card>
   );
