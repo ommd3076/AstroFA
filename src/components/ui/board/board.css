@@ -49,34 +49,44 @@
   --radius-2lg: 10px;
 }
 
-.boardui-surface {
-  --bui-button-primary: #89d6c6;
-  --bui-button-danger: #d94a55;
-  --bui-gradient-button-primary-default: linear-gradient(180deg, #a7ebdf 0%, #89d6c6 100%);
-  --bui-gradient-button-primary-hover: linear-gradient(180deg, #c1f2e9 0%, #a7ebdf 100%);
-  --bui-gradient-button-primary-active: linear-gradient(180deg, #89d6c6 0%, #67bcae 100%);
-  --bui-gradient-button-primary-disabled: linear-gradient(180deg, #444755 0%, #343641 100%);
-  --bui-gradient-button-danger-default: linear-gradient(180deg, #ef737b 0%, #d94a55 100%);
-  --bui-ink-on-accent: #10161d;
-  --bui-ink-primary: #eef1ed;
-  --bui-ink-secondary: #c5cfcd;
-  --bui-ink-muted: #8e9b9b;
-  --bui-surface: #1b2632;
-  --bui-surface-hover: #243341;
-  --bui-surface-active: #2c3b4a;
-  --bui-surface-subtle: #141d27;
-  --bui-border: #2c3b4a;
-  --bui-border-strong: rgb(137 214 198 / 48%);
-  --bui-ghost: rgb(137 214 198 / 12%);
-  --bui-ghost-hover: rgb(137 214 198 / 20%);
-  --bui-ghost-active: rgb(137 214 198 / 26%);
-  --bui-status-blue-bg: rgb(96 165 250 / 18%);
-  --bui-status-blue-ink: #a9d2ff;
-  --bui-status-rose-bg: rgb(229 72 77 / 16%);
-  --bui-status-rose-ink: #ff9a9e;
-  --bui-status-yellow-bg: rgb(229 169 59 / 18%);
-  --bui-status-yellow-ink: #f3ca7a;
-  font-family: var(--font-sans);
+/* Portalled overlays keep the same paper/panel contract as their trigger. */
+[data-boardui-portal],
+[data-radix-popper-content-wrapper],
+[role="dialog"],
+[role="menu"],
+[role="listbox"] {
+  color: var(--bui-ink-primary);
+  color-scheme: light;
+}
+
+[data-boardui-portal] {
+  --bui-surface: var(--bui-panel);
+  --bui-surface-subtle: var(--bui-paper);
+  --bui-ink-primary: var(--bui-ink);
+  --bui-ink-muted: var(--bui-muted);
+}
+
+/* The key overlay primitives stay legible even when rendered outside a surface. */
+[role="dialog"],
+[role="menu"],
+[role="listbox"] {
+  background: var(--bui-panel);
+  border-color: var(--bui-border);
+  box-shadow: var(--shadow-lg);
+}
+
+[role="tab"][aria-selected="true"] {
+  color: var(--bui-accent);
+  background: var(--bui-selected);
+}
+
+[role="switch"] {
+  border-color: var(--bui-border);
+}
+
+[role="switch"][aria-checked="true"] {
+  background: var(--bui-accent);
+  border-color: var(--bui-accent);
 }
 
 .boardui-surface .button-press-motion {

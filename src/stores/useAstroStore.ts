@@ -32,7 +32,7 @@ export type ActiveView =
 const getInitialParams = () => {
   if (typeof window === 'undefined') {
     return {
-      view: 'sky' as ActiveView,
+      view: 'overview' as ActiveView,
       trace: false,
       results: false,
       analysis: false,
@@ -75,7 +75,7 @@ const getInitialParams = () => {
   }
 
   return {
-    view: results ? 'results' : analysis ? 'patterns' : view && validViews.includes(view) ? view : 'sky',
+    view: results ? 'results' : analysis ? 'patterns' : view && validViews.includes(view) ? view : trace ? 'sky' : 'overview',
     trace: trace || results || analysis,
     results,
     analysis,

@@ -779,3 +779,125 @@
   --color-date-range-edge-background: #34736e;
 }
 
+/* ---------------------------------------------------------------------------
+ * Costellar light runtime contract
+ *
+ * The vendored BoardUI token file above contains the upstream Figma ramps and
+ * historical dark recipes. Keep those recipes available to source consumers,
+ * but make the app's active semantic layer unambiguously light. :root is
+ * intentional: React Aria menus, dialogs and command palettes are portalled
+ * outside their triggering surface and must inherit the same readable values.
+ * --------------------------------------------------------------------------- */
+:root,
+.boardui-surface {
+  --bui-paper: #f3f1e9;
+  --bui-panel: #fbfaf5;
+  --bui-border: #d8d4c8;
+  --bui-ink: #222b26;
+  --bui-muted: #58655d;
+  --bui-accent: #24584c;
+  --bui-selected: #e7ede3;
+  --bui-midnight-stage: #121c22;
+
+  --bui-ink-primary: var(--bui-ink);
+  --bui-ink-secondary: color-mix(in srgb, var(--bui-ink) 78%, var(--bui-paper));
+  --bui-ink-muted: var(--bui-muted);
+  --bui-ink-on-accent: #fbfaf5;
+  --bui-surface: var(--bui-panel);
+  --bui-surface-hover: #f0eee6;
+  --bui-surface-active: var(--bui-selected);
+  --bui-surface-subtle: var(--bui-paper);
+  --bui-button-primary: var(--bui-accent);
+  --bui-button-danger: #a53f43;
+  --bui-border-strong: color-mix(in srgb, var(--bui-accent) 58%, var(--bui-border));
+  --bui-ghost: color-mix(in srgb, var(--bui-accent) 12%, transparent);
+  --bui-ghost-hover: color-mix(in srgb, var(--bui-accent) 18%, transparent);
+  --bui-ghost-active: color-mix(in srgb, var(--bui-accent) 24%, transparent);
+  --bui-status-blue-bg: #e5edf2;
+  --bui-status-blue-ink: #24516a;
+  --bui-status-rose-bg: #f7e4e2;
+  --bui-status-rose-ink: #8c3438;
+  --bui-status-yellow-bg: #f6edcf;
+  --bui-status-yellow-ink: #765515;
+  --bui-gradient-button-primary-default: linear-gradient(180deg, #2e685b 0%, #24584c 100%);
+  --bui-gradient-button-primary-hover: linear-gradient(180deg, #397565 0%, #2e685b 100%);
+  --bui-gradient-button-primary-active: linear-gradient(180deg, #1e4c41 0%, #24584c 100%);
+  --bui-gradient-button-primary-disabled: linear-gradient(180deg, #e4e1d8 0%, #d8d4c8 100%);
+  --bui-gradient-button-danger-default: linear-gradient(180deg, #b74e52 0%, #a53f43 100%);
+
+  --color-accent-50: #f0f5ef;
+  --color-accent-100: #e7ede3;
+  --color-accent-200: #d5e3d7;
+  --color-accent-300: #b8d0bd;
+  --color-accent-400: #8fb5a0;
+  --color-accent-500: #5e927e;
+  --color-accent-600: #3e7563;
+  --color-accent-700: #2e685b;
+  --color-accent-800: #24584c;
+  --color-accent-900: #1d473e;
+  --color-accent-950: #15362f;
+  --color-foreground-full: var(--bui-ink);
+  --color-foreground-icon-primary: var(--bui-ink);
+  --color-foreground-icon-secondary: var(--bui-muted);
+  --color-foreground-icon-tertiary: #7b867e;
+  --color-foreground-disabled: #8c958e;
+  --color-text-primary: var(--bui-ink);
+  --color-text-secondary: var(--bui-ink-secondary);
+  --color-text-tertiary: var(--bui-muted);
+  --color-text-disabled: #8c958e;
+  --color-text-placeholder: #7b867e;
+  --color-text-white: #fbfaf5;
+  --color-background-full: var(--bui-paper);
+  --color-background-primary-default: var(--bui-panel);
+  --color-background-primary-hover: var(--bui-surface-hover);
+  --color-background-primary-active: var(--bui-selected);
+  --color-background-primary-disabled: #eeeae1;
+  --color-background-secondary-default: var(--bui-paper);
+  --color-background-secondary-hover: #ece9df;
+  --color-background-tertiary-default: #eeeae1;
+  --color-background-tertiary-hover: #e5e2d8;
+  --color-background-inner-default: var(--bui-panel);
+  --color-border-button-default: var(--bui-border);
+  --color-border-button-hover: var(--bui-border-strong);
+  --color-border-button-active: var(--bui-accent);
+  --color-border-button-group: var(--bui-border);
+  --color-border-focus-ring: #2e685b;
+  --color-separator-border: var(--bui-border);
+  --color-button-ghost-background: var(--bui-ghost);
+  --color-button-ghost-hover: var(--bui-ghost-hover);
+  --color-button-ghost-active: var(--bui-ghost-active);
+  --color-button-ghost-foreground: var(--bui-accent);
+  --color-button-ghost-disabled: #eeeae1;
+  --color-button-ghost-disabled-foreground: #8c958e;
+  --color-border-table: var(--bui-border);
+  --color-dropdown-item-hover-background: var(--bui-selected);
+  --color-segmented-control-background: var(--bui-paper);
+  --color-segmented-control-selected-background: var(--bui-selected);
+  --color-switch-off-chip-start: #e4e1d8;
+  --color-switch-off-chip-end: #d8d4c8;
+  --color-switch-on-chip-start: #2e685b;
+  --color-switch-on-chip-end: #24584c;
+  --color-tab-count-selected-background: var(--bui-selected);
+  --color-pill-tab-blue-selected-background: var(--bui-selected);
+  --color-pill-tab-blue-hover-background: #f0eee6;
+  --color-notification-center-background: var(--bui-panel);
+  --color-badge-neutral-background: #e8e5dc;
+  --color-team-menu-count-background: #e1ded4;
+  --color-team-menu-count-foreground: var(--bui-muted);
+  --color-badge-new-background: var(--bui-selected);
+  --color-badge-new-text: var(--bui-accent);
+  --color-chart-track: #e1ded4;
+  --color-chart-cursor: #9aa39c;
+  --color-chart-neutral: var(--bui-muted);
+  --color-chart-agents-bar: var(--bui-accent);
+  --color-chart-agents-bar-active: #1d473e;
+  --color-docs-file-chip-background: var(--bui-selected);
+  --color-docs-file-chip-border: #b8d0bd;
+  --color-docs-file-chip-foreground: var(--bui-accent);
+  --color-docs-code-background: #ece9df;
+  --color-docs-install-rail: #e8e5dc;
+  --color-calendar-event-purple-background: var(--bui-selected);
+  --color-calendar-event-purple-title: var(--bui-accent);
+  --color-calendar-event-purple-time: var(--bui-muted);
+}
+

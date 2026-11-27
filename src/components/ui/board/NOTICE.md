@@ -20,6 +20,10 @@ Registry references for the existing customized components:
 - Button Group: https://www.boardui.com/r/button-group.json
 - Chip: https://www.boardui.com/r/chip.json
 - Table: https://www.boardui.com/r/table.json
+- Orders Chart: https://www.boardui.com/r/orders-chart-card.json
 
 Registry aliases were rewritten to local relative imports. BoardUI styles are
-scoped to `.boardui-surface` and use Costellar's graphite and mint observatory theme.
+scoped to `.boardui-surface`, with portal-safe semantic values also exposed on
+`:root`. The active Costellar runtime is light-only: paper `#f3f1e9`, panel
+`#fbfaf5`, border `#d8d4c8`, ink `#222b26`, muted `#58655d`, accent `#24584c`,
+selected `#e7ede3`, and midnight stage `#121c22`.
