@@ -1,5 +1,3 @@
-@import "./theme-tokens.css";
-
 /* BoardUI utilities used only by the scoped Costellar atlas surfaces. */
 @theme inline {
   --color-button-primary: var(--bui-button-primary);
@@ -49,44 +47,34 @@
   --radius-2lg: 10px;
 }
 
-/* Portalled overlays keep the same paper/panel contract as their trigger. */
-[data-boardui-portal],
-[data-radix-popper-content-wrapper],
-[role="dialog"],
-[role="menu"],
-[role="listbox"] {
-  color: var(--bui-ink-primary);
-  color-scheme: light;
-}
-
-[data-boardui-portal] {
-  --bui-surface: var(--bui-panel);
-  --bui-surface-subtle: var(--bui-paper);
-  --bui-ink-primary: var(--bui-ink);
-  --bui-ink-muted: var(--bui-muted);
-}
-
-/* The key overlay primitives stay legible even when rendered outside a surface. */
-[role="dialog"],
-[role="menu"],
-[role="listbox"] {
-  background: var(--bui-panel);
-  border-color: var(--bui-border);
-  box-shadow: var(--shadow-lg);
-}
-
-[role="tab"][aria-selected="true"] {
-  color: var(--bui-accent);
-  background: var(--bui-selected);
-}
-
-[role="switch"] {
-  border-color: var(--bui-border);
-}
-
-[role="switch"][aria-checked="true"] {
-  background: var(--bui-accent);
-  border-color: var(--bui-accent);
+.boardui-surface {
+  --bui-button-primary: #8fa3ff;
+  --bui-button-danger: #d94a55;
+  --bui-gradient-button-primary-default: linear-gradient(180deg, #a8b8ff 0%, #8fa3ff 100%);
+  --bui-gradient-button-primary-hover: linear-gradient(180deg, #bfcbff 0%, #a8b8ff 100%);
+  --bui-gradient-button-primary-active: linear-gradient(180deg, #8fa3ff 0%, #788eef 100%);
+  --bui-gradient-button-primary-disabled: linear-gradient(180deg, #444755 0%, #343641 100%);
+  --bui-gradient-button-danger-default: linear-gradient(180deg, #ef737b 0%, #d94a55 100%);
+  --bui-ink-on-accent: #0b0b10;
+  --bui-ink-primary: #f3f1eb;
+  --bui-ink-secondary: #c0bec5;
+  --bui-ink-muted: #94939b;
+  --bui-surface: #151519;
+  --bui-surface-hover: #202027;
+  --bui-surface-active: #26262f;
+  --bui-surface-subtle: #1b1b20;
+  --bui-border: rgb(243 241 235 / 12%);
+  --bui-border-strong: rgb(168 184 255 / 38%);
+  --bui-ghost: rgb(143 163 255 / 12%);
+  --bui-ghost-hover: rgb(143 163 255 / 20%);
+  --bui-ghost-active: rgb(143 163 255 / 26%);
+  --bui-status-blue-bg: rgb(143 163 255 / 18%);
+  --bui-status-blue-ink: #c3ceff;
+  --bui-status-rose-bg: rgb(229 72 77 / 16%);
+  --bui-status-rose-ink: #ff9a9e;
+  --bui-status-yellow-bg: rgb(229 169 59 / 18%);
+  --bui-status-yellow-ink: #f3ca7a;
+  font-family: var(--font-sans);
 }
 
 .boardui-surface .button-press-motion {

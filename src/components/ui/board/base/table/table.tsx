@@ -27,7 +27,7 @@ import { cx } from "../../utils/cx";
  *
  * Sizes: `md` (h-16 rows) and `sm` (h-12 rows), set once via `data-size`.
  *
- * Pair with a table state manager when you need sorting / filtering /
+ * Pair with @tanstack/react-table when you need sorting / filtering /
  * pagination logic (see the advanced Data Table example).
  */
 
