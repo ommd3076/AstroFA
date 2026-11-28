@@ -34,7 +34,7 @@ The frontend automata lab remains an educational TypeScript implementation. Conf
 ## Key Layers
 
 1. **Astronomical Data Layer:**
-   - 30,000 stars from HYG Database v3.8, preserving the original naked-eye and constellation-reference set and extending it with the next brightest valid records (proper name, HR, HIP, HD, RA/Dec J2000, apparent magnitude, B-V color index, distance, spectral type). Catalog magnitude is not a guarantee of naked-eye visibility.
+   - 8,921 stars from HYG Database v3.8 (proper name, HR, HIP, HD, RA/Dec J2000, apparent magnitude, B-V color index, distance, spectral type).
    - 88 official IAU constellations with line segments mapped to Yale Bright Star numbers.
    - 24 reference pattern traversals across 12 prominent constellations.
 

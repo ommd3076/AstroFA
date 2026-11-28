@@ -22,7 +22,7 @@ Costellar uses strictly authentic astronomical data from authoritative open scie
   - `dist`: Distance in parsecs
   - `spect`: Spectral classification
   - `pmra`, `pmdec`: Proper motion in mas/yr
-- **Ingestion Policy:** Preserve all naked-eye stars ($V \le 6.5$) and every star referenced by constellation line figures, then add the next brightest valid HYG records by apparent visual magnitude until the catalog contains at least **30,000 unique stars**. Ties are resolved by ascending HYG ID for reproducible output. Sol (ID 0), duplicate IDs, and records without finite in-range coordinates or a finite magnitude are excluded. The generated catalog contains 30,000 stars through magnitude **7.66**. Catalog magnitude describes source data and is not a promise that a star is visually observable: apparent visibility depends on sky conditions, optics, and display/rendering limits.
+- **Ingestion Policy:** All naked-eye stars ($V \le 6.5$) plus all stars referenced by constellation line figures, yielding **8,921 stars**. Sol (ID 0) is excluded from the night sky starfield.
 
 ---
 
