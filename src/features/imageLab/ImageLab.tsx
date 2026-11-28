@@ -8,52 +8,14 @@ import { imagePointsToMath, recognizeTraceOnServer } from '../../recognition/cli
 import type { BackendRecognitionState } from '../../recognition/types';
 import { IMAGE_HEADER_SCAN_BYTES, isRasterDimensionsAllowed, parseRasterDimensions, projectReferencePointsToImage } from './imageUpload';
 import { PageHeader } from '../../components/PageHeader';
-import { Input } from '../../components/ui/board/base/input/input';
-import { Slider } from '../../components/ui/board/base/slider/slider';
-import { Switch } from '../../components/ui/board/base/switch/switch';
-import { SegmentedControl, SegmentedControlItem } from '../../components/ui/board/base/segmented-control/segmented-control';
-import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
-import './imageLab.css';
-
-// Keep the existing feature copy/API while routing every action through the
-// installed Board UI primitive. This avoids a second button language in the lab.
-const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
-  <BoardButton
-    {...props}
-    variant={variant === 'default' ? 'primary' : variant === 'outline' ? 'secondary' : variant}
-    size={size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size}
-  >
-    {children}
-  </BoardButton>
-);
-
-const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className = '', children, ...props }) => (
-  <section {...props} className={`atlas-surface flex flex-col ${className}`}>{children}</section>
-);
-const Empty: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
-  <div {...props} className={`flex flex-col items-center justify-center gap-3 text-center ${className}`}>{children}</div>
-);
-const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex flex-col items-center gap-1.5 ${className}`}>{children}</div>
-);
-const EmptyContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex items-center justify-center gap-2 ${className}`}>{children}</div>
-);
-const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className = '', children, ...props }) => (
-  <h3 {...props} className={`font-medium text-[var(--ink-primary)] ${className}`}>{children}</h3>
-);
-const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
-  <p {...props} className={`text-[var(--ink-secondary)] ${className}`}>{children}</p>
-);
-const EmptyMedia: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
-  <div {...props} className={`flex items-center justify-center ${className}`}>{children}</div>
-);
-const Alert: React.FC<React.HTMLAttributes<HTMLDivElement> & { variant?: string }> = ({ className = '', children, variant: _variant, ...props }) => (
-  <div {...props} className={`border border-rose-400/40 bg-rose-400/10 text-rose-200 rounded-lg ${className}`}>{children}</div>
-);
-const AlertDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
-  <p {...props} className={className}>{children}</p>
-);
+import { Alert, AlertDescription } from '../../components/ui/space/alert';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '../../components/ui/space/empty';
+import { Input } from '../../components/ui/space/input';
+import { Slider } from '../../components/ui/space/slider';
+import { Switch } from '../../components/ui/space/switch';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 
 // Deterministic Pseudo-Random Number Generator (Mulberry32) for reproducible synthetic sky
 function createSeededRandom(seed: number) {
@@ -580,7 +542,7 @@ export const ImageLab: React.FC = () => {
   };
 
   return (
-    <div className="image-lab boardui-surface field-page w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto min-h-0 pr-0.5">
+    <div className="image-lab w-full h-full flex flex-col bg-[var(--bg-shell)] text-[var(--ink-primary)] font-sans gap-4 overflow-y-auto min-h-0 pr-0.5">
       <style>{`
         .image-lab input[type="range"] { accent-color: var(--signal-mid); }
         .image-lab canvas { max-width: 100%; max-height: min(64vh, 640px); width: auto; height: auto; }
@@ -629,10 +591,10 @@ export const ImageLab: React.FC = () => {
       />
 
       {/* Image-first asymmetric studio workspace: Dominant stage (left 8) + Ordered inspector rail (right 4) */}
-      <div className="image-workspace field-workspace grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 items-start">
+      <div className="image-workspace grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 items-start">
         {/* DOMINANT IMAGE CANVAS STAGE (Left 8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-3 min-h-0">
-          <Card className="image-preview-card field-panel atlas-surface p-3.5 gap-3 flex flex-col min-h-[480px] rounded-xl shadow-none">
+          <Card className="image-preview-card atlas-surface p-3.5 gap-3 flex flex-col min-h-[480px] rounded-xl shadow-none">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-semibold text-[var(--ink-primary)]">
@@ -645,41 +607,29 @@ export const ImageLab: React.FC = () => {
                 )}
               </div>
 
-              <SegmentedControl
+              <ToggleGroup
                 aria-label="Preview overlay mode"
-                selectedKeys={new Set([previewMode])}
-                onSelectionChange={keys => {
-                  const next = [...keys][0];
+                size="sm"
+                value={[previewMode]}
+                onValueChange={vals => {
+                  const next = vals.find(v => v !== previewMode) ?? vals[0];
                   if (next === 'ORIGINAL' || next === 'DETECTED') setPreviewMode(next);
                 }}
-                className="max-w-full overflow-x-auto"
+                className="bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] p-0.5 rounded-lg gap-0.5"
               >
                 {(['ORIGINAL', 'DETECTED'] as const).map(mode => (
-                  <SegmentedControlItem
+                  <ToggleGroupItem
                     key={mode}
-                    id={mode}
-                    className="text-[11px] font-semibold"
+                    value={mode}
+                    className="text-[11px] font-semibold data-pressed:bg-primary data-pressed:text-primary-foreground"
                   >
                     {mode === 'ORIGINAL' ? 'Original' : 'Detected'}
-                  </SegmentedControlItem>
+                  </ToggleGroupItem>
                 ))}
-              </SegmentedControl>
+              </ToggleGroup>
             </div>
 
-            <div
-              className={`image-viewport field-image-plate relative flex-1 bg-[var(--bg-viewport)] rounded-lg overflow-hidden flex items-center justify-center p-2 border border-[var(--border-subtle)] min-h-[400px] ${isDragOver ? 'is-drop-target' : ''}`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                onChange={handleFileUpload}
-                className="hidden"
-                aria-label="Choose a PNG or JPEG sky image"
-              />
+            <div className="image-viewport relative flex-1 bg-[var(--bg-viewport)] rounded-lg overflow-hidden flex items-center justify-center p-2 border border-[var(--border-subtle)] min-h-[400px]">
               {imageLoaded ? (
                 <canvas
                   ref={canvasRef}
@@ -702,15 +652,7 @@ export const ImageLab: React.FC = () => {
                       {uploadError || 'Choose a local PNG or JPEG sky image, or load the labelled synthetic Cassiopeia sample. FITS is not supported.'}
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent className="flex-wrap">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="text-xs font-semibold"
-                    >
-                      Choose sky image
-                    </Button>
+                  <EmptyContent>
                     <Button
                       variant="default"
                       size="sm"
@@ -742,7 +684,7 @@ export const ImageLab: React.FC = () => {
           </Card>
 
           {/* Compact Shape Confirmation Bar beneath canvas */}
-          <Card className="field-panel atlas-surface p-3.5 gap-2.5 flex flex-col sm:flex-row sm:items-center justify-between rounded-xl shadow-none">
+          <Card className="atlas-surface p-3.5 gap-2.5 flex flex-col sm:flex-row sm:items-center justify-between rounded-xl shadow-none">
             <div className="min-w-0 space-y-1">
               <div className="flex items-center gap-2.5">
                 <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">Server shape</span>
@@ -789,8 +731,8 @@ export const ImageLab: React.FC = () => {
 
         {/* ORDERED INSPECTOR RAIL (Right 4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-3 min-h-0">
-          {/* 1. Asset manifest and recovery actions */}
-          <Card className="field-panel atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
+          {/* 1. Source Upload & Sample */}
+          <Card className="atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[var(--ink-primary)]">
                 1. Source photograph
@@ -819,19 +761,18 @@ export const ImageLab: React.FC = () => {
                   : 'border-[var(--border-subtle)] bg-[var(--bg-card-subtle)] hover:border-[var(--signal-surface)]'
               }`}
             >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
               <svg className="w-5 h-5 text-[var(--ink-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => { event.stopPropagation(); fileInputRef.current?.click(); }}
-                className="text-[11px] font-semibold"
-              >
-                Choose PNG / JPEG
-              </Button>
-              <div className="text-[10px] text-[var(--ink-muted)]">
-                or drop a file here
+              <div className="text-[11px] font-semibold text-[var(--ink-primary)]">
+                Drop or choose PNG / JPEG
               </div>
               <div className="text-[10px] text-[var(--ink-muted)] font-mono">
                 Local browser decode
@@ -892,7 +833,7 @@ export const ImageLab: React.FC = () => {
           </Card>
 
           {/* 2. Luminance Threshold & Detection Count */}
-          <Card className="field-panel atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
+          <Card className="atlas-surface p-3.5 gap-2.5 rounded-xl shadow-none">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[var(--ink-primary)]">
                 2. Luminance threshold
@@ -953,14 +894,12 @@ export const ImageLab: React.FC = () => {
 
             <div className="space-y-1 py-0.5">
               <Slider
-                minValue={50}
-                maxValue={240}
+                min={50}
+                max={240}
                 step={1}
                 value={threshold}
-                onChange={handleSetThreshold}
+                onValueChange={val => handleSetThreshold(typeof val === 'number' ? val : val[0])}
                 aria-label="Luminance detection threshold slider"
-                thumbLabel="Luminance threshold"
-                showTooltip={false}
               />
             </div>
 
@@ -971,10 +910,14 @@ export const ImageLab: React.FC = () => {
               <Input
                 id="image-lab-threshold"
                 type="number"
-                size="small"
+                size="sm"
+                min={50}
+                max={240}
+                step={1}
                 value={thresholdText}
                 onKeyDown={e => e.stopPropagation()}
-                onChange={raw => {
+                onChange={e => {
+                  const raw = e.target.value;
                   setThresholdText(raw);
                   if (/^\d+$/.test(raw)) {
                     const next = Number(raw);
@@ -995,17 +938,16 @@ export const ImageLab: React.FC = () => {
           </Card>
 
           {/* 3. Detection Contrast Preprocessing */}
-          <Card className="field-panel atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
+          <Card className="atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
             <div className="flex items-center justify-between">
               <label htmlFor="image-lab-contrast-switch" className="text-xs font-semibold text-[var(--ink-primary)] cursor-pointer">
                 3. Detection contrast
               </label>
               <Switch
                 id="image-lab-contrast-switch"
-                isSelected={filterActive}
-                onChange={setFilterActive}
+                checked={filterActive}
+                onCheckedChange={checked => setFilterActive(checked)}
                 aria-label="Enable detection contrast preprocessing"
-                size="sm"
               />
             </div>
 
@@ -1015,14 +957,12 @@ export const ImageLab: React.FC = () => {
                 <span className="font-mono tabular-nums text-[var(--signal-mid)] font-semibold">{contrast.toFixed(2)}×</span>
               </div>
               <Slider
-                minValue={0.5}
-                maxValue={2.0}
+                min={0.5}
+                max={2.0}
                 step={0.05}
                 value={contrast}
-                onChange={setContrast}
+                onValueChange={val => setContrast(typeof val === 'number' ? val : val[0])}
                 aria-label="Contrast scale"
-                thumbLabel="Contrast scale"
-                showTooltip={false}
               />
               <p className="text-[11px] leading-relaxed text-[var(--ink-muted)]">
                 Remaps luminance before thresholding. Denoise, debayer, and platesolve calibration are not applied.
@@ -1031,7 +971,7 @@ export const ImageLab: React.FC = () => {
           </Card>
 
           {/* 4. Manual Star Tools */}
-          <Card className="field-panel atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
+          <Card className="atlas-surface p-3.5 gap-2 rounded-xl shadow-none">
             <span className="text-xs font-semibold text-[var(--ink-primary)]">
               4. Manual correction
             </span>
