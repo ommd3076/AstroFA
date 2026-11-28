@@ -20,9 +20,6 @@ interface SkyCanvasProps {
   showDeepSky?: boolean;
 }
 
-const MIN_SKY_FOV = 4;
-const MAX_SKY_FOV = 85;
-
 export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgOverlayRef = useRef<SVGSVGElement>(null);
@@ -60,7 +57,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const skyDomeMeshRef = useRef<THREE.Mesh | null>(null);
   const skyDomeTexRef = useRef<THREE.Texture | null>(null);
   const starPointsRef = useRef<THREE.Points | null>(null);
-  const starMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
   const normalLinesMeshRef = useRef<THREE.LineSegments | null>(null);
   const focusedLinesMeshRef = useRef<THREE.LineSegments | null>(null);
   const traceLineMeshRef = useRef<THREE.Line | null>(null);
@@ -81,9 +77,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
   const lastSvgContentRef = useRef<string>('');
   const isRenderScheduled = useRef(false);
   const animFrameId = useRef<number | null>(null);
-  const pickFrameId = useRef<number | null>(null);
-  const latestPointerRef = useRef({ x: 0, y: 0 });
-  const lastPickTimeRef = useRef(0);
 
   // 1. Initialize Scene & Three.js Canvas
   useEffect(() => {
@@ -192,7 +185,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     const colors = new Float32Array(starCount * 3);
     const sizes = new Float32Array(starCount);
     const alphas = new Float32Array(starCount);
-    const magnitudes = new Float32Array(starCount);
 
     const tempColor = new THREE.Color();
     for (let i = 0; i < starCount; i++) {
@@ -210,7 +202,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       // Magnitude scaling: Sirius (-1.44) ~ 11.9px, mag 6.5 ~ 1.8px
       sizes[i] = Math.max(1.8, 10.0 - 1.3 * star.mag);
       alphas[i] = Math.max(0.28, Math.min(1.0, 1.04 - 0.115 * star.mag));
-      magnitudes[i] = star.mag;
     }
 
     const starGeometry = new THREE.BufferGeometry();
@@ -218,30 +209,21 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     starGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
     starGeometry.setAttribute('aAlpha', new THREE.BufferAttribute(alphas, 1));
-    starGeometry.setAttribute('aMagnitude', new THREE.BufferAttribute(magnitudes, 1));
 
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     const starMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uPixelRatio: { value: pixelRatio },
-        uFov: { value: camera.fov },
       },
       vertexShader: `
         attribute float aSize;
         attribute float aAlpha;
-        attribute float aMagnitude;
         uniform float uPixelRatio;
-        uniform float uFov;
         varying vec3 vColor;
         varying float vAlpha;
         void main() {
           vColor = color;
-          // Keep the wide sky readable and reveal the deeper HYG catalog as it is magnified.
-          float zoomDepth = clamp(log(60.0 / uFov) / log(60.0 / 4.0), 0.0, 1.0);
-          float magnitudeLimit = mix(6.5, 10.5, zoomDepth);
-          float magnitudeVisibility = 1.0 - smoothstep(magnitudeLimit - 0.25, magnitudeLimit + 0.65, aMagnitude);
-          // A dim floor preserves hover and trace discoverability for faint catalog entries.
-          vAlpha = aAlpha * mix(0.012, 1.0, magnitudeVisibility);
+          vAlpha = aAlpha;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           gl_PointSize = clamp(aSize * uPixelRatio, 1.5, 28.0);
         }
@@ -270,7 +252,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
     const starPoints = new THREE.Points(starGeometry, starMaterial);
     celestialGroup.add(starPoints);
     starPointsRef.current = starPoints;
-    starMaterialRef.current = starMaterial;
 
     // --- Build Constellation Lines ---
     const normalLinePositions: number[] = [];
@@ -474,9 +455,6 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       resizeObserver.disconnect();
       skyDomeTexRef.current?.dispose();
       skyDomeTexRef.current = null;
-      starMaterialRef.current = null;
-      if (pickFrameId.current !== null) cancelAnimationFrame(pickFrameId.current);
-      pickFrameId.current = null;
       scene.traverse(obj => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.Points) {
           obj.geometry?.dispose();
@@ -783,17 +761,14 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
 
   // Zoom event listener for external toolbar controls
   useEffect(() => {
-    const applyFov = (fov: number) => {
-      if (!cameraRef.current) return;
-      cameraRef.current.fov = Math.max(MIN_SKY_FOV, Math.min(MAX_SKY_FOV, fov));
-      cameraRef.current.updateProjectionMatrix();
-      if (starMaterialRef.current) starMaterialRef.current.uniforms.uFov.value = cameraRef.current.fov;
-      window.dispatchEvent(new CustomEvent('sky-zoom-change', { detail: { fov: cameraRef.current.fov } }));
-      requestRenderRef.current();
-    };
     const handleCustomZoom = (e: Event) => {
-      const customEvent = e as CustomEvent<{ factor?: number }>;
-      if (cameraRef.current && customEvent.detail?.factor) applyFov(cameraRef.current.fov * customEvent.detail.factor);
+      const customEvent = e as CustomEvent<{ delta: number }>;
+      if (cameraRef.current && customEvent.detail) {
+        const nextFov = cameraRef.current.fov + customEvent.detail.delta;
+        cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
+        cameraRef.current.updateProjectionMatrix();
+        requestRenderRef.current();
+      }
     };
     window.addEventListener('sky-zoom', handleCustomZoom);
     return () => window.removeEventListener('sky-zoom', handleCustomZoom);
@@ -830,32 +805,23 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
       return;
     }
 
-    // Coalesce mouse movement into one 3D point-cloud query per frame.
-    latestPointerRef.current = { x: e.clientX, y: e.clientY };
-    if (pickFrameId.current !== null) return;
-    pickFrameId.current = requestAnimationFrame(() => {
-      pickFrameId.current = null;
-      const now = performance.now();
-      if (now - lastPickTimeRef.current < 40) return;
-      lastPickTimeRef.current = now;
-      const { x, y } = latestPointerRef.current;
-      if (!containerRef.current || !cameraRef.current || !starPointsRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const ndcX = ((x - rect.left) / rect.width) * 2 - 1;
-      const ndcY = -((y - rect.top) / rect.height) * 2 + 1;
+    // Raycast / hover picking
+    if (!containerRef.current || !cameraRef.current || !starPointsRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const ndcX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-      const raycaster = new THREE.Raycaster();
-      raycaster.params.Points = { threshold: 14 }; // 14px picking threshold
-      raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cameraRef.current);
+    const raycaster = new THREE.Raycaster();
+    raycaster.params.Points = { threshold: 14 }; // 14px picking threshold
+    raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cameraRef.current);
 
-      const intersects = raycaster.intersectObject(starPointsRef.current, false);
-      if (intersects.length > 0 && intersects[0].index !== undefined) {
-        const idx = intersects[0].index;
-        setHoveredStar(STARS[idx]);
-      } else {
-        setHoveredStar(null);
-      }
-    });
+    const intersects = raycaster.intersectObject(starPointsRef.current, false);
+    if (intersects.length > 0 && intersects[0].index !== undefined) {
+      const idx = intersects[0].index;
+      setHoveredStar(STARS[idx]);
+    } else {
+      setHoveredStar(null);
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -868,11 +834,9 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
 
   const handleWheel = (e: React.WheelEvent) => {
     if (!cameraRef.current) return;
-    const nextFov = cameraRef.current.fov * Math.exp(e.deltaY * 0.0012);
-    cameraRef.current.fov = Math.max(MIN_SKY_FOV, Math.min(MAX_SKY_FOV, nextFov));
+    const nextFov = cameraRef.current.fov + e.deltaY * 0.05;
+    cameraRef.current.fov = Math.max(20, Math.min(85, nextFov));
     cameraRef.current.updateProjectionMatrix();
-    if (starMaterialRef.current) starMaterialRef.current.uniforms.uFov.value = cameraRef.current.fov;
-    window.dispatchEvent(new CustomEvent('sky-zoom-change', { detail: { fov: cameraRef.current.fov } }));
     requestRenderRef.current();
   };
 
@@ -921,13 +885,103 @@ export const SkyCanvas: React.FC<SkyCanvasProps> = ({ showDeepSky = true }) => {
         className="absolute inset-0 pointer-events-none z-10 w-full h-full"
       />
 
+      {/* Hovered Star Tooltip Telemetry Readout (Costellar HUD Reticle) */}
       {hoveredStar && (
-        <div className="field-hover-star" aria-hidden="true">
-          <strong>{hoveredStar.proper || hoveredStar.name}</strong>
-          <span>{hoveredStar.mag.toFixed(2)} mag · {(hoveredStar.ra / 15).toFixed(2)}h RA · {hoveredStar.dec.toFixed(1)}° Dec</span>
-          {isTraceMode && <span>Click to add this star to the trace</span>}
+        <div className="hud-reticle absolute pointer-events-none z-20 bottom-6 left-6 p-3 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] text-xs space-y-2 font-mono" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
+          <div className="flex items-center justify-between gap-3 border-b border-[#1E293B] pb-1.5">
+            <span className="font-bold text-[#E0E8F9] text-xs uppercase tracking-[0.08em]">
+              {hoveredStar.proper || hoveredStar.name}
+            </span>
+            {hoveredStar.con && (
+              <span className="px-1.5 py-0.5 bg-[#101827] border border-[#232D42] rounded-[3px] text-[9px] text-[#8FA4C4] uppercase tracking-wider font-semibold">
+                {hoveredStar.con}
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[#8C93A0] text-[10px] uppercase tracking-wider">
+            <span className="flex items-baseline gap-1">
+              <span>MAG:</span>
+              <strong className="font-dot text-xs text-[var(--signal-cobalt)] font-bold">
+                {hoveredStar.mag.toFixed(2)}
+              </strong>
+            </span>
+            <span className="flex items-baseline gap-1">
+              <span>B-V:</span>
+              <strong className="text-[#C7D5EC]">{hoveredStar.ci ?? 'N/A'}</strong>
+            </span>
+            <span className="flex items-baseline gap-1">
+              <span>RA:</span>
+              <strong className="text-[#C7D5EC]">{(hoveredStar.ra / 15).toFixed(2)}H</strong>
+            </span>
+            <span className="flex items-baseline gap-1">
+              <span>DEC:</span>
+              <strong className="text-[#C7D5EC]">{hoveredStar.dec.toFixed(1)}°</strong>
+            </span>
+          </div>
+          {isTraceMode && (
+            <div className="pt-1 text-[9px] text-[#6892F6] flex items-center gap-1.5 border-t border-[#1E293B]/60 uppercase tracking-[0.08em]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal-cobalt)]" />
+              CLICK STAR TO APPEND TRACE
+            </div>
+          )}
         </div>
       )}
+
+      {/* Bottom Horizon Silhouette & Azimuth Scale (Matching Frame 2) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none overflow-hidden select-none">
+        {/* Azimuth Compass Scale */}
+        <div className="w-full pb-1 flex items-center justify-center relative h-7">
+          <svg className="w-full h-7 overflow-visible" preserveAspectRatio="none">
+            <line x1="0" y1="18" x2="100%" y2="18" stroke="#334155" strokeWidth="1" strokeDasharray="3 4" opacity="0.6" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-between px-8 text-[9px] font-mono font-semibold text-[#94A3B8] tracking-widest uppercase">
+            <span>120°</span>
+            <span className="text-[#64748B]">SE</span>
+            <span>150°</span>
+            <span className="text-[var(--signal-cobalt)] font-bold text-[10px]">180° S</span>
+            <span>210°</span>
+            <span className="text-[#64748B]">SW</span>
+            <span>240°</span>
+          </div>
+        </div>
+
+        {/* Low Mountain Ridge Silhouette */}
+        <svg viewBox="0 0 1200 48" className="w-full h-5 block text-[#020617] fill-current" preserveAspectRatio="none">
+          <path d="M0,48 L0,26 L40,20 L90,24 L150,14 L210,22 L270,12 L330,20 L400,10 L470,23 L540,13 L620,26 L690,14 L760,22 L840,9 L910,20 L980,13 L1060,24 L1130,16 L1200,22 L1200,48 Z" />
+        </svg>
+      </div>
+
+      {/* Precision 360° Azimuth Telemetry Strip with HUD Corner Ticks */}
+      <div className="hud-reticle absolute bottom-6 right-6 z-20 bg-[#080E1C]/95 border border-[#1E293B] rounded-[6px] px-3.5 py-2 text-[10px] font-mono text-[#8C93A0] pointer-events-none uppercase tracking-[0.08em] space-y-1" style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
+        <div className="flex items-center justify-between gap-4 text-[9px] text-[#525866]">
+          <span>AZIMUTH TELEMETRY</span>
+          <span className="text-[var(--signal-cobalt)] font-semibold">360° HORIZON</span>
+        </div>
+        <div className="flex items-center gap-2 text-[10px]">
+          <span className="font-bold text-[#EF4444]">N</span>
+          <span className="text-[#C7D5EC]">000°</span>
+          <span className="text-[#232D42]">|</span>
+          <span className="font-bold text-[#6892F6]">E</span>
+          <span className="text-[#C7D5EC]">090°</span>
+          <span className="text-[#232D42]">|</span>
+          <span className="font-bold text-[#8FA4C4]">S</span>
+          <span className="text-[#C7D5EC]">180°</span>
+          <span className="text-[#232D42]">|</span>
+          <span className="font-bold text-[#6892F6]">W</span>
+          <span className="text-[#C7D5EC]">270°</span>
+        </div>
+        {/* Discrete Segment Ticks Ruler */}
+        <div className="flex items-center justify-between gap-1 pt-0.5">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 w-[2px] ${
+                i % 4 === 0 ? 'bg-[var(--signal-cobalt)] h-2' : 'bg-[#232D42]'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
