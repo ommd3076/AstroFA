@@ -1,6 +1,5 @@
 import React from 'react';
-// Keep the shared header independent from the legacy Space UI helper tree.
-const cn = (...values: Array<string | undefined>) => values.filter(Boolean).join(' ');
+import { cn } from './ui/space/utils';
 
 interface PageHeaderProps {
   eyebrow?: string;
@@ -30,7 +29,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <header
       className={cn(
-        'atlas-page-header field-page-heading shrink-0 border-b border-[var(--border-subtle)] pb-4 space-y-3',
+        'shrink-0 border-b border-[var(--border-subtle)] pb-3.5 space-y-3',
         className
       )}
     >
@@ -44,7 +43,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1
               id={titleId}
-              className="atlas-page-title atlas-title text-xl sm:text-2xl font-semibold tracking-tight text-[var(--ink-primary)]"
+              className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--ink-primary)]"
             >
               {title}
             </h1>
