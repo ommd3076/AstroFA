@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { NFA_MACHINE, REFERENCE_PATTERNS } from '../../data/astroData';
 import type { StateId, NFATransition } from '../../automata/types';
-import { Card } from './boardPrimitives';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from './boardPrimitives';
+import { Card } from '../../components/ui/space/card';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
 
 export const NfaView: React.FC = () => {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('ALL');

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DETERMINIZATION_RESULT, DFA_MACHINE } from '../../data/astroData';
-import { Button, Card } from './boardPrimitives';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
 
 export const SubsetConstructionView: React.FC = () => {
   const steps = DETERMINIZATION_RESULT.steps;

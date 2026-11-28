@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { MINIMIZATION_RESULT, MINIMIZED_DFA_MACHINE, DFA_MACHINE } from '../../data/astroData';
 import type { StateId } from '../../automata/types';
-import { Button, Card, Input } from './boardPrimitives';
-import { ToggleGroup, ToggleGroupItem } from './boardPrimitives';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Input } from '../../components/ui/space/input';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 
 export const MinimizedDfaView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'partitions' | 'sideBySide' | 'proof'>('partitions');

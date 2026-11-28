@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { DFA_MACHINE } from '../../data/astroData';
 import type { StateId } from '../../automata/types';
-import { Button, Card, Input } from './boardPrimitives';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import { Input } from '../../components/ui/space/input';
 
 export const DfaView: React.FC = () => {
   const [selectedStateId, setSelectedStateId] = useState<StateId>(DFA_MACHINE.initialState);

@@ -7,11 +7,13 @@ import {
 } from '../../data/astroData';
 import type { DFA, StateId } from '../../automata/types';
 import { simulateDfa } from '../../automata/simulate';
-import { Alert, AlertDescription, Button, Input } from './boardPrimitives';
-import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from './boardPrimitives';
-import { Switch } from './boardPrimitives';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './boardPrimitives';
-import { ToggleGroup, ToggleGroupItem } from './boardPrimitives';
+import { Alert, AlertDescription } from '../../components/ui/space/alert';
+import { Button } from '../../components/ui/space/button';
+import { Input } from '../../components/ui/space/input';
+import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from '../../components/ui/space/select';
+import { Switch } from '../../components/ui/space/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/space/table';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/space/toggle-group';
 import {
   FRAME_10_DFA,
   FRAME_10_METRICS,
