@@ -1,67 +1,148 @@
-import { lazy, Suspense, useLayoutEffect } from 'react';
-import { ArrowUpRight } from 'lucide-react';
-import { FieldHome } from './field/FieldHome';
-import { FieldNavigation, fieldRoutes } from './field/FieldNavigation';
+import React from 'react';
+import './App.css';
 import { useAstroStore } from './stores/useAstroStore';
-import type { ActiveView } from './stores/useAstroStore';
+import { HeaderNav } from './components/HeaderNav';
+import { SkyExplorer } from './features/skyExplorer/SkyExplorer';
+import { SkyTonight } from './features/skyTonight/SkyTonight';
+import { ConstellationExplorer } from './features/constellationExplorer/ConstellationExplorer';
+import { AutomataLab } from './features/automataLab/AutomataLab';
+import { HuntMode } from './features/huntMode/HuntMode';
+import { ImageLab } from './features/imageLab/ImageLab';
+import { AcademicWalkthrough } from './features/academic/AcademicWalkthrough';
+import { CreditsModal } from './components/CreditsModal';
+import { Overview } from './features/overview/Overview';
+import { RecognitionResultsModal } from './features/traceMode/RecognitionResultsModal';
+import { PatternAnalysisModal } from './features/traceMode/PatternAnalysisModal';
+import { TooltipProvider } from './components/ui/space/tooltip';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/space/sidebar';
+import { Separator } from './components/ui/space/separator';
+import { Button } from './components/ui/space/button';
+import { Kbd } from './components/ui/space/kbd';
+import { SearchIcon, CompassIcon } from 'lucide-react';
 
-const FieldSky = lazy(() => import('./field/FieldSky').then(module => ({ default: module.FieldSky })));
-const FieldCatalog = lazy(() => import('./field/FieldCatalog').then(module => ({ default: module.FieldCatalog })));
-const FieldTonight = lazy(() => import('./field/FieldTonight').then(module => ({ default: module.FieldTonight })));
-const FieldHunt = lazy(() => import('./field/FieldHunt').then(module => ({ default: module.FieldHunt })));
-const ImageLab = lazy(() => import('./features/imageLab/ImageLab').then(module => ({ default: module.ImageLab })));
-const AutomataLab = lazy(() => import('./features/automataLab/AutomataLab').then(module => ({ default: module.AutomataLab })));
-const Walkthrough = lazy(() => import('./features/academic/AcademicWalkthrough').then(module => ({ default: module.AcademicWalkthrough })));
-const Sources = lazy(() => import('./components/CreditsModal').then(module => ({ default: module.CreditsModal })));
-const Results = lazy(() => import('./features/traceMode/RecognitionResultsModal').then(module => ({ default: module.RecognitionResultsModal })));
-const Geometry = lazy(() => import('./features/traceMode/PatternAnalysisModal').then(module => ({ default: module.PatternAnalysisModal })));
+const VIEW_TITLES: Record<string, string> = {
+  overview: 'Atlas Overview',
+  sky: 'Sky Planetarium',
+  tonight: 'Sky Tonight',
+  constellations: 'Constellation Catalog',
+  automataLab: 'Automata Lab',
+  hunt: 'Constellation Hunt',
+  imageLab: 'Image Lab',
+  academic: 'Academic Walkthrough',
+  credits: 'Sources & Credits',
+  results: 'Recognition Report',
+  patterns: 'Geometry Analysis',
+};
 
-function navigate(view: ActiveView) {
-  if (view === 'sky' || view === 'overview') useAstroStore.setState({ isTraceMode: false });
-  useAstroStore.getState().setActiveView(view);
-}
+export const App: React.FC = () => {
+  const activeView = useAstroStore(state => state.activeView);
+  const setActiveView = useAstroStore(state => state.setActiveView);
+  const isTraceMode = useAstroStore(state => state.isTraceMode);
+  const observer = useAstroStore(state => state.observer);
 
-export function App() {
-  const view = useAstroStore(state => state.activeView);
-  const closeReport = () => useAstroStore.getState().setActiveView('sky');
+  const currentLabel =
+    activeView === 'sky' && isTraceMode
+      ? 'Sky Planetarium · Trace Mode'
+      : VIEW_TITLES[activeView] || 'Costellar Atlas';
 
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-    const route = fieldRoutes.find(item => item.id === view);
-    document.title = route ? `${route.name} · Costellar` : 'Costellar';
-  }, [view]);
-
-  const screen = {
-    overview: <FieldHome onObserve={() => navigate('sky')} />,
-    sky: <FieldSky />,
-    tonight: <FieldTonight />,
-    constellations: <FieldCatalog />,
-    hunt: <FieldHunt />,
-    imageLab: <ImageLab />,
-    automataLab: <AutomataLab />,
-    academic: <Walkthrough />,
-    credits: <Sources />,
-    results: <Results onClose={closeReport} />,
-    patterns: <Geometry onClose={closeReport} />,
-  }[view];
+  const isStageRoute = activeView === 'sky' || activeView === 'hunt';
 
   return (
-    <div className="field-app boardui-surface">
-      <a className="field-skip" href="#main-content">Skip to content</a>
-      <FieldNavigation view={view} navigate={navigate} />
-      <main id="main-content" className="field-main" data-view={view} tabIndex={-1}>
-        <Suspense fallback={<p role="status" className="field-loading">Loading view…</p>}>{screen}</Suspense>
-      </main>
-      <footer className="field-footer">
-        <div className="field-footer-inner">
-          <strong>Costellar</strong>
-          <nav aria-label="Reference and diagnostics">
-            {fieldRoutes.slice(7).map(item => <button key={item.id} aria-current={view === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}>{item.name}<ArrowUpRight size={12} aria-hidden /></button>)}
-          </nav>
-        </div>
-      </footer>
-    </div>
+    <TooltipProvider>
+      <SidebarProvider className="h-svh overflow-hidden bg-[var(--bg-shell)] text-[var(--ink-primary)]">
+        {/* Space UI Collapsible Sidebar & Global Command Palette */}
+        <HeaderNav />
+
+        {/* Bounded Inset Workspace preserving WebGL canvas sizing */}
+        <SidebarInset className="min-w-0 min-h-0 flex-1 overflow-hidden bg-[var(--bg-tray)] border border-[var(--border-subtle)]">
+          {/* Compact Instrument Shell Header */}
+          <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-shell)]/90 px-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <SidebarTrigger className="text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]" />
+              <Separator orientation="vertical" className="h-4" />
+              <span className="truncate text-xs font-semibold tracking-tight text-[var(--ink-primary)]">
+                {currentLabel}
+              </span>
+              {activeView === 'sky' && isTraceMode && (
+                <span className="hidden sm:inline-flex items-center rounded-[4px] border border-[var(--signal-surface)] bg-[var(--bg-pill-active)] px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-[var(--signal-mid)]">
+                  Trace Active
+                </span>
+              )}
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.dispatchEvent(new CustomEvent('costellar:open-command'))}
+                className="h-7 gap-2 border-[var(--border-subtle)] bg-[var(--bg-card)] px-2.5 text-[11px] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]"
+                aria-label="Open command search"
+              >
+                <SearchIcon className="size-3.5 text-[var(--ink-muted)]" aria-hidden="true" />
+                <span className="hidden sm:inline">Find target or view...</span>
+                <Kbd className="hidden md:inline-flex">Ctrl K</Kbd>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.dispatchEvent(new CustomEvent('costellar:open-observer'))}
+                className={`${activeView === 'sky' ? 'hidden' : 'hidden sm:inline-flex'} h-7 max-w-[180px] gap-1.5 px-2 text-[11px] font-mono text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]`}
+                title="Change observer location"
+              >
+                <CompassIcon className="size-3.5 text-[var(--signal-mid)]" aria-hidden="true" />
+                <span className="max-w-[140px] truncate">{observer.name.split(',')[0]}</span>
+              </Button>
+            </div>
+          </header>
+
+          {/* Main View Area */}
+          <div
+            className={`atlas-workspace ${
+              isStageRoute ? 'p-1.5 sm:p-2 overflow-hidden' : 'p-3 sm:p-5 lg:p-6'
+            }`}
+          >
+            {/* View 0: Overview Atlas Landing */}
+            {activeView === 'overview' && <Overview />}
+
+            {/* View 1: Live Interactive Sky Explorer */}
+            {activeView === 'sky' && <SkyExplorer />}
+
+            {/* View 2: Sky Tonight (Above-horizon constellations) */}
+            {activeView === 'tonight' && <SkyTonight />}
+
+            {/* View 3: Constellation Explorer */}
+            {activeView === 'constellations' && <ConstellationExplorer />}
+
+            {/* View 4: Automata Theory Lab */}
+            {activeView === 'automataLab' && <AutomataLab />}
+
+            {/* View 5: Constellation Hunt Mode */}
+            {activeView === 'hunt' && <HuntMode />}
+
+            {/* View 6: Image Lab */}
+            {activeView === 'imageLab' && <ImageLab />}
+
+            {/* View 7: Academic Demonstration (Viva Mode) */}
+            {activeView === 'academic' && <AcademicWalkthrough />}
+
+            {/* View 8: Data Sources & Licensing Credits */}
+            {activeView === 'credits' && <CreditsModal />}
+
+            {/* View 9: Dedicated Recognition Results Page */}
+            {activeView === 'results' && (
+              <RecognitionResultsModal onClose={() => setActiveView('sky')} />
+            )}
+
+            {/* View 10: Dedicated Pattern Analysis Page */}
+            {activeView === 'patterns' && (
+              <PatternAnalysisModal onClose={() => setActiveView('sky')} />
+            )}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
-}
+};
 
 export default App;
