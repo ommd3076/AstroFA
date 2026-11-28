@@ -4,46 +4,23 @@ import { encodeGeometry } from '../../geometry/quantize';
 import { normalizeGeometry } from '../../geometry/normalize';
 import { REFERENCE_PATTERNS } from '../../data/astroData';
 import { PageHeader } from '../../components/PageHeader';
-import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '../../components/ui/space/empty';
 import {
   Table,
   TableBody,
   TableCell,
-  TableColumn,
+  TableHead,
   TableHeader,
   TableRow,
-} from '../../components/ui/board/base/table/table';
-import { Chip } from '../../components/ui/board/base/badges/chip';
-import './traceMode.css';
-
-const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
-  <BoardButton
-    {...props}
-    variant={variant === 'default' ? 'primary' : variant === 'outline' ? 'secondary' : variant}
-    size={size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size}
-  >
-    {children}
-  </BoardButton>
-);
-
-const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className = '', children, ...props }) => (
-  <section {...props} className={`atlas-surface flex flex-col ${className}`}>{children}</section>
-);
-const Empty: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex flex-col items-center justify-center gap-3 text-center ${className}`}>{children}</div>
-);
-const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex flex-col items-center gap-1.5 ${className}`}>{children}</div>
-);
-const EmptyContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex items-center justify-center gap-2 ${className}`}>{children}</div>
-);
-const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className = '', children, ...props }) => (
-  <h3 {...props} className={`font-medium text-[var(--ink-primary)] ${className}`}>{children}</h3>
-);
-const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
-  <p {...props} className={`text-[var(--ink-secondary)] ${className}`}>{children}</p>
-);
+} from '../../components/ui/space/table';
 
 interface PatternAnalysisModalProps {
   onClose: () => void;
@@ -144,7 +121,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
   );
 
   return (
-    <div className="trace-field boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
+    <div className="w-full min-w-0 font-sans text-[var(--ink-primary)]">
       <div className="mx-auto w-full max-w-6xl space-y-4 p-3 sm:p-5">
         <PageHeader
           eyebrow="Trace workspace / geometry"
@@ -239,7 +216,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
             </Empty>
           </Card>
         ) : (
-          <section className="geometry-workbench" aria-label="Geometry evidence">
+          <>
             <section className="grid gap-3 lg:grid-cols-[1.2fr_1fr]">
               <Card className={surface}>
                 <h2 className="text-sm font-semibold text-[var(--ink-primary)]">Normalized trace</h2>
@@ -295,22 +272,26 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
               </div>
               {recognitionReport?.geometricScores.length ? (
                 <div className="mt-3">
-                  <Table aria-label="Geometric candidate patterns" size="sm" selectionMode="none">
+                  <Table>
                     <TableHeader>
-                      <TableColumn id="rank" className="w-12 font-mono text-[10px] uppercase">#</TableColumn>
-                      <TableColumn id="pattern" className="text-[10px] uppercase">Pattern</TableColumn>
-                      <TableColumn id="residual" className="text-right font-mono text-[10px] uppercase">Norm. RMSE</TableColumn>
+                      <TableRow>
+                        <TableHead className="w-12 font-mono text-[10px] uppercase">#</TableHead>
+                        <TableHead className="text-[10px] uppercase">Pattern</TableHead>
+                        <TableHead className="text-right text-[10px] uppercase">Norm. RMSE</TableHead>
+                      </TableRow>
                     </TableHeader>
-                    <TableBody items={recognitionReport.geometricScores.slice(0, 5)}>
+                    <TableBody>
                       {recognitionReport.geometricScores.slice(0, 5).map((candidate, index) => (
-                        <TableRow key={candidate.patternId} id={candidate.patternId} textValue={`${candidate.patternName} ${candidate.constellationId}`}>
+                        <TableRow key={candidate.patternId}>
                           <TableCell className="font-mono tabular-nums text-xs text-[var(--ink-muted)]">
                             {String(index + 1).padStart(2, '0')}
                           </TableCell>
                           <TableCell className="text-xs font-medium text-[var(--ink-primary)]">
                             {candidate.patternName}
                             <span className="ml-2 font-mono text-[var(--ink-secondary)]">{candidate.constellationId}</span>
-                            {candidate.isVerified && <Chip className="ml-2" variant="caption" color="cyan">verified</Chip>}
+                            {candidate.isVerified && (
+                              <span className="ml-2 text-[var(--signal-mid)]">· verified</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-right font-mono tabular-nums text-xs font-semibold text-[var(--ink-primary)]">
                             {candidate.residual.toFixed(4)}
@@ -361,7 +342,7 @@ export const PatternAnalysisModal: React.FC<PatternAnalysisModalProps> = ({ onCl
                 </Button>
               </div>
             </Card>
-          </section>
+          </>
         )}
       </div>
     </div>

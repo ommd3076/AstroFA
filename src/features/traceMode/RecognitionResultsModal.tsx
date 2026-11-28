@@ -2,46 +2,23 @@ import React from 'react';
 import { useAstroStore } from '../../stores/useAstroStore';
 import { REFERENCE_PATTERNS } from '../../data/astroData';
 import { PageHeader } from '../../components/PageHeader';
-import { Button as BoardButton } from '../../components/ui/board/base/buttons/button';
+import { Button } from '../../components/ui/space/button';
+import { Card } from '../../components/ui/space/card';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '../../components/ui/space/empty';
 import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
-  TableColumn,
   TableRow,
-} from '../../components/ui/board/base/table/table';
-import { Chip } from '../../components/ui/board/base/badges/chip';
-import './traceMode.css';
-
-const Button: React.FC<any> = ({ variant = 'default', size = 'sm', children, ...props }) => (
-  <BoardButton
-    {...props}
-    variant={variant === 'default' ? 'primary' : variant === 'outline' ? 'secondary' : variant}
-    size={size === 'icon-xs' ? 'xs' : size === 'sm' ? 'small' : size}
-  >
-    {children}
-  </BoardButton>
-);
-
-const Card: React.FC<React.HTMLAttributes<HTMLElement>> = ({ className = '', children, ...props }) => (
-  <section {...props} className={`atlas-surface flex flex-col ${className}`}>{children}</section>
-);
-const Empty: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex flex-col items-center justify-center gap-3 text-center ${className}`}>{children}</div>
-);
-const EmptyHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex flex-col items-center gap-1.5 ${className}`}>{children}</div>
-);
-const EmptyContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className = '', children, ...props }) => (
-  <div {...props} className={`flex items-center justify-center gap-2 ${className}`}>{children}</div>
-);
-const EmptyTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className = '', children, ...props }) => (
-  <h3 {...props} className={`font-medium text-[var(--ink-primary)] ${className}`}>{children}</h3>
-);
-const EmptyDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className = '', children, ...props }) => (
-  <p {...props} className={`text-[var(--ink-secondary)] ${className}`}>{children}</p>
-);
+} from '../../components/ui/space/table';
 
 interface RecognitionResultsModalProps {
   onClose: () => void;
@@ -142,7 +119,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
   const surface = 'atlas-surface rounded-xl p-4 sm:p-5 gap-0 shadow-none';
 
   return (
-    <div className="trace-field boardui-surface w-full min-w-0 font-sans text-[var(--ink-primary)]">
+    <div className="w-full min-w-0 font-sans text-[var(--ink-primary)]">
       <div className="mx-auto w-full max-w-6xl space-y-4 p-3 sm:p-5">
         <PageHeader
           eyebrow="Trace workspace / report"
@@ -220,7 +197,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
             </Empty>
           </Card>
         ) : (
-          <section className="recognition-workbench" aria-label="Recognition evidence">
+          <>
             <section className="grid gap-3 lg:grid-cols-[1.35fr_1fr]">
               <Card className={`${surface} flex flex-col justify-between`}>
                 <div>
@@ -255,7 +232,7 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
                 <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--border-subtle)] pt-3 text-xs text-[var(--ink-secondary)]">
                   <div className="flex items-center gap-1.5">
                     <dt className="sr-only">Status</dt>
-                    <dd><Chip variant="caption" color={report.dfaAccepted ? 'cyan' : 'rose'}>{statusLabel}</Chip></dd>
+                    <dd className="font-medium text-[var(--ink-primary)]">{statusLabel}</dd>
                   </div>
                   <span className="text-[var(--ink-muted)]" aria-hidden="true">·</span>
                   <div>
@@ -306,23 +283,27 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
                 </span>
               </div>
               {candidates.length ? (
-                <div className="boardui-surface mt-3">
-                  <Table aria-label="Geometric trace candidates" size="sm" selectionMode="none">
+                <div className="mt-3">
+                  <Table>
                     <TableHeader>
-                      <TableColumn id="rank" className="w-12 font-mono text-[10px] uppercase">#</TableColumn>
-                      <TableColumn id="candidate" className="text-[10px] uppercase">Candidate</TableColumn>
-                      <TableColumn id="residual" className="text-right font-mono text-[10px] uppercase">Norm. RMSE</TableColumn>
+                      <TableRow>
+                        <TableHead className="w-12 font-mono text-[10px] uppercase">#</TableHead>
+                        <TableHead className="text-[10px] uppercase">Candidate</TableHead>
+                        <TableHead className="text-right text-[10px] uppercase">Norm. RMSE</TableHead>
+                      </TableRow>
                     </TableHeader>
-                    <TableBody items={candidates.slice(0, 5)}>
+                    <TableBody>
                       {candidates.slice(0, 5).map((candidate, index) => (
-                        <TableRow key={candidate.patternId} id={candidate.patternId} textValue={`${candidate.patternName} ${candidate.constellationId} ${candidate.residual.toFixed(4)}`}>
+                        <TableRow key={candidate.patternId}>
                           <TableCell className="font-mono tabular-nums text-xs text-[var(--ink-muted)]">
                             {String(index + 1).padStart(2, '0')}
                           </TableCell>
                           <TableCell className="text-xs font-medium text-[var(--ink-primary)]">
                             {candidate.patternName}
                             <span className="ml-2 font-mono text-[var(--ink-secondary)]">{candidate.constellationId}</span>
-                            {candidate.isVerified && <Chip className="ml-2" variant="caption" color="cyan">verified reference</Chip>}
+                            {candidate.isVerified && (
+                              <span className="ml-2 text-[var(--signal-mid)]">· verified reference</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-right font-mono tabular-nums text-xs font-semibold text-[var(--ink-primary)]">
                             {candidate.residual.toFixed(4)}
@@ -346,8 +327,27 @@ export const RecognitionResultsModal: React.FC<RecognitionResultsModalProps> = (
                     : 'This report contains no symbols to simulate.'}
                 </p>
               </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportReport}
+                  className="text-xs font-semibold"
+                >
+                  Export JSON
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handoff}
+                  disabled={!report.inputSymbols.length}
+                  className="text-xs font-semibold"
+                >
+                  Open in Automata Lab
+                </Button>
+              </div>
             </Card>
-          </section>
+          </>
         )}
       </div>
     </div>
